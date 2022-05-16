@@ -1,0 +1,12 @@
+# Paths
+path_to_dataset:
+path_to_results:
+
+# Analysis parameters
+speed_threshold: 5 # cm.s-1
+bin_size: 3 # cm
+rate_map_smoothing: 2 # sigma for gaussian smoothing, 0 for no smoothing
+split_half_method: per_bin # half, corrected_per_activity, corrected_per_bin, none
+split_half_threshould: .3 # threshold for stability. Default = .3
+num_permutations: 1000 # Number of circular permutations
+
