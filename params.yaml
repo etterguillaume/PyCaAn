@@ -1,12 +1,23 @@
 # Paths
-path_to_dataset:
-path_to_results:
+path_to_dataset: /Volumes/ETTER_SSD/lab_data/calcium_imaging
+path_to_results: /Volumes/GoogleDrive/My Drive/Etter-Lab/manuscripts/2022A/results
+
+# Experiment
+overwrite_tuning_data: True # If tuning curves already analyzed, re-analyze?
+only_analyze_overlap_sessions: False # Restrict analysis to sessions present in all animals?
 
 # Analysis parameters
+maze_to_analyze: openfield # openfield, lineartrack, both
+sampling_frequency: 30 # frames per second
+decoding_training_set: .75 # portion of recording used to train decoder
+decoding_set_selection: random
+z_threshold: 2 # Used to detect periods of putative activity
 speed_threshold: 5 # cm.s-1
+distance_travelled_threshold: 3000 #cm
+time_in_bin_threshold: 2 #s
+portion_surface_covered_threshold: 1 # 0-1, default=1 (all bins explored)
 bin_size: 3 # cm
 rate_map_smoothing: 2 # sigma for gaussian smoothing, 0 for no smoothing
 split_half_method: per_bin # half, corrected_per_activity, corrected_per_bin, none
 split_half_threshould: .3 # threshold for stability. Default = .3
 num_permutations: 1000 # Number of circular permutations
-
