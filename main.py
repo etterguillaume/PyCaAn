@@ -1,18 +1,38 @@
 #%% Imports
 import yaml
 import os
-import pandas
-from scipy.io import loadmat
+import h5py
 
 #%% Load YAML file
+print('Opening parameters file... ', end='')
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
-
+print('Done!')
 #%% Establish list of animals
-# Use pandas to create table of all recordings, input their date (use as ID). Row = mouse, column = experiment/session
-# Save in results, use this as list of sessions to process
+print('Listing subjects... ', end='')
+foldersList = os.listdir(params['path_to_dataset'] + os.sep + 'open_field')
+for i, folder in enumerate(foldersList):
+  if not folder.startswith('M'):
+    foldersList.pop(i)
+print('Done!')
+print(f'Found {len(foldersList)} subjects')
+
+#%% Establish list of sessions
+print('Listing sessions... ', end='')
+sessionsList = []
+for folder in foldersList:
+    sessions = os.listdir(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + folder)
+    for session in sessions:
+        if os.path.isfile(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + folder + os.sep + session + os.sep + 'ms.mat'):
+            sessionsList.append(folder + os.sep + session)
+print('Done!')
+print(f'Found {len(sessionsList)} total sessions')
 
 #%% Subject analysis
+for sessions in sessionsList:
+    [ca_trace, ca_time, ]
+
+
 # Load each matfile
 
 # Binarize calcium traces
