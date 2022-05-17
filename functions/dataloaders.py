@@ -3,7 +3,7 @@ import numpy as np
 
 def load_data(path):
     data = {}
-    f = h5py.File(path + '/behav.mat','r')
+    f = h5py.File(path + '/ms.mat','r')
     data.update(
                 {
                 'corrProj':np.array(f.get('ms/CorrProj')),
@@ -12,7 +12,7 @@ def load_data(path):
                 'frameNum':np.array(f.get('ms/frameNum')),
                 'numNeurons':np.array(f.get('ms/numNeurons')),
                 'caTime':np.array(f.get('ms/time')),
-                'caTrace':np.array(f.get('ms/RawTraces'))
+                'caTrace':np.array(f.get('ms/RawTraces'))/1000 # convert ms->s
                 }
                 )
     f = h5py.File(path + '/behav.mat','r')
