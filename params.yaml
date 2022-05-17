@@ -14,10 +14,10 @@ decoding_set_selection: random
 z_threshold: 2 # Used to detect periods of putative activity
 speed_threshold: 5 # cm.s-1
 distance_travelled_threshold: 3000 #cm
-time_in_bin_threshold: 2 #s
-portion_surface_covered_threshold: 1 # 0-1, default=1 (all bins explored)
-bin_size: 3 # cm
-rate_map_smoothing: 2 # sigma for gaussian smoothing, 0 for no smoothing
-split_half_method: per_bin # half, corrected_per_activity, corrected_per_bin, none
-split_half_threshould: .3 # threshold for stability. Default = .3
+occupancy_frame_threshold: 20 # min number of frames per location
+portion_surface_covered_threshold: .8 # 0-1, default=1 (all bins explored)
+bin_size: 2.5 # cm
+maze_width: 50 # cm
+rate_map_smoothing: 5 # cm, sigma for gaussian smoothing, 0 for no smoothing
+split_half_threshold: .3 # threshold for stability. Default = .3
 num_permutations: 1000 # Number of circular permutations

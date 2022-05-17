@@ -11,15 +11,15 @@ def load_data(path):
                 'SFPs':np.array(f.get('ms/SFPs')),
                 'frameNum':np.array(f.get('ms/frameNum')),
                 'numNeurons':np.array(f.get('ms/numNeurons')),
-                'caTime':np.array(f.get('ms/time')),
-                'caTrace':np.array(f.get('ms/RawTraces'))/1000 # convert ms->s
+                'caTime':np.array(f.get('ms/time'))/1000, # convert ms->s
+                'caTrace':np.array(f.get('ms/RawTraces')) 
                 }
                 )
     f = h5py.File(path + '/behav.mat','r')
     data.update(
                 {
                 'position':np.array(f.get('behav/position')),
-                'behavTime':np.array(f.get('behav/time')),
+                'behavTime':np.array(f.get('behav/time'))/1000, # convert ms->s
                 'mazeWidth_px':np.array(f.get('behav/width')),
                 'mazeWidth_cm':np.array(f.get('behav/trackLength'))
                 }

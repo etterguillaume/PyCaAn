@@ -8,6 +8,7 @@ import os
 import tqdm
 from functions.dataloaders import load_data
 from functions.signal_processing import binarize_ca_traces, interpolate_behavior, compute_velocity
+from functions.tuning import extract_2D_tuning
 
 #%% Load YAML file
 print('Opening parameters file... ', end='')
@@ -36,26 +37,17 @@ print(f'Found {len(sessionsList)} total sessions')
 
 #%% Subject analysis
 #for session in tqdm.tqdm(sessionsList):
+# Check if data exists
 data = load_data(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + session)
 binarized_traces = binarize_ca_traces(data['caTrace'], params['z_threshold'],params['sampling_frequency'])
 interpolated_position = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
-
-#%%
 velocity, running_ts = compute_velocity(interpolated_position, data['caTime'], params['speed_threshold'])
 
-# Compute occupancy and joint probabilities
+#%% Compute tuning curves for every cell
+tuning_data = extract_2D_tuning(binarized_traces, interpolated_position, running_ts, params)
 
 
-
-# Compute tuning curves for every cell
-# [MI, PDF, occupancy_vector, prob_being_active, tuning_curve ] = extract_1D_information(binarized_trace, interp_behav_vec, bin_vector, inclusion_vector)
-
-# Smooth
-
-# Shuffle, compute significance
-
-# Compute split-half stability
-
+#%%
 # Decoding (jacknife? Decoding using 1,2,4,8,16,32,64,128,256,512, ... max cells)
 
 # Save the data in a neat format!
