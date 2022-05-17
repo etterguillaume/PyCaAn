@@ -1,9 +1,13 @@
+#%%
+%load_ext autoreload
+%autoreload 2
+
 #%% Imports
 import yaml
 import os
-import h5py
-from functions.dataloaders import load_calcium_data
-from functions.signal_processing import binarize_ca_traces
+import tqdm
+from functions.dataloaders import load_data
+from functions.signal_processing import binarize_ca_traces, interpolate_behavior
 
 #%% Load YAML file
 print('Opening parameters file... ', end='')
@@ -31,14 +35,14 @@ print('Done!')
 print(f'Found {len(sessionsList)} total sessions')
 
 #%% Subject analysis
-for session in sessionsList:
-    ms = load_calcium_data(session)
+#for session in tqdm.tqdm(sessionsList):
+data = load_data(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + session)
+#%%
+binarized_traces = binarize_ca_traces(data['caTrace'], params['z_threshold'],params['sampling_frequency'])
+#%%
+interpolated_position = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
 
-    binarized_traces = binarize_ca_traces(ms['ca_trace'], params['z_threshold'])
-
-    interpolated_position = interpolate_behavior()
-
-    velocity, running_ts = compute_velocity()
+    #velocity, running_ts = compute_velocity()
 
 # Compute occupancy and joint probabilities
 

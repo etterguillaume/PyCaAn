@@ -1,5 +1,5 @@
 # Paths
-path_to_dataset: /Volumes/ETTER_SSD/lab_data/calcium_imaging
+path_to_dataset: /Users/guillaume/Documents/calcium_imaging
 path_to_results: /Volumes/GoogleDrive/My Drive/Etter-Lab/manuscripts/2022A/results
 
 # Experiment
