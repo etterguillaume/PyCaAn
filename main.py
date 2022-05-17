@@ -2,6 +2,8 @@
 import yaml
 import os
 import h5py
+from functions.dataloaders import load_calcium_data
+from functions.signal_processing import binarize_ca_traces
 
 #%% Load YAML file
 print('Opening parameters file... ', end='')
@@ -29,19 +31,14 @@ print('Done!')
 print(f'Found {len(sessionsList)} total sessions')
 
 #%% Subject analysis
-for sessions in sessionsList:
-    [ca_trace, ca_time, ]
+for session in sessionsList:
+    ms = load_calcium_data(session)
 
+    binarized_traces = binarize_ca_traces(ms['ca_trace'], params['z_threshold'])
 
-# Load each matfile
+    interpolated_position = interpolate_behavior()
 
-# Binarize calcium traces
-
-# Interpolate behavior
-
-# Compute velocities
-
-# Find periods of immobility, create an inclusion vector
+    velocity, running_ts = compute_velocity()
 
 # Compute occupancy and joint probabilities
 
