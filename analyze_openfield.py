@@ -12,7 +12,7 @@ from functions.tuning import extract_2D_tuning
 
 #%% Load YAML file
 print('Opening parameters file... ', end='')
-with open('params.yaml','r') as file:
+with open('openfield_params.yaml','r') as file:
     params = yaml.full_load(file)
 print('Done!')
 #%% Establish list of animals

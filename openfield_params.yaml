@@ -7,7 +7,6 @@ overwrite_tuning_data: True # If tuning curves already analyzed, re-analyze?
 only_analyze_overlap_sessions: False # Restrict analysis to sessions present in all animals?
 
 # Analysis parameters
-maze_to_analyze: openfield # openfield, lineartrack, both
 sampling_frequency: 30 # frames per second
 decoding_training_set: .75 # portion of recording used to train decoder
 decoding_set_selection: random
