@@ -51,7 +51,8 @@ velocity, running_ts = compute_velocity(interpolated_position, data['caTime'], p
 
 #for session in tqdm.tqdm(sessionsList):
 #%% Compute tuning curves for every cell
-tuning_data = extract_2D_tuning(binarized_traces, interpolated_position, running_ts, params)
+tuning_data = extract_2D_tuning(binarized_traces, interpolated_position, running_ts, params) # extract fields properties, stability, peak likelihood, dispersion, MI, MI sig, fields
+# store all the data in a folder for large scale analysis
 
 #%%
 # Decoding (jacknife? Decoding using 1,2,4,8,16,32,64,128,256,512, ... max cells)
@@ -62,5 +63,9 @@ tuning_data = extract_2D_tuning(binarized_traces, interpolated_position, running
 
 
 #%% Group analysis
-# Plot stuff!
+# Test bimodality for mutual information, activity, stability etc etc
+# Multidimensional clustering (k-means? tsne?)
+# Per mouse analysis vs all mice pooled?
 
+#%%
+# Model w/ artificial agent

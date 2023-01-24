@@ -36,20 +36,19 @@ def extract_2D_tuning(binarized_traces, interpolated_position, inclusion_ts, par
                     # get min number of frames for a given bin
                     # Use this number to sample activity in other bins randomly
 
-
-                    activity_in_bin_idx = find(binarized_trace == 1 & binarized_spatial_vector == 1);
-                    inactivity_in_bin_idx = find(binarized_trace == 0 & binarized_spatial_vector == 1);
-                    likelihood(y,x) = length(activity_in_bin_idx)/length(position_idx);
+                    activity_in_bin_idx = (binarized_trace == 1) & (binarized_spatial_vector == 1)
+                    inactivity_in_bin_idx = (binarized_trace == 0) & (binarized_spatial_vector == 1)
+                    likelihood[y,x] = len(activity_in_bin_idx)/len(position_idx);
                     
-                    joint_prob_active = length(activity_in_bin_idx)/length(binarized_trace);
-                    joint_prob_inactive = length(inactivity_in_bin_idx)/length(binarized_trace);
-                    prob_in_bin = length(position_idx)./length(binarized_trace);
+                    joint_prob_active = len(activity_in_bin_idx)/len(binarized_trace);
+                    joint_prob_inactive = len(inactivity_in_bin_idx)/len(binarized_trace);
+                    prob_in_bin = len(position_idx)/len(binarized_trace);
                     
-                    if joint_prob_active ~= 0
-                        MI = MI + joint_prob_active*log2(joint_prob_active./(prob_in_bin*prob_being_active));
+                    if joint_prob_active>0:
+                        MI = MI + joint_prob_active*np.log2(joint_prob_active/(prob_in_bin*prob_being_active));
                 
-                    if joint_prob_inactive ~= 0
-                        MI = MI + joint_prob_inactive*log2(joint_prob_inactive./(prob_in_bin*(1-prob_being_active)));
+                    if joint_prob_inactive>0:
+                        MI = MI + joint_prob_inactive*np.log2(joint_prob_inactive/(prob_in_bin*(1-prob_being_active)));
             
 
     posterior = likelihood*occupancy_map/prob_being_active
