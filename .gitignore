@@ -3,6 +3,21 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Mac files
+.DS_Store
+
+# Pytorch files
+*.pt
+*.pth
+
+# Image files
+*.jpg
+*.jpeg
+*.png
+*.pdf
+*.svg
+*.eps
+
 # C extensions
 *.so
 

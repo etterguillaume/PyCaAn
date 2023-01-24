@@ -1,4 +1,6 @@
+jupyter-lab
 matplotlib
+notebook
 numpy
 pandas
 pyyaml
