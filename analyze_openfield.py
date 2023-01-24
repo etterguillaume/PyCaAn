@@ -39,18 +39,27 @@ print(f'Found {len(sessionsList)} total sessions')
 #for session in tqdm.tqdm(sessionsList):
 # Check if data exists
 data = load_data(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + session)
+
+# Apply thresholds_1 here (min duration/frames, clean data etc)
+
+#for session in tqdm.tqdm(sessionsList):
 binarized_traces = binarize_ca_traces(data['caTrace'], params['z_threshold'],params['sampling_frequency'])
 interpolated_position = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
 velocity, running_ts = compute_velocity(interpolated_position, data['caTime'], params['speed_threshold'])
 
+# Apply thresholds_2 here (min num cells, coverage, distance travelled, speed etc etc)
+
+#for session in tqdm.tqdm(sessionsList):
 #%% Compute tuning curves for every cell
 tuning_data = extract_2D_tuning(binarized_traces, interpolated_position, running_ts, params)
-
 
 #%%
 # Decoding (jacknife? Decoding using 1,2,4,8,16,32,64,128,256,512, ... max cells)
 
+#%%
 # Save the data in a neat format!
+# Mice selected, number of cells per mouse, distance travelled, avg speed, etc etc
+
 
 #%% Group analysis
 # Plot stuff!
