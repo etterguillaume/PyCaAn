@@ -6,13 +6,13 @@
 import yaml
 import os
 import tqdm
-from functions.dataloaders import load_data
-from functions.signal_processing import binarize_ca_traces, interpolate_behavior, compute_velocity
-from functions.tuning import extract_2D_tuning
+from functions.data_processing.dataloaders import load_data
+from functions.signal_processing.signal_processing import binarize_ca_traces, interpolate_behavior, compute_velocity
+from functions.tuning_curves.tuning import extract_2D_tuning
 
 #%% Load YAML file
 print('Opening parameters file... ', end='')
-with open('openfield_params.yaml','r') as file:
+with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 print('Done!')
 #%% Establish list of animals

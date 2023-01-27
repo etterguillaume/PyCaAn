@@ -1,5 +1,5 @@
 # Paths
-path_to_dataset: /Users/guillaume/Documents/datasets/calcium_imaging
+path_to_dataset: ../../datasets/calcium_imaging
 path_to_results: /Volumes/GoogleDrive/My Drive/Etter-Lab/manuscripts/spatiotemporal_ensemble_dynamics/results
 
 # Experiment
@@ -17,6 +17,7 @@ portion_surface_covered_threshold: .8 # 0-1, default=1 (all bins explored)
 bin_size: 2.5 # cm
 linear_track_length: 134 # cm
 open_field_width: 50 # cm
-rate_map_smoothing: 5 # cm, sigma for gaussian smoothing, 0 for no smoothing
+rate_map_smoothing_sigma: 5 # cm, sigma for gaussian smoothing, 0 for no smoothing
+rate_map_smoothing_size: 5 # cm, size for gaussian smoothing, 0 for no smoothing
 split_half_threshold: .3 # threshold for stability. Default = .3
 num_permutations: 1000 # Number of circular permutations

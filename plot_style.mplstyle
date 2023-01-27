@@ -1,0 +1,27 @@
+# Figure size, resolution
+figure.figsize: 2, 2
+figure.dpi: 300
+
+# Fonts
+font.family: sans
+font.sans-serif: Helvetica
+
+# Axes
+axes.titlesize : large
+axes.labelsize : medium
+xtick.labelsize : small
+ytick.labelsize : small
+
+# Lines and markers
+lines.linewidth : 1
+lines.markersize : 2
+
+# Colors
+axes.prop_cycle: cycler(color=['dodgerblue', 'slateblue', 'deeppink', 'crimson', 'orangered', 'orange', 'gold', 'greenyellow', 'springgreen', 'mediumturquoise'])
+lines.color: midnightblue
+
+# Legend
+legend.loc: upper left
+legend.frameon: False
+legend.fontsize: medium
+
