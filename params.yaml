@@ -21,3 +21,8 @@ rate_map_smoothing_sigma: 5 # cm, sigma for gaussian smoothing, 0 for no smoothi
 rate_map_smoothing_size: 5 # cm, size for gaussian smoothing, 0 for no smoothing
 split_half_threshold: .3 # threshold for stability. Default = .3
 num_permutations: 1000 # Number of circular permutations
+
+
+# Plotting
+max_ca_traces_to_plot: 50
+plot_gain: 3

@@ -10,7 +10,7 @@ def load_data(path):
                 'experiment':np.array(f.get('ms/Experiment')),
                 'SFPs':np.array(f.get('ms/SFPs')),
                 'frameNum':np.array(f.get('ms/frameNum')),
-                'numNeurons':np.array(f.get('ms/numNeurons')),
+                'numNeurons':int(np.array(f.get('ms/numNeurons'))),
                 'caTime':np.array(f.get('ms/time'))/1000, # convert ms->s
                 'caTrace':np.array(f.get('ms/RawTraces')) 
                 }

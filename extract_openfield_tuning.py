@@ -11,28 +11,22 @@ from functions.signal_processing.signal_processing import binarize_ca_traces, in
 from functions.tuning_curves.tuning import extract_2D_tuning
 
 #%% Load YAML file
-print('Opening parameters file... ', end='')
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
-print('Done!')
 #%% Establish list of animals
-print('Listing subjects... ', end='')
 foldersList = os.listdir(params['path_to_dataset'] + os.sep + 'open_field')
 for i, folder in enumerate(foldersList):
   if not folder.startswith('M'):
     foldersList.pop(i)
-print('Done!')
 print(f'Found {len(foldersList)} subjects')
 
 #%% Establish list of sessions
-print('Listing sessions... ', end='')
 sessionsList = []
 for folder in foldersList:
     sessions = os.listdir(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + folder)
     for session in sessions:
         if os.path.isfile(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + folder + os.sep + session + os.sep + 'ms.mat'):
             sessionsList.append(folder + os.sep + session)
-print('Done!')
 print(f'Found {len(sessionsList)} total sessions')
 
 #%% Subject analysis
