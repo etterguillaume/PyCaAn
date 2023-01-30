@@ -36,5 +36,11 @@ print(f'Found {len(sessionsList)} total sessions')
 data = load_data('/Users/guillaumeetter/Documents/datasets/calcium_imaging/open_field/M246/J20_246_lego005_20180621/')
 
 #%%
-plot_summary(data, params)
+name = 'M246'
+plot_summary(data, params, name, plot=True)
+# %%
+data.keys()
+
+# %%
+data['experiment']
 # %%

@@ -1,6 +1,6 @@
 # Paths
 path_to_dataset: ../../datasets/calcium_imaging
-path_to_results: /Volumes/GoogleDrive/My Drive/Etter-Lab/manuscripts/spatiotemporal_ensemble_dynamics/results
+path_to_results: /Users/guillaumeetter/Library/CloudStorage/GoogleDrive-etterguillaume@gmail.com/My Drive/Etter-Lab/manuscripts/spatiotemporal_ensemble_dynamics/results
 
 # Experiment
 overwrite_data: True # If file is present, re-analyse?
