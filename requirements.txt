@@ -1,4 +1,4 @@
-jupyter-lab
+jupyterlab
 matplotlib
 notebook
 numpy
@@ -6,7 +6,6 @@ pandas
 pyyaml
 scikit-learn
 scipy
-seaborn
 tqdm
 torch>=1.13.1
 torchvision>=0.14.1
