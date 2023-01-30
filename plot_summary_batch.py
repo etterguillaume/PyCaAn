@@ -5,11 +5,7 @@
 #%% Imports
 import yaml
 import os
-import tqdm
-import matplotlib.pyplot as plt
-import numpy as np
 from functions.dataloaders import load_data
-from functions.signal_processing import binarize_ca_traces, interpolate_behavior, compute_velocity
 from functions.plotting import plot_summary
 #%%
 with open('params.yaml','r') as file:
@@ -32,8 +28,11 @@ for folder in foldersList:
 print(f'Found {len(sessionsList)} total sessions')
 
 #%%TODO: fix path issues
-#data = load_data(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + session)
-data = load_data('/Users/guillaumeetter/Documents/datasets/calcium_imaging/open_field/M246/J20_246_lego005_20180621/')
+for session in sessionsList:
+    if os.path.exists(# Check if session exists
+        data = load_data(params['path_to_dataset'] + os.sep + 'open_field' + os.sep + session)
+
+#data = load_data('/Users/guillaumeetter/Documents/datasets/calcium_imaging/open_field/M246/J20_246_lego005_20180621/')
 
 #%%
 name = 'M246'
