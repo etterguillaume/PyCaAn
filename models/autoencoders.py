@@ -8,7 +8,7 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
  
         # encoder
         self.encoder = nn.Sequential(
-            nn.Dropout(p=DO_rate) # Portion of units that will be corrupted. 0 by default
+            nn.Dropout(p=DO_rate), # Portion of units that will be corrupted. 0 by default
             nn.Linear(in_features=input_dim, out_features=latent_dim),
             nn.BatchNorm1d(num_features=latent_dim),
             nn.ReLU(),
@@ -18,8 +18,8 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
             nn.Linear(in_features=latent_dim, out_features=latent_dim),
             nn.BatchNorm1d(num_features=latent_dim),
             nn.ReLU(),
-            nn.Linear(in_channels=latent_dim, out_channels=output_dim),
-            nn.BatchNorm2d(output_dim),
+            nn.Linear(in_features=latent_dim, out_features=output_dim),
+            nn.BatchNorm1d(output_dim),
             nn.ReLU(),
         )
         
