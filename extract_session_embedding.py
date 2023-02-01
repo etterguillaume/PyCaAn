@@ -1,99 +1,144 @@
 #%% Import dependencies
 import yaml
-import tqdm
+from tqdm import tqdm
 import os
 from functions.dataloaders import load_data
+from functions.signal_processing import binarize_ca_traces,  interpolate_behavior
 import torch
 from models.autoencoders import AE_MLP
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 import numpy as np
+sigmoid = torch.nn.Sigmoid()
+
+# Metrics
+BCE_error = torch.nn.BCELoss(reduction='none')
 
 #TEMP
 import matplotlib.pyplot as plt
-
-#%%
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") #TODO: define prefered device in params
-
-device=torch.device('cpu')
-seed = 42 # TODO add to params
-torch.manual_seed(seed) # Seed for reproducibility
-np.random.seed(seed)
 
 #%% Load parameters
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 
+#%% Specify device and seeds
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") #TODO: define prefered device in params
+device = torch.device('cpu')
+
+torch.manual_seed(params['seed']) # Seed for reproducibility
+np.random.seed(params['seed'])
+
+#%% Housekeeping
+if not os.path.exists(params['path_to_results'] + '/models'):
+    os.makedirs(params['path_to_results'] + '/models')
+
 #%% Load session
 session_path = '/Users/guillaumeetter/Documents/datasets/calcium_imaging/M246/M246_legoLT_20180716'
 data = load_data(session_path)
-# %%
-data.keys()
-# %%
-data['caTrace'].shape
+
+#%% Interpolate location
+position = interpolate_behavior(data['position'], data['behavTime'], data['caTime']).T
+
+#%% Signal processing
+traces = data['caTrace'].T # Transpose to get matrix = samples x neurons
+if params['data_type'] == 'binarized':
+    traces = binarize_ca_traces(traces,
+                                          z_threshold=params['z_threshold'],
+                                          sampling_frequency=params['sampling_frequency']).T            
 
 #%%
-datapoints = torch.tensor(data['caTrace'].T,dtype=torch.float32).to(device)
-
-#%%
-plt.imshow(datapoints, interpolation=None, aspect='auto')
+# If binarized, no need to normalize. Else, apply transform here
+traces = torch.tensor(traces,dtype=torch.float32).to(device)
 
 # %% Establish model and objective functions
-model = AE_MLP(input_dim=data['numNeurons'],latent_dim=64,output_dim=3,DO_rate=0).to(device) # TODO: add to params
+DO_rate=.5 #TODO: add to params
+model = AE_MLP(input_dim=data['numNeurons'],latent_dim=64,output_dim=2,DO_rate=DO_rate).to(device) # TODO: add to params
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3) # TODO: add to params
-criterion = torch.nn.MSELoss()
+if params['data_type'] == 'binarized':
+    criterion = torch.nn.BCELoss()
+else:
+    criterion = torch.nn.MSELoss()
 
-#%%
-reconstruction, embedding = model(datapoints)
+#%% Establish dataset
+train_test_ratio=.75 # Train/test ratio
+dataset_size=traces.shape[0]
+train_set_size = int(dataset_size * train_test_ratio)
+test_set_size = dataset_size - train_set_size
+train_set, test_set = random_split(traces, [train_set_size, test_set_size]) # Random split
 
-#%%
-plt.imshow(reconstruction.detach(), interpolation=None, aspect='auto')
-
-#%% Establish dataset here
-# Normalize
-# Train/test sets
-train_test_ratio=.75
-generator=random_split()
-n_train = int(np.round(train_test_ratio*datapoints.shape[0]))
-split_idx = np.random.choice(np.arange(datapoints.shape[0]),n_train)
-train_indices = np.zeros(datapoints.shape[0],dtype=bool)
-train_indices[split_idx] = 1
-train_loader = DataLoader(datapoints[train_indices,:], batch_size=64, shuffle=True)
-test_loader = DataLoader(datapoints[test_indices,:], batch_size=64, shuffle=True)
+train_loader = DataLoader(train_set, batch_size=64, shuffle=True)
+test_loader = DataLoader(test_set, batch_size=64, shuffle=True)
 n_train = len(train_loader)
-n_val = len(test_loader)
-
-
+n_test = len(test_loader)
 
 #%%
-early_stop = 0
-for epoch in tqdm(range(50)):
-    running_loss = 0
+train_loss=[]
+test_loss=[]
+for epoch in tqdm(range(params["maxTrainSteps"])):
+    run_train_loss = 0
+    model.train()
     for i, x in enumerate(train_loader):
-        datapoints = [].to(device)
-        # images = normalize(torch.cat([x_clean0, x_clean1])).to(device).float()
-        reconstruction, _ = model(datapoints)
-        loss = criterion(reconstruction, datapoints)
-        running_loss += loss/x_clean0.size(0)
-        optimizer.zero_grad()
+        x = x.to(device)
+        reconstruction, _ = model(x)
+        if params['data_type']=='binarized':
+            reconstruction=sigmoid(reconstruction)
+        loss = criterion(reconstruction, x)
         loss.backward()
         optimizer.step()
+        run_train_loss += loss.item()
+        optimizer.zero_grad()
+    train_loss.append(run_train_loss/n_train)
 
-    val_loss = 0
+    run_test_loss = 0
+    model.eval()
     for i, x in enumerate(test_loader):
-        datapoints = [].to(device)
-        # images = normalize(torch.cat([x_clean0, x_clean1])).to(device).float()
+        x = x.to(device)
         with torch.no_grad():
-            rec, x, mu, logvar = model(datapoints)                    
-            loss = criterion(reconstruction, datapoints)
-            val_loss += loss/x_clean0.size(0)
+            reconstruction, _ = model(x)
+            if params['data_type']=='binarized':
+                reconstruction=sigmoid(reconstruction)
+            loss = criterion(reconstruction, x)
+            run_test_loss += loss.item()
+    test_loss.append(run_test_loss/n_test)
 
-    if running_loss/n_train < val_loss/n_val:
-        early_stop += 1
-    print(f"Epoch: {epoch+1} \t Train Loss: {running_loss/n_train:.2f} \t Val Loss: {val_loss/n_val:.2f}")
-    
-    torch.save(model.state_dict(), params['path_to_results']+ '/models' + f'/{seed}/vae_{h_dim}_{latent_dim}.pth')
-    if early_stop == patience:
-        print("early stopping...")
-        break
+    print(f"Epoch: {epoch+1} \t Train Loss: {run_train_loss/n_train:.4f} \t Val Loss: {run_test_loss/n_test:.4f}")    
+    torch.save(model.state_dict(), params['path_to_results']+ '/models' + f'/model.pth')
+# %%
+# Plot training curves
+plt.plot(train_loss)
+plt.plot(test_loss)
+
+#%%
+# Plot reconstruction examples
+with torch.no_grad():
+    reconstruction, embedding = model(traces)
+
+#%%
+plt.subplot(121)
+max_val=torch.max(traces)
+cells2plot = 10
+for i in range(cells2plot):
+    plt.plot(traces[:,i]*params['plot_gain']+max_val*i/params['plot_gain'],
+            c=(1-i/50,.6,i/50),
+            linewidth=.3)    
+    plt.xlim([0,2000])
+plt.title(f'Original: {DO_rate}')
+
+max_val=torch.max(reconstruction)
+plt.subplot(122)
+for i in range(cells2plot):
+    plt.plot(reconstruction[:,i]*params['plot_gain']+max_val*i/params['plot_gain'],
+            c=(1-i/50,.6,i/50),
+            linewidth=.3)
+    plt.xlim([0,2000])
+plt.title(f'Reconstruction\nDropout rate: {DO_rate}')
+#plt.plot(datapoints[:,0]-reconstruction[:,0])
+# %%
+embedding.shape
+# %%
+plt.scatter(embedding[:,0], embedding[:,1], c=position[:,0])
+# %%
+error = BCE_error(traces[:,0],reconstruction[:,0])
+plt.plot(error)
+# %%

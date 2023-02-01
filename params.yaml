@@ -2,10 +2,14 @@
 path_to_dataset: ../../datasets/calcium_imaging
 path_to_results: /Users/guillaumeetter/Library/CloudStorage/GoogleDrive-etterguillaume@gmail.com/My Drive/Etter-Lab/manuscripts/spatiotemporal_ensemble_dynamics/results
 
+# General
+seed: 42
+
 # Experiment
 overwrite_data: True # If file is present, re-analyse?
 
 # Analysis parameters
+data_type: 'raw' # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
 sampling_frequency: 30 # frames per second
 decoding_training_set: .75 # portion of recording used to train decoder
 decoding_set_selection: random
@@ -22,11 +26,11 @@ rate_map_smoothing_size: 5 # cm, size for gaussian smoothing, 0 for no smoothing
 split_half_threshold: .3 # threshold for stability. Default = .3
 num_permutations: 1000 # Number of circular permutations
 
-
 # Plotting
 max_ca_traces_to_plot: 50
 plot_gain: 3
 
 # Embeddings
 device: 'mps' # Preferred device to training. Supported: 'cuda' (nvidia), 'mps' (apple metal shaders). If not available, will revert back to cpu
-training_patience: 5 # Number of epochs before early stopping
+maxTrainSteps: 100
+decoding_training_set: .75 # portion of recording used to train embedding model
