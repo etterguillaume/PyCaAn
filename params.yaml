@@ -31,6 +31,8 @@ max_ca_traces_to_plot: 50
 plot_gain: 3
 
 # Embeddings
-device: 'mps' # Preferred device to training. Supported: 'cuda' (nvidia), 'mps' (apple metal shaders). If not available, will revert back to cpu
+device: 'cpu' # Preferred device to training. Supported: 'cuda' (nvidia), 'mps' (apple metal shaders). If not available, will revert back to cpu
+learning_rate: 0.001
 maxTrainSteps: 100
 decoding_training_set: .75 # portion of recording used to train embedding model
+AE_dropout_rate: .8
