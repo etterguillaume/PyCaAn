@@ -31,12 +31,8 @@ device = torch.device('cpu')
 torch.manual_seed(params['seed']) # Seed for reproducibility
 np.random.seed(params['seed'])
 
-#%% Housekeeping
-if not os.path.exists(params['path_to_results'] + '/models'):
-    os.makedirs(params['path_to_results'] + '/models')
-
 #%% Load session
-session_path = '/Users/guillaumeetter/Documents/datasets/calcium_imaging/M246/M246_LT_7'
+session_path = '../../datasets/calcium_imaging/M246/M246_LT_7'
 data = load_data(session_path)
 
 #%% Interpolate location
@@ -115,7 +111,7 @@ for epoch in tqdm(range(params["maxTrainSteps"])):
     test_loss.append(run_test_loss/n_test)
 
     print(f"Epoch: {epoch+1} \t Train Loss: {run_train_loss/n_train:.4f} \t Test Loss: {run_test_loss/n_test:.4f}")    
-    torch.save(model.state_dict(), params['path_to_results']+ '/models' + f'/model.pth')
+    torch.save(model.state_dict(), 'results/trained_models/' + f'AE_model.pth')
 # %%
 # Plot training curves
 plt.plot(train_loss)
