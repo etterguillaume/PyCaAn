@@ -9,6 +9,7 @@ scipy
 tqdm
 torch>=1.13.1
 torchvision>=0.14.1
+h5py
 
 umap-learn
 scikit-learn
