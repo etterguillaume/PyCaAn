@@ -164,7 +164,7 @@ plt.scatter(embedding[:,0], embedding[:,1], c=velocity)
 plt.colorbar()
 plt.title('Velocity')
 # %%
-embedding_raw = umap.UMAP(n_neighbors=50, min_dist=0.8,n_components=2,metric='cosine').fit_transform(traces)
+embedding_raw = umap.UMAP(n_neighbors=50, min_dist=0.1,n_components=2,metric='cosine').fit_transform(traces)
 # %%
 plt.figure(figsize=(5,5))
 plt.subplot(221)
