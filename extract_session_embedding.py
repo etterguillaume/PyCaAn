@@ -6,6 +6,7 @@ from functions.dataloaders import load_data
 from functions.signal_processing import binarize_ca_traces,  interpolate_behavior, compute_velocity
 import torch
 from models.autoencoders import AE_MLP
+from models.decoders import linear
 from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 import numpy as np
@@ -18,6 +19,7 @@ BCE_error = torch.nn.BCELoss(reduction='none')
 #TEMP
 import matplotlib.pyplot as plt
 plt.style.use('plot_style.mplstyle')
+from functions.plotting import interactive_plot_manifold3D
 
 #%% Load parameters
 with open('params.yaml','r') as file:
@@ -111,7 +113,14 @@ for epoch in tqdm(range(params["maxTrainSteps"])):
     test_loss.append(run_test_loss/n_test)
 
     print(f"Epoch: {epoch+1} \t Train Loss: {run_train_loss/n_train:.4f} \t Test Loss: {run_test_loss/n_test:.4f}")    
-    torch.save(model.state_dict(), 'results/trained_models/' + f'AE_model.pth')
+    torch.save({
+            'params': params,
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'train_loss': train_loss,
+            'val_loss': test_loss,
+            }, f'results/AE_model.pt')
 # %%
 # Plot training curves
 plt.plot(train_loss)
@@ -143,38 +152,12 @@ for i in range(cells2plot):
 plt.title(f'Reconstruction\nDropout rate: {params["AE_dropout_rate"]}')
 #plt.plot(datapoints[:,0]-reconstruction[:,0])
 
+#%% UMAP for comparison
+embedding_UMAP = umap.UMAP(n_neighbors=50, min_dist=0.8,n_components=2,metric='cosine').fit_transform(traces)
+
+#%% Train decoder on embedding and location
+embedding_decoder = 
 # %%
-plt.figure(figsize=(5,5))
-plt.subplot(221)
-plt.scatter(embedding[:,0], embedding[:,1], c=ca_time)
-plt.colorbar()
-plt.title('Time')
 
-plt.subplot(222)
-plt.scatter(embedding[:,0], embedding[:,1], c=position)
-plt.colorbar()
-plt.title('Location')
 
-plt.subplot(223)
-plt.scatter(embedding[:,0], embedding[:,1], c=velocity)
-plt.colorbar()
-plt.title('Velocity')
-# %%
-embedding_raw = umap.UMAP(n_neighbors=50, min_dist=0.8,n_components=2,metric='cosine').fit_transform(traces)
-# %%
-plt.figure(figsize=(5,5))
-plt.subplot(221)
-plt.scatter(embedding_raw[:,0], embedding_raw[:,1], c=ca_time)
-plt.colorbar()
-plt.title('Time')
-
-plt.subplot(222)
-plt.scatter(embedding_raw[:,0], embedding_raw[:,1], c=position)
-plt.colorbar()
-plt.title('Location')
-
-plt.subplot(223)
-plt.scatter(embedding_raw[:,0], embedding_raw[:,1], c=velocity)
-plt.colorbar()
-plt.title('Velocity')
  # %%
