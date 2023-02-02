@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from plotly import graph_objects as go
 plt.style.use('plot_style.mplstyle')
 
 def plot_summary(data, params, name, save_fig=True, extension='.png', plot=False):
@@ -35,3 +36,31 @@ def plot_summary(data, params, name, save_fig=True, extension='.png', plot=False
 
     if plot==False:
         plt.close()
+
+def interactive_plot_manifold3D(x,y,z,color):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter3d(
+        x=x,
+        y=y,
+        z=z,
+        name='Embedded neuronal activity',
+        mode = 'markers',
+        marker=dict(
+            size=4,
+            color=color,
+            colorscale='Viridis',
+            showscale=True,
+            opacity=0.8)))
+
+    fig.update_layout(
+        title=go.layout.Title(
+            text='Embedded neuronal activity',
+            xref="paper",
+            x=0),
+            xaxis_title="X",
+            yaxis_title="Y",
+            font=dict(
+            family="Helvetica",
+            size=18))
+
+    fig.show()
