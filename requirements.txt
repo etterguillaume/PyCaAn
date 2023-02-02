@@ -4,8 +4,12 @@ notebook
 numpy
 pandas
 pyyaml
-scikit-learn
+pingouin
 scipy
 tqdm
 torch>=1.13.1
 torchvision>=0.14.1
+
+umap-learn
+scikit-learn
+plotly

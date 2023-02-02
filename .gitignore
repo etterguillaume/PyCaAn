@@ -7,16 +7,16 @@ __pycache__/
 .DS_Store
 
 # Pytorch files
-*.pt
-*.pth
+#*.pt
+#*.pth
 
 # Image files
-*.jpg
-*.jpeg
-*.png
-*.pdf
-*.svg
-*.eps
+#*.jpg
+#*.jpeg
+#*.png
+#*.pdf
+#*.svg
+#*.eps
 
 # C extensions
 *.so
