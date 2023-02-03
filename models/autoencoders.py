@@ -7,31 +7,21 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
         # encoder
         self.encoder = nn.Sequential(
             nn.Linear(in_features=input_dim, out_features=latent_dim),
-            nn.BatchNorm1d(num_features=latent_dim),
             nn.ReLU(),
             nn.Linear(in_features=latent_dim, out_features=latent_dim),
-            nn.BatchNorm1d(num_features=latent_dim),
-            nn.ReLU(),
-            nn.Linear(in_features=latent_dim, out_features=latent_dim),
-            nn.BatchNorm1d(num_features=latent_dim),
             nn.ReLU(),
             nn.Linear(in_features=latent_dim, out_features=output_dim),
-            nn.BatchNorm1d(output_dim),
             nn.ReLU(),
         )
 
         # decoder 
         self.decoder = nn.Sequential(
             nn.Linear(in_features=output_dim, out_features=latent_dim),
-            nn.BatchNorm1d(num_features=latent_dim),
             nn.ReLU(),
             nn.Linear(in_features=latent_dim, out_features=latent_dim),
-            nn.BatchNorm1d(num_features=latent_dim),
-            nn.ReLU(),
-            nn.Linear(in_features=latent_dim, out_features=latent_dim),
-            nn.BatchNorm1d(num_features=latent_dim),
             nn.ReLU(),
             nn.Linear(in_features=latent_dim, out_features=input_dim),
+            nn.Sigmoid()
         )
  
     def forward(self, x):

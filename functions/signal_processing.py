@@ -37,3 +37,22 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
     running_ts[velocity>speed_threshold] = True
     
     return velocity, running_ts
+
+def preprocess_data(data, params):
+    data['position'] = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
+    data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
+
+    if params['data_type']=='binarized':
+        data['caTrace'] = binarize_ca_traces(data['caTrace'],
+                                          z_threshold=params['z_threshold'],
+                                          sampling_frequency=params['sampling_frequency'])
+    else: # Normalize
+        data_mean         
+
+    if params['remove_immobility']:
+        data['caTrace'] = data['caTrace'][data['running_ts'],:] # Transpose to get matrix = samples x neurons
+        data['caTime'] = data['caTime'][data['running_ts']]
+        data['velocity'] = data['velocity'][data['running_ts']]
+        data['position'] = data['position'][data['running_ts'],0]
+
+    return data

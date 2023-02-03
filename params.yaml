@@ -1,38 +1,53 @@
+# General
+device: cpu # Preferred device to training. Supported: 'cuda' (nvidia), 'mps' (apple metal shaders). If not available, will revert back to cpu
+seed: 42
+
 # Paths
 path_to_dataset: ../../datasets/calcium_imaging
 path_to_results: /results
-
-# General
-seed: 42
 
 # Experiment
 overwrite_data: True # If file is present, re-analyse?
 
 # Analysis parameters
-data_type: 'raw' # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
+data_type: raw # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
 sampling_frequency: 30 # frames per second
-decoding_training_set: .75 # portion of recording used to train decoder
-decoding_set_selection: random
 z_threshold: 2 # Used to detect periods of putative activity
+
+# Locomotor info
 speed_threshold: 5 # cm.s-1
+remove_immobility: False
+
+# Data curation thresholds
 distance_travelled_threshold: 3000 #cm
 occupancy_frame_threshold: 20 # min number of frames per location
 portion_surface_covered_threshold: .8 # 0-1, default=1 (all bins explored)
+min_num_neurons: 100 # Minimum number of neurons for a session to be included
+
+# Tuning curve computations
 bin_size: 2.5 # cm
-linear_track_length: 134 # cm
-open_field_width: 50 # cm
+#linear_track_length: 134 # cm
+#open_field_width: 50 # cm
 rate_map_smoothing_sigma: 5 # cm, sigma for gaussian smoothing, 0 for no smoothing
 rate_map_smoothing_size: 5 # cm, size for gaussian smoothing, 0 for no smoothing
 split_half_threshold: .3 # threshold for stability. Default = .3
 num_permutations: 1000 # Number of circular permutations
+
+# Chronic alignment parameters
 
 # Plotting
 max_ca_traces_to_plot: 50
 plot_gain: 3
 
 # Embeddings
-device: 'cpu' # Preferred device to training. Supported: 'cuda' (nvidia), 'mps' (apple metal shaders). If not available, will revert back to cpu
+embedding_dims: 2
 learning_rate: 0.001
 maxTrainSteps: 100
-decoding_training_set: .75 # portion of recording used to train embedding model
+train_test_ratio: .8 # portion of recording used to train embedding model
 AE_dropout_rate: .8
+batch_size: 32
+patience: 5 # Number of steps after which training will stop if test loss does not improve
+
+# Decoder parameters
+decoding_training_set: .8 # portion of recording used to train decoder
+decoding_set_selection: random
