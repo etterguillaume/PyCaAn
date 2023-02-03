@@ -21,7 +21,6 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
             nn.Linear(in_features=latent_dim, out_features=latent_dim),
             nn.ReLU(),
             nn.Linear(in_features=latent_dim, out_features=input_dim),
-            nn.Sigmoid()
         )
  
     def forward(self, x):

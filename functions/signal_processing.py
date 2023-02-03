@@ -46,8 +46,8 @@ def preprocess_data(data, params):
         data['caTrace'] = binarize_ca_traces(data['caTrace'],
                                           z_threshold=params['z_threshold'],
                                           sampling_frequency=params['sampling_frequency'])
-    else: # Normalize
-        data_mean         
+    #else: # Normalize
+        #data_mean         
 
     if params['remove_immobility']:
         data['caTrace'] = data['caTrace'][data['running_ts'],:] # Transpose to get matrix = samples x neurons

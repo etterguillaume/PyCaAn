@@ -1,6 +1,6 @@
 import torch
 
-def train_model(model, train_loader, test_loader, optimizer, criterion, device, params):
+def train_embedder(model, train_loader, test_loader, optimizer, criterion, device, params):
     n_train = len(train_loader)
     n_test = len(test_loader)
 
