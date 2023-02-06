@@ -9,7 +9,7 @@ from functions.model_training import train_embedder, train_decoder
 
 from functions.datasets import generateDataset, split_to_loaders
 from models.autoencoders import AE_MLP
-from models.decoders import position_decoder
+from models.decoders import linear_decoder
 
 import numpy as np
 from scipy.stats import pearsonr as corr
@@ -41,26 +41,23 @@ data = load_data(session_path)
 #%% Preprocessing 
 data = preprocess_data(data,params)
 
-#%%
-dataset_z = (np.mean(data['caTrace']), np.std(data['caTrace']))
-position_z = (np.mean(data['position']), np.std(data['position']))
-
 # %% Establish model and objective functions
 model = AE_MLP(input_dim=data['numNeurons'],latent_dim=64,output_dim=params['embedding_dims']).to(device) # TODO: add to params
 optimizer = torch.optim.AdamW(model.parameters(), lr=params['learning_rate']) # TODO: add to params
-criterion = torch.nn.MSELoss()
+BCE_criterion = torch.nn.BCELoss()
+MSE_criterion = torch.nn.MSELoss()
 
 #%%
-dataset = generateDataset(data, params, dataset_z=dataset_z, position_z=position_z)
+dataset = generateDataset(data, params)
 
 #%% Establish dataset
 train_loader, test_loader = split_to_loaders(dataset, params)
 
 #%% Train model
-train_embedder(model, train_loader, test_loader, optimizer, criterion, device, params)
+train_embedder(model, train_loader, test_loader, optimizer, BCE_criterion, device, params)
 
 #%% Train decoder on embedding and location
-embedding_decoder = position_decoder(input_dims=params['embedding_dims'])
+embedding_decoder = linear_decoder(input_dims=params['embedding_dims'],output_dims=1)
 
 #%%
 decoder_optimizer = torch.optim.AdamW(embedding_decoder.parameters(), lr=params['learning_rate'])
@@ -70,8 +67,7 @@ for param in model.parameters():
     param.requires_grad = False # Freeze all weights
 
 #%% Train decoder
-train_decoder(model, embedding_decoder, train_loader, test_loader, optimizer, criterion, device, params)
-
+train_decoder(model, embedding_decoder, train_loader, test_loader, optimizer, MSE_criterion, device, params)
 
 #%% Validate models
 # Validate reconstruction error, accuracy
@@ -87,9 +83,9 @@ for i, (x, position, _) in enumerate(test_loader):
     x = x.to(device)
     with torch.no_grad():
         reconstruction, embedding = model(x)
-        loss = criterion(reconstruction, x) # Only compute loss on masked part
+        loss = BCE_criterion(reconstruction, x) # Only compute loss on masked part
         pred = embedding_decoder(embedding)
-        pred_loss = criterion(pred,position)
+        pred_loss = MSE_criterion(pred,position)
 
         total_inputs = np.append(total_inputs, x, axis=0)
         total_reconstructions = np.append(total_reconstructions, reconstruction, axis=0)
