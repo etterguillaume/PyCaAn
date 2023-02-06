@@ -10,13 +10,14 @@ path_to_results: /results
 overwrite_data: True # If file is present, re-analyse?
 
 # Analysis parameters
-data_type: raw # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
+data_type: binarized # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
 sampling_frequency: 30 # frames per second
 z_threshold: 2 # Used to detect periods of putative activity
 
 # Locomotor info
 speed_threshold: 5 # cm.s-1
 remove_immobility: False
+remove_inactivity: False # If true and data is binarized, will remove epochs where no cell was active
 
 # Data curation thresholds
 distance_travelled_threshold: 3000 #cm
@@ -45,7 +46,7 @@ learning_rate: 0.001
 maxTrainSteps: 100
 train_test_ratio: .8 # portion of recording used to train embedding model
 AE_dropout_rate: .8
-batch_size: 32
+batch_size: 256
 patience: 5 # Number of steps after which training will stop if test loss does not improve
 
 # Decoder parameters
