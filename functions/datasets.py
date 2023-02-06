@@ -5,14 +5,11 @@ from torch.utils.data import DataLoader
 from torch.utils.data import random_split
 
 class generateDataset(Dataset):
-    def __init__(self, data, params, dataset_z=None, position_z=None, velocity_z=None):
+    def __init__(self, data):
         self.neural_data = torch.tensor(data['caTrace'],dtype=torch.float)
         self.position = torch.tensor(data['position'],dtype=torch.float)
         self.velocity = torch.tensor(data['velocity'],dtype=torch.float)
-        
-        self.dataset_z = dataset_z
-        self.position_z = position_z
-        self.velocity_z = velocity_z
+
         #TODO implement other variables
         #TODO error checking
 
@@ -21,16 +18,8 @@ class generateDataset(Dataset):
 
     def __getitem__(self, idx):
         data = self.neural_data[idx, :]
-        if self.dataset_z:
-            data = (data-self.dataset_z[0])/self.dataset_z[1]
-        
         position = self.position[idx]
-        if self.position_z:
-            position = (position-self.position_z[0])/self.position_z[1]
-
         velocity = self.velocity[idx]
-        if self.velocity_z:
-            velocity = (velocity-self.velocity_z[0])/self.velocity_z[1]
 
         return data, position, velocity
 

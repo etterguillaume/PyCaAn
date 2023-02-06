@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use('plot_style.mplstyle')
 import os
 from plotly import graph_objects as go
-plt.style.use('plot_style.mplstyle')
+
 
 def plot_summary(data, params, name, save_fig=True, extension='.png', plot=False):
     plt.figure(figsize=(3,3))
@@ -65,34 +66,71 @@ def interactive_plot_manifold3D(x,y,z,color):
 
     fig.show()
 
+#%% Plot reconstruction 
+    plt.figure(figsize=(3,3))
+    plt.subplot(221)
+    x=total_inputs.flatten()
+    y=total_reconstructions.flatten()
+    a, b = np.polyfit(x, y, 1)
+    plt.scatter(x,y)
+    plt.plot(x, a*x+b,'r--')
+    plt.xlabel('Original input value')
+    plt.ylabel('Reconstructed input value')
+    plt.title(f'Reconstruction\nR2={reconstruction_stats[0].round(4)}, p={reconstruction_stats[1].round(4)}')
 
-#%%
-# Plot reconstruction examples
-# with torch.no_grad():
-#     reconstruction, embedding = model(torch.tensor(data['caTrace'],dtype=torch.float))
+    plt.subplot(222)
+    plt.hist(total_losses)
+    plt.xlabel('Loss')
+    plt.ylabel('Number')
+    plt.title(f'Embedder\nmean loss:{avg_loss.round(4)}')
 
-# #%%
-# #lower_bound_loss = criterion(torch.tensor(data['caTrace'],dtype=torch.float),torch.tensor(data['caTrace'],dtype=torch.float))
-# #upper_bound_loss = criterion(torch.tensor(data['caTrace'],dtype=torch.float),torch.tensor(~data['caTrace'],dtype=torch.float))
-# error = criterion(reconstruction, torch.tensor(data['caTrace'],dtype=torch.float))
+#%% Plot decoding 
+    plt.subplot(223)
+    x=total_positions[:,0].flatten()
+    y=total_predictions[:,0].flatten()
+    a, b = np.polyfit(x, y, 1)
+    plt.scatter(x,y)
+    plt.plot(x, a*x+b,'r--')
+    plt.xlabel('Actual position')
+    plt.ylabel('Decoded position')
+    plt.title(f'Decoder\nR2={decoder_stats[0].round(4)}, p={decoder_stats[1].round(4)}')
 
-# #%%
-# plt.subplot(121)
-# max_val=torch.max(torch.tensor(data['caTrace'],dtype=torch.float))
-# cells2plot = 10
-# for i in range(cells2plot):
-#     plt.plot(torch.tensor(data['caTrace'],dtype=torch.float)[:,i]*params['plot_gain']+max_val*i/params['plot_gain'],
-#             c=(1-i/50,.6,i/50),
-#             linewidth=.3)    
-#     plt.xlim([0,2000])
-# plt.title(f'Original: {params["AE_dropout_rate"]}')
+    plt.subplot(224)
+    plt.hist(total_pred_losses)
+    plt.xlabel('Loss')
+    plt.ylabel('Number')
+    plt.title(f'Decoder\nmean loss:{avg_pred_loss.round(4)}')
 
-# max_val=torch.max(reconstruction)
-# plt.subplot(122)
-# for i in range(cells2plot):
-#     plt.plot(reconstruction[:,i]*params['plot_gain']+max_val*i/params['plot_gain'],
-#             c=(1-i/50,.6,i/50),
-#             linewidth=.3)
-#     plt.xlim([0,2000])
-# plt.title(f'Reconstruction\nDropout rate: {params["AE_dropout_rate"]}')
-#plt.plot(datapoints[:,0]-reconstruction[:,0])
+    plt.tight_layout()
+
+
+#%% Plot reconstruction examples
+
+    with torch.no_grad():
+        reconstruction, embedding = model(torch.tensor(data['caTrace'],dtype=torch.float))
+
+    #%%
+    #lower_bound_loss = criterion(torch.tensor(data['caTrace'],dtype=torch.float),torch.tensor(data['caTrace'],dtype=torch.float))
+    #upper_bound_loss = criterion(torch.tensor(data['caTrace'],dtype=torch.float),torch.tensor(~data['caTrace'],dtype=torch.float))
+    error = criterion(reconstruction, torch.tensor(data['caTrace'],dtype=torch.float))
+
+    #%%
+    plt.subplot(121)
+    max_val=torch.max(torch.tensor(data['caTrace'],dtype=torch.float))
+    cells2plot = 10
+    for i in range(cells2plot):
+        plt.plot(torch.tensor(data['caTrace'],dtype=torch.float)[:,i]*params['plot_gain']+max_val*i/params['plot_gain'],
+                c=(1-i/50,.6,i/50),
+                linewidth=.3)    
+        plt.xlim([0,2000])
+    plt.title(f'Original: {params["AE_dropout_rate"]}')
+
+    max_val=torch.max(reconstruction)
+    plt.subplot(122)
+    for i in range(cells2plot):
+        plt.plot(reconstruction[:,i]*params['plot_gain']+max_val*i/params['plot_gain'],
+                c=(1-i/50,.6,i/50),
+                linewidth=.3)
+        plt.xlim([0,2000])
+    plt.title(f'Reconstruction\nDropout rate: {params["AE_dropout_rate"]}')
+    plt.plot(datapoints[:,0]-reconstruction[:,0])
