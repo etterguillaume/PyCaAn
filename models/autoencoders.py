@@ -39,44 +39,44 @@ class TCN_10(nn.Module):
  
         # encoder
         self.encoder = nn.Sequential(
-            nn.Conv1d(in_channels=input_dim, out_channels=latent_dim, kernel_size=2, stride=1,padding=0),
+            nn.Conv1d(in_channels=input_dim, out_channels=64, kernel_size=2, stride=1,padding=0),
             nn.BatchNorm1d(latent_dim),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.Conv1d(in_channels=latent_dim, out_channels=latent_dim, kernel_size=3, stride=1,padding=0),
+            nn.Conv1d(in_channels=64, out_channels=32, kernel_size=3, stride=1,padding=0),
             nn.BatchNorm1d(latent_dim),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.Conv1d(in_channels=latent_dim, out_channels=latent_dim, kernel_size=3, stride=1,padding=0),
+            nn.Conv1d(in_channels=32, out_channels=16, kernel_size=3, stride=1,padding=0),
             nn.BatchNorm1d(latent_dim),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.Conv1d(in_channels=latent_dim, out_channels=latent_dim, kernel_size=3, stride=1,padding=0),
+            nn.Conv1d(in_channels=16, out_channels=8, kernel_size=3, stride=1,padding=0),
             nn.BatchNorm1d(latent_dim),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.Conv1d(in_channels=latent_dim, out_channels=output_dim, kernel_size=3, stride=1,padding=0),
+            nn.Conv1d(in_channels=8, out_channels=output_dim, kernel_size=3, stride=1,padding=0),
         )
 
         # decoder 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=output_dim, out_channels=latent_dim, kernel_size=3, stride=1,padding=0),
+            nn.ConvTranspose1d(in_channels=output_dim, out_channels=8, kernel_size=3, stride=1,padding=0),
             nn.BatchNorm1d(latent_dim),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.ConvTranspose1d(in_channels=latent_dim, out_channels=latent_dim, kernel_size=3, stride=1,padding=0),
+            nn.ConvTranspose1d(in_channels=8, out_channels=16, kernel_size=3, stride=1,padding=0),
             nn.BatchNorm1d(latent_dim),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.ConvTranspose1d(in_channels=latent_dim, out_channels=latent_dim, kernel_size=3, stride=1,padding=0),
+            nn.ConvTranspose1d(in_channels=16, out_channels=32, kernel_size=3, stride=1,padding=0),
             nn.BatchNorm1d(latent_dim),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.ConvTranspose1d(in_channels=latent_dim, out_channels=latent_dim, kernel_size=3, stride=1,padding=0),
+            nn.ConvTranspose1d(in_channels=32, out_channels=64, kernel_size=3, stride=1,padding=0),
             nn.BatchNorm1d(latent_dim),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.ConvTranspose1d(in_channels=latent_dim, out_channels=output_dim, kernel_size=2, stride=1,padding=0),
+            nn.ConvTranspose1d(in_channels=64, out_channels=input_dim, kernel_size=2, stride=1,padding=0),
             nn.Sigmoid() # To scale output between [0,1]
         )
  
