@@ -41,12 +41,14 @@ max_ca_traces_to_plot: 50
 plot_gain: 3
 
 # Embeddings
+input_neurons: 100
+latent_dims: 64
 embedding_dims: 2
-learning_rate: 0.001
+learning_rate: 0.0001
 maxTrainSteps: 100
 train_test_ratio: .8 # portion of recording used to train embedding model
 AE_dropout_rate: .8
-batch_size: 256
+batch_size: 128
 patience: 5 # Number of steps after which training will stop if test loss does not improve
 
 # Decoder parameters

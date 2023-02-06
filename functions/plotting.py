@@ -64,3 +64,35 @@ def interactive_plot_manifold3D(x,y,z,color):
             size=18))
 
     fig.show()
+
+
+#%%
+# Plot reconstruction examples
+# with torch.no_grad():
+#     reconstruction, embedding = model(torch.tensor(data['caTrace'],dtype=torch.float))
+
+# #%%
+# #lower_bound_loss = criterion(torch.tensor(data['caTrace'],dtype=torch.float),torch.tensor(data['caTrace'],dtype=torch.float))
+# #upper_bound_loss = criterion(torch.tensor(data['caTrace'],dtype=torch.float),torch.tensor(~data['caTrace'],dtype=torch.float))
+# error = criterion(reconstruction, torch.tensor(data['caTrace'],dtype=torch.float))
+
+# #%%
+# plt.subplot(121)
+# max_val=torch.max(torch.tensor(data['caTrace'],dtype=torch.float))
+# cells2plot = 10
+# for i in range(cells2plot):
+#     plt.plot(torch.tensor(data['caTrace'],dtype=torch.float)[:,i]*params['plot_gain']+max_val*i/params['plot_gain'],
+#             c=(1-i/50,.6,i/50),
+#             linewidth=.3)    
+#     plt.xlim([0,2000])
+# plt.title(f'Original: {params["AE_dropout_rate"]}')
+
+# max_val=torch.max(reconstruction)
+# plt.subplot(122)
+# for i in range(cells2plot):
+#     plt.plot(reconstruction[:,i]*params['plot_gain']+max_val*i/params['plot_gain'],
+#             c=(1-i/50,.6,i/50),
+#             linewidth=.3)
+#     plt.xlim([0,2000])
+# plt.title(f'Reconstruction\nDropout rate: {params["AE_dropout_rate"]}')
+#plt.plot(datapoints[:,0]-reconstruction[:,0])

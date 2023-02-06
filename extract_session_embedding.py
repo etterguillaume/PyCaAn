@@ -5,10 +5,9 @@ import yaml
 from tqdm import tqdm
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data
-from functions.model_training import train_embedder, train_decoder
-
+from functions.data_embedding import train_embedder
+from functions.decoding import train_decoder
 from functions.datasets import generateDataset, split_to_loaders
-from models.autoencoders import AE_MLP
 from models.decoders import linear_decoder
 
 import numpy as np
@@ -26,14 +25,6 @@ from functions.plotting import interactive_plot_manifold3D
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 
-#%% Specify device and seeds
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#device = torch.device("mps" if torch.backends.mps.is_available() else "cpu") #TODO: define prefered device in params
-device = torch.device('cpu')
-
-torch.manual_seed(params['seed']) # Seed for reproducibility
-np.random.seed(params['seed'])
-
 #%% Load session
 session_path = '../../datasets/calcium_imaging/M246/M246_LT_7'
 data = load_data(session_path)
@@ -41,41 +32,25 @@ data = load_data(session_path)
 #%% Preprocessing 
 data = preprocess_data(data,params)
 
-# %% Establish model and objective functions
-model = AE_MLP(input_dim=data['numNeurons'],latent_dim=64,output_dim=params['embedding_dims']).to(device) # TODO: add to params
-optimizer = torch.optim.AdamW(model.parameters(), lr=params['learning_rate']) # TODO: add to params
-BCE_criterion = torch.nn.BCELoss()
-MSE_criterion = torch.nn.MSELoss()
-
 #%%
 dataset = generateDataset(data, params)
 
 #%% Establish dataset
 train_loader, test_loader = split_to_loaders(dataset, params)
 
-#%% Train model
-train_embedder(model, train_loader, test_loader, optimizer, BCE_criterion, device, params)
+embedding_model = train_embedding_model(params, train_loader, test_loader)
 
 #%% Train decoder on embedding and location
-embedding_decoder = linear_decoder(input_dims=params['embedding_dims'],output_dims=1)
+embedding_decoder = train_linear_decoder(params, embedding_model, train_loader, test_loader)
 
-#%%
-decoder_optimizer = torch.optim.AdamW(embedding_decoder.parameters(), lr=params['learning_rate'])
-
-#%% Freeze embedding model
-for param in model.parameters():
-    param.requires_grad = False # Freeze all weights
-
-#%% Train decoder
-train_decoder(model, embedding_decoder, train_loader, test_loader, optimizer, MSE_criterion, device, params)
 
 #%% Validate models
 # Validate reconstruction error, accuracy
 # Validate decoding error, accuracy
 total_inputs = np.empty((0,data['numNeurons']))
 total_reconstructions = np.empty((0,data['numNeurons']))
-total_predictions = np.empty((0,2))
-total_positions = np.empty((0,2))
+total_predictions = np.empty(0)
+total_positions = np.empty(0)
 total_losses = np.empty(0)
 total_pred_losses = np.empty(0)
 
@@ -85,18 +60,18 @@ for i, (x, position, _) in enumerate(test_loader):
         reconstruction, embedding = model(x)
         loss = BCE_criterion(reconstruction, x) # Only compute loss on masked part
         pred = embedding_decoder(embedding)
-        pred_loss = MSE_criterion(pred,position)
+        pred_loss = MSE_criterion(pred,position[:,0])
 
         total_inputs = np.append(total_inputs, x, axis=0)
         total_reconstructions = np.append(total_reconstructions, reconstruction, axis=0)
         total_losses = np.append(total_losses, loss)
         total_pred_losses = np.append(total_pred_losses, pred_loss)
-        total_positions = np.append(total_positions, position, axis=0)
-        total_predictions = np.append(total_predictions, pred, axis=0)
+        total_positions = np.append(total_positions, position[:,0], axis=0)
+        total_predictions = np.append(total_predictions, pred[0], axis=0)
 
 #%%
 reconstruction_stats = corr(total_inputs.flatten(),total_reconstructions.flatten())
-decoder_stats = corr(total_positions[:,0].flatten(),total_predictions[:,0].flatten())
+decoder_stats = corr(total_positions.flatten(),total_predictions.flatten())
 avg_loss = np.mean(total_losses)
 avg_pred_loss = np.mean(total_pred_losses)
 
