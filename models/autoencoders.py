@@ -1,7 +1,7 @@
 from torch import nn
 
 class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dropout input layer
-    def __init__(self, input_dim, latent_dim, output_dim): # TODO parameterize num_layer and dimensions as vector eg [64,32,16,8]
+    def __init__(self, input_dim, output_dim): # TODO parameterize num_layer and dimensions as vector eg [64,32,16,8]
         super(AE_MLP, self).__init__()
  
         # encoder
@@ -46,7 +46,7 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
 
 
 class TCN_10(nn.Module):
-    def __init__(self, input_dim, latent_dim, output_dim):
+    def __init__(self, input_dim, output_dim):
         super(TCN_10, self).__init__()
  
         # encoder

@@ -36,13 +36,9 @@ num_permutations: 1000 # Number of circular permutations
 
 # Chronic alignment parameters
 
-# Plotting
-max_ca_traces_to_plot: 50
-plot_gain: 3
-
 # Embeddings
 input_neurons: 100
-latent_dims: 64
+hidden_layers: [64,32,16,8]
 embedding_dims: 2
 learning_rate: 0.0001
 maxTrainSteps: 100
@@ -54,3 +50,7 @@ patience: 5 # Number of steps after which training will stop if test loss does n
 # Decoder parameters
 decoding_training_set: .8 # portion of recording used to train decoder
 decoding_set_selection: random
+
+# Plotting
+max_ca_traces_to_plot: 50
+plot_gain: 3

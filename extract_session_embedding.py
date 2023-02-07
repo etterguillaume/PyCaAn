@@ -8,14 +8,12 @@ from functions.signal_processing import preprocess_data
 from functions.data_embedding import train_embedding_model
 from functions.decoding import train_linear_decoder
 from functions.datasets import generateDataset, split_to_loaders
-from models.decoders import linear_decoder
 
 import numpy as np
 from scipy.stats import pearsonr as corr
 
 import matplotlib.pyplot as plt
 plt.style.use('plot_style.mplstyle')
-from functions.plotting import interactive_plot_manifold3D
 
 #%% Load parameters
 with open('params.yaml','r') as file:
@@ -27,14 +25,16 @@ data = load_data(session_path)
 
 #%% Preprocessing 
 data = preprocess_data(data,params)
+data['caTrace']=data['caTrace'][:,0:params['input_neurons']]
 
 #%%
 dataset = generateDataset(data)
 
-#%% Establish dataset
+#%% Split dataset into 
 train_loader, test_loader = split_to_loaders(dataset, params)
 
-embedding_model = train_embedding_model(params, train_loader, test_loader)
+#%%
+embedding_model, train_loss, test_loss = train_embedding_model(params, train_loader, test_loader)
 
 #%% Train decoder on embedding and location
 embedding_decoder = train_linear_decoder(params, embedding_model, train_loader, test_loader)

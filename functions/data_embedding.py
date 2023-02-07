@@ -7,7 +7,7 @@ def train_embedding_model(params, train_loader, test_loader):
     torch.manual_seed(params['seed']) # Seed for reproducibility
     np.random.seed(params['seed'])
 
-    model = AE_MLP(input_dim=params['input_neurons'],latent_dim=params['latent_dims'],output_dim=params['embedding_dims']).to(device)
+    model = AE_MLP(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=params['learning_rate'])
     criterion = torch.nn.BCELoss()
     n_train = len(train_loader)
@@ -53,3 +53,5 @@ def train_embedding_model(params, train_loader, test_loader):
         if early_stop == params['patience']:
             print("early stopping...")
             break
+
+    return model, train_loss, test_loss
