@@ -16,8 +16,7 @@ from functions.analysis import analyze_AE_reconstruction, analyze_decoding
 
 import numpy as np
 from scipy.stats import pearsonr as corr
-from functions.plotting import plot_losses
-
+from functions.plotting import plot_losses, plot_embedding_results
 
 #%% Load parameters
 with open('params.yaml','r') as file:
@@ -44,7 +43,7 @@ plot_losses(train_loss, test_loss, title='Embedding model')
 #%% Train decoder on embedding and location
 embedding_decoder, train_loss, test_loss = train_linear_decoder(params, embedding_model, train_loader, test_loader)
 plot_losses(train_loss, test_loss, title='Decoder')
-# %% Compute 
+# %% Compute
 train_accuracy, train_precision, train_recall, train_F1 = analyze_AE_reconstruction(params, embedding_model, train_loader)
 test_accuracy, test_precision, test_recall, test_F1 = analyze_AE_reconstruction(params, embedding_model, test_loader)
 
@@ -52,4 +51,6 @@ test_accuracy, test_precision, test_recall, test_F1 = analyze_AE_reconstruction(
 train_decoding_error, train_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, train_loader)
 test_decoding_error, test_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, test_loader)
 
-# %% Visualize reconstruction
+# %% Visualize results
+plot_embedding_results(data, embedding_model, embedding_decoder, test_F1, test_decoding_error)
+# %%

@@ -8,16 +8,12 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
         self.encoder = nn.Sequential(
             nn.Linear(in_features=input_dim, out_features=64),
             nn.ReLU(),
-            nn.Dropout(.5),
             nn.Linear(in_features=64, out_features=32),
             nn.ReLU(),
-            nn.Dropout(.5),
             nn.Linear(in_features=32, out_features=16),
             nn.ReLU(),
-            nn.Dropout(.5),
             nn.Linear(in_features=16, out_features=8),
             nn.ReLU(),
-            nn.Dropout(.5),
             nn.Linear(in_features=8, out_features=output_dim),
         )
 
@@ -25,16 +21,12 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
         self.decoder = nn.Sequential(
             nn.Linear(in_features=output_dim, out_features=8),
             nn.ReLU(),
-            nn.Dropout(.5),
             nn.Linear(in_features=8, out_features=16),
             nn.ReLU(),
-            nn.Dropout(.5),
             nn.Linear(in_features=16, out_features=32),
             nn.ReLU(),
-            nn.Dropout(.5),
             nn.Linear(in_features=32, out_features=64),
             nn.ReLU(),
-            nn.Dropout(.5),
             nn.Linear(in_features=64, out_features=input_dim),
             nn.Sigmoid()
         )

@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 plt.style.use('plot_style.mplstyle')
 import os
 from plotly import graph_objects as go
+import torch
 
 def plot_summary(data, params, name, save_fig=True, extension='.png', plot=False):
     plt.figure(figsize=(3,3))
@@ -45,6 +46,47 @@ def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'
     plt.ylabel(loss_label)
     plt.title(title)
     plt.legend()
+
+def plot_embedding_results(data, embedding_model, embedding_decoder, reconstruction_Fscore, decoding_error):
+    original = torch.tensor(data['caTrace'],dtype=torch.float)
+    reconstruction, embedding = embedding_model(original)
+    reconstruction[reconstruction<=.5] = 0
+    reconstruction[reconstruction>.5] = 1
+    pred = embedding_decoder(embedding)
+
+    plt.figure(figsize=(3,4))
+    plt.subplot(341)
+    plt.imshow(original,aspect='auto',interpolation='none')
+    plt.title('Neural data')
+
+    plt.subplot(342)
+    plt.imshow(reconstruction,aspect='auto',interpolation='none')
+    plt.title('Reconstruction')
+
+    plt.subplot(343)
+    plt.scatter(embedding[:,0],embedding[:,1],c=data['position'][:,0])
+    plt.title('Embedding: position')
+
+    plt.subplot(344)
+    plt.scatter(embedding[:,0],embedding[:,1],c=data['caTime'])
+    plt.title('Embedding: time')
+
+    plt.subplot(345)
+    plt.hist(reconstruction_Fscore)
+    plt.title('Reconstruction\nF-score')
+
+    plt.subplot(347)
+    plt.hist(decoding_error)
+    plt.title('Decoding error')
+    plt.ylabel('Error (cm)')
+
+    plt.subplot(348)
+    plt.plot(data['position'][:,0], label='Actual')
+    plt.plot(pred.detach().cpu().numpy().flatten(), label='Decoded')
+    plt.title('Decoder')
+
+    plt.tight_layout()
+
     
 def interactive_plot_manifold3D(x,y,z,color):
     fig = go.Figure()
