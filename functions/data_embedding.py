@@ -3,14 +3,19 @@ import numpy as np
 from models.autoencoders import AE_MLP
 from tqdm import tqdm
 
+def add_noise(inputs,noise_factor=0.5):
+	noisy = inputs+torch.randn_like(inputs) * noise_factor
+	noisy = torch.clip(noisy,0.,1.)
+	return noisy
+
 def train_embedding_model(params, train_loader, test_loader):
     device = torch.device('cpu')
     torch.manual_seed(params['seed']) # Seed for reproducibility
     np.random.seed(params['seed'])
 
     model = AE_MLP(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=params['learning_rate'])
-    criterion = torch.nn.BCELoss()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=params['model_learning_rate'])
+    criterion = torch.nn.MSELoss()
     n_train = len(train_loader)
     n_test = len(test_loader)
 

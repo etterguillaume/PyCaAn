@@ -53,6 +53,6 @@ def preprocess_data(data, params):
         data['caTrace'] = data['caTrace'][data['running_ts'],:] # Transpose to get matrix = samples x neurons
         data['caTime'] = data['caTime'][data['running_ts']]
         data['velocity'] = data['velocity'][data['running_ts']]
-        data['position'] = data['position'][data['running_ts'],0]
+        data['position'] = data['position'][data['running_ts'],:]
 
     return data

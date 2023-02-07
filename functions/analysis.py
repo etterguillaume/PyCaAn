@@ -5,10 +5,11 @@ from scipy.stats import pearsonr as corr
 
 def reconstruction_accuracy(reconstruction, original):
     # Compute accuracy
+    reconstruction = reconstruction.round()
     accuracy = sum(original==reconstruction)/len(original)
-    true_positives = sum((reconstruction>.5) & (original>.5))
-    false_positives = sum((reconstruction>.5) & (original<=.5))
-    false_negatives = sum((reconstruction<=.5) & (original>.5))
+    true_positives = sum((reconstruction>0) & (original>0))
+    false_positives = sum((reconstruction>0) & (original==0))
+    false_negatives = sum((reconstruction==0) & (original>0))
     
     precision = true_positives/(true_positives+false_positives)
     recall = true_positives/(true_positives+false_negatives)

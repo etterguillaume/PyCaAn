@@ -3,32 +3,19 @@ from torch import nn
 class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dropout input layer
     def __init__(self, input_dim, output_dim): # TODO parameterize num_layer and dimensions as vector eg [64,32,16,8]
         super(AE_MLP, self).__init__()
- 
         # encoder
         self.encoder = nn.Sequential(
             nn.Linear(in_features=input_dim, out_features=64),
             nn.ReLU(),
-            nn.Linear(in_features=64, out_features=32),
-            nn.ReLU(),
-            nn.Linear(in_features=32, out_features=16),
-            nn.ReLU(),
-            nn.Linear(in_features=16, out_features=8),
-            nn.ReLU(),
-            nn.Linear(in_features=8, out_features=output_dim),
+            nn.Linear(in_features=64, out_features=output_dim),
         )
 
         # decoder 
         self.decoder = nn.Sequential(
-            nn.Linear(in_features=output_dim, out_features=8),
-            nn.ReLU(),
-            nn.Linear(in_features=8, out_features=16),
-            nn.ReLU(),
-            nn.Linear(in_features=16, out_features=32),
-            nn.ReLU(),
-            nn.Linear(in_features=32, out_features=64),
+            nn.Linear(in_features=output_dim, out_features=64),
             nn.ReLU(),
             nn.Linear(in_features=64, out_features=input_dim),
-            nn.Sigmoid()
+        #    nn.Sigmoid()
         )
  
     def forward(self, x):
@@ -81,7 +68,7 @@ class TCN_10(nn.Module):
             nn.ReLU(),
             nn.Dropout(.5),
             nn.ConvTranspose1d(in_channels=64, out_channels=input_dim, kernel_size=2, stride=1,padding=0),
-            nn.Sigmoid() # To scale output between [0,1]
+            nn.Sigmoid()
         )
  
     def forward(self, x):

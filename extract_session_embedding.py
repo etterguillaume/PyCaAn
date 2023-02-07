@@ -23,7 +23,7 @@ with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Load session
-session_path = '../../datasets/calcium_imaging/M246/M246_LT_7'
+session_path = '../../datasets/calcium_imaging/M246/M246_LT_6'
 data = load_data(session_path)
 
 #%% Preprocessing 

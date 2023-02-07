@@ -50,37 +50,38 @@ def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'
 def plot_embedding_results(data, embedding_model, embedding_decoder, reconstruction_Fscore, decoding_error):
     original = torch.tensor(data['caTrace'],dtype=torch.float)
     reconstruction, embedding = embedding_model(original)
-    reconstruction[reconstruction<=.5] = 0
-    reconstruction[reconstruction>.5] = 1
     pred = embedding_decoder(embedding)
 
-    plt.figure(figsize=(3,4))
+    plt.figure(figsize=(4,4))
     plt.subplot(341)
     plt.imshow(original,aspect='auto',interpolation='none')
     plt.title('Neural data')
 
     plt.subplot(342)
-    plt.imshow(reconstruction,aspect='auto',interpolation='none')
+    plt.imshow(reconstruction,aspect='auto',interpolation='none',vmin=0,vmax=1)
     plt.title('Reconstruction')
+    plt.colorbar()
 
     plt.subplot(343)
     plt.scatter(embedding[:,0],embedding[:,1],c=data['position'][:,0])
     plt.title('Embedding: position')
+    plt.colorbar()
 
     plt.subplot(344)
     plt.scatter(embedding[:,0],embedding[:,1],c=data['caTime'])
     plt.title('Embedding: time')
+    plt.colorbar()
 
-    plt.subplot(345)
-    plt.hist(reconstruction_Fscore)
-    plt.title('Reconstruction\nF-score')
+    plt.subplot(323)
+    plt.hist(reconstruction_Fscore, bins='auto')
+    plt.title('Reconstruction\nF-score: test set')
 
-    plt.subplot(347)
-    plt.hist(decoding_error)
-    plt.title('Decoding error')
+    plt.subplot(324)
+    plt.hist(decoding_error, bins='auto')
+    plt.title('Decoding error: test set')
     plt.ylabel('Error (cm)')
 
-    plt.subplot(348)
+    plt.subplot(313)
     plt.plot(data['position'][:,0], label='Actual')
     plt.plot(pred.detach().cpu().numpy().flatten(), label='Decoded')
     plt.title('Decoder')

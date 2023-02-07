@@ -12,7 +12,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
     decoder = linear_decoder(input_dims=params['embedding_dims'], output_dims=1) #TODO flexibility for output dims
     criterion = torch.nn.MSELoss()
     
-    optimizer = torch.optim.AdamW(decoder.parameters(), lr=params['learning_rate'])
+    optimizer = torch.optim.AdamW(decoder.parameters(), lr=params['decoder_learning_rate'])
     n_train = len(train_loader)
     n_test = len(test_loader)
     
@@ -57,8 +57,8 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
                 'train_loss': train_loss,
                 'val_loss': test_loss,
                 }, f'results/trained_models/embedding_decoder.pt')
-        if early_stop == params['patience']:
-            print("early stopping...")
-            break
+        #if early_stop == params['patience']:
+        #    print("early stopping...")
+        #    break
 
     return decoder, train_loss, test_loss
