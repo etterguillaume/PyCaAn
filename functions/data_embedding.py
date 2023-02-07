@@ -1,6 +1,7 @@
 import torch
 import numpy as np
-from models.autoencoders import AE_MLP 
+from models.autoencoders import AE_MLP
+from tqdm import tqdm
 
 def train_embedding_model(params, train_loader, test_loader):
     device = torch.device('cpu')
@@ -16,7 +17,7 @@ def train_embedding_model(params, train_loader, test_loader):
     train_loss=[]
     test_loss=[]
     early_stop = 0
-    for epoch in range(params["maxTrainSteps"]):
+    for epoch in tqdm(range(params["maxTrainSteps"])):
         run_train_loss = 0
         model.train()
         for i, (x, _, _) in enumerate(train_loader):
@@ -41,7 +42,7 @@ def train_embedding_model(params, train_loader, test_loader):
             early_stop += 1
         test_loss.append(run_test_loss/n_test)
 
-        print(f"Epoch: {epoch+1} \t Train Loss: {run_train_loss/n_train:.4f} \t Test Loss: {run_test_loss/n_test:.4f}")    
+        #print(f"Epoch: {epoch+1} \t Train Loss: {run_train_loss/n_train:.4f} \t Test Loss: {run_test_loss/n_test:.4f}")    
         torch.save({
                 'params': params,
                 'epoch': epoch,

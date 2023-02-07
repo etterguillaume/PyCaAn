@@ -1,8 +1,5 @@
 #%% Import dependencies
-import torch
-from torchvision import transforms
 import yaml
-from tqdm import tqdm
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data
 from functions.data_embedding import train_embedding_model

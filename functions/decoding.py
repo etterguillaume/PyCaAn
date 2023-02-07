@@ -1,5 +1,6 @@
 import torch
 from models.decoders import linear_decoder
+from tqdm import tqdm
 
 def train_linear_decoder(params, embedding_model, train_loader, test_loader):
     device = torch.device(params['device'])
@@ -8,7 +9,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
     for param in embedding_model.parameters(): 
         param.requires_grad = False # Freeze all weights from embedding model
 
-    decoder = linear_decoder(input_dims=params['embedding_dims'])
+    decoder = linear_decoder(input_dims=params['embedding_dims'], output_dims=1) #TODO flexibility for output dims
     criterion = torch.nn.MSELoss()
     
     optimizer = torch.optim.AdamW(decoder.parameters(), lr=params['learning_rate'])
@@ -16,7 +17,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
     n_test = len(test_loader)
     train_loss=[]
     test_loss=[]
-    for epoch in range(params["maxTrainSteps"]):
+    for epoch in tqdm(range(params["maxTrainSteps"])):
         run_train_loss = 0
         embedding_model.eval()
         decoder.train()
