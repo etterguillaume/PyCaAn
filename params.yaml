@@ -10,7 +10,7 @@ path_to_results: /results
 overwrite_data: True # If file is present, re-analyse?
 
 # Analysis parameters
-data_type: binarized # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
+data_type: raw # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
 sampling_frequency: 30 # frames per second
 z_threshold: 2 # Used to detect periods of putative activity
 
@@ -37,6 +37,7 @@ num_permutations: 1000 # Number of circular permutations
 # Chronic alignment parameters
 
 # Embeddings
+embedding_method: UMAP # UMAP, TCAE, VAE
 input_neurons: 100
 hidden_layers: [64,32,16,8]
 embedding_dims: 2

@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from models.autoencoders import AE_MLP
 from tqdm import tqdm
+from umap import UMAP
 
 def add_noise(inputs,noise_factor=0.5):
 	noisy = inputs+torch.randn_like(inputs) * noise_factor
