@@ -4,7 +4,6 @@ plt.style.use('plot_style.mplstyle')
 import os
 from plotly import graph_objects as go
 
-
 def plot_summary(data, params, name, save_fig=True, extension='.png', plot=False):
     plt.figure(figsize=(3,3))
     plt.subplot(221)
@@ -38,6 +37,15 @@ def plot_summary(data, params, name, save_fig=True, extension='.png', plot=False
     if plot==False:
         plt.close()
 
+def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'):
+    plt.figure()
+    plt.plot(train_loss, label='Train')
+    plt.plot(test_loss, label='Test')
+    plt.xlabel('Epochs')
+    plt.ylabel(loss_label)
+    plt.title(title)
+    plt.legend()
+    
 def interactive_plot_manifold3D(x,y,z,color):
     fig = go.Figure()
     fig.add_trace(go.Scatter3d(

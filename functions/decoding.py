@@ -15,8 +15,10 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
     optimizer = torch.optim.AdamW(decoder.parameters(), lr=params['learning_rate'])
     n_train = len(train_loader)
     n_test = len(test_loader)
+    
     train_loss=[]
     test_loss=[]
+    early_stop = 0
     for epoch in tqdm(range(params["maxTrainSteps"])):
         run_train_loss = 0
         embedding_model.eval()
@@ -26,7 +28,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
             x = x.to(device)
             _, embedding = embedding_model(x)
             pred = decoder(embedding)
-            loss = criterion(pred, position[:,0]) # TODO this is only for linear position
+            loss = criterion(pred.flatten(), position[:,0]) # TODO this is only for linear position
             loss.backward()
             optimizer.step()
             run_train_loss += loss.item()
@@ -40,7 +42,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
             with torch.no_grad():
                 _, embedding = embedding_model(x)
                 pred = decoder(embedding)
-                loss = criterion(pred, position[:,0]) # TODO this is only for linear position
+                loss = criterion(pred.flatten(), position[:,0]) # TODO this is only for linear position
                 run_test_loss += loss.item()
         if run_train_loss/n_train < run_test_loss/n_test:
             early_stop += 1
