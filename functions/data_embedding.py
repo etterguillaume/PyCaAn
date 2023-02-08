@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from models.autoencoders import AE_MLP
+from models.autoencoders import AE_MLP, TCN_10
 from tqdm import tqdm
 from umap import UMAP
 
@@ -13,8 +13,10 @@ def train_embedding_model(params, train_loader, test_loader):
     device = torch.device('cpu')
     torch.manual_seed(params['seed']) # Seed for reproducibility
     np.random.seed(params['seed'])
-
-    model = AE_MLP(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
+    if params['embedding_model']=='AE_MLP':
+        model = AE_MLP(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
+    elif params['embedding_model']=='TCAE':
+        model = TCN_10(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=params['model_learning_rate'])
     criterion = torch.nn.MSELoss()
     n_train = len(train_loader)

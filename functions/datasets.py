@@ -6,21 +6,35 @@ from torch.utils.data import random_split
 
 class generateDataset(Dataset):
     def __init__(self, data, params):
-        self.neural_data = torch.tensor(data['caTrace'][:,0:params['input_neurons']],dtype=torch.float)
-        self.position = torch.tensor(data['position'],dtype=torch.float)
-        self.velocity = torch.tensor(data['velocity'],dtype=torch.float)
+        neural_data = torch.tensor(data['caTrace'][:,0:params['input_neurons']],dtype=torch.float)
+        position = torch.tensor(data['position'],dtype=torch.float)
+        velocity = torch.tensor(data['velocity'],dtype=torch.float)
         #TODO implement other variables
         #TODO error checking
 
-        if params['data_block_size'] > 1: 
+        if params['data_block_size'] > 1:
             # Split into data chunks
-            self.neural_data = torch.split(self.neural_data, params['data_block_size'])
-            self.position = torch.split(self.position, params['data_block_size'])
-            self.velocity = torch.split(self.velocity, params['data_block_size'])
+            numChunks = len(neural_data)-params['data_block_size']+1 # Compute number of chunks
+            self.neural_data = torch.zeros((numChunks, params['input_neurons'],params['data_block_size']))
+            self.position = torch.zeros((numChunks,2,params['data_block_size']))
+            self.velocity = torch.zeros((numChunks,1,params['data_block_size']))
+            for chunk in range(numChunks):
+                self.neural_data[chunk,:,:] = torch.transpose(neural_data[chunk:chunk+params['data_block_size'],:],0,1)
+                self.position[chunk,:,:] = torch.transpose(position[chunk:chunk+params['data_block_size'],:],0,1)
+                self.velocity[chunk,0,:] = velocity[chunk:chunk+params['data_block_size']]
+
+        else: # Do not use any chunks and just index 
+            self.neural_data = neural_data
+            self.position = position
+            self.velocity = velocity
+
+            # self.neural_data = torch.split(self.neural_data, params['data_block_size'])
+            # self.position = torch.split(self.position, params['data_block_size'])
+            # self.velocity = torch.split(self.velocity, params['data_block_size'])
             # Remove last uneven block
-            self.neural_data = self.neural_data[:-1]
-            self.position = self.position[:-1]
-            self.velocity = self.velocity[:-1]
+            # self.neural_data = self.neural_data[:-1]
+            # self.position = self.position[:-1]
+            # self.velocity = self.velocity[:-1]
 
     def __len__(self):
         return len(self.neural_data)
@@ -40,6 +54,6 @@ def split_to_loaders(dataset, params):
     train_set, test_set = random_split(dataset, [train_set_size, test_set_size]) # Random split
 
     train_loader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=True)
-    test_loader = DataLoader(test_set, batch_size=params['batch_size'], shuffle=True)
+    test_loader = DataLoader(test_set, batch_size=params['batch_size'], shuffle=False)
 
     return train_loader, test_loader

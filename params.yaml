@@ -37,7 +37,7 @@ num_permutations: 1000 # Number of circular permutations
 # Chronic alignment parameters
 
 # Embeddings
-embedding_method: UMAP # UMAP, TCAE, VAE
+embedding_model: TCAE # UMAP, TCAE, VAE
 input_neurons: 100
 data_block_size: 10
 hidden_layers: [64,32,16,8]

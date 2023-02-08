@@ -32,7 +32,7 @@ data = preprocess_data(data,params)
 #%%
 dataset = generateDataset(data, params)
 
-#%% Split dataset into 
+#%% Split dataset into
 train_loader, test_loader = split_to_loaders(dataset, params)
 
 #%%
