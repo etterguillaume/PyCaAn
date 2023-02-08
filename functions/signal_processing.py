@@ -5,16 +5,16 @@ from numpy import diff
 from numpy import std
 from numpy import sqrt
 
-def binarize_ca_traces(ca_traces, z_threshold, sampling_frequency):
+def binarize_ca_traces(ca_traces, z_threshold, sampling_frequency): #TODO MAKE SURE THIS WORKS!!!!!!
     binarized_traces = np.zeros(ca_traces.shape, dtype='bool')
     b, a = signal.butter(20, 2/(sampling_frequency/2), 'low', analog=False)
-    for trace_num in range(ca_traces.shape[0]):
-        ca_trace = ca_traces[trace_num,:]
+    for trace_num in range(ca_traces.shape[1]):
+        ca_trace = ca_traces[:,trace_num]
         filtered_trace = signal.detrend(signal.filtfilt(b,a,ca_trace)) # Detrend and filter
         norm_trace = filtered_trace/std(filtered_trace)
         d1_trace = diff(filtered_trace)
         d1_trace = np.append(d1_trace,0)
-        binarized_traces[trace_num,(norm_trace > z_threshold) & (d1_trace > 0)] = 1
+        binarized_traces[(norm_trace > z_threshold) & (d1_trace > 0),trace_num] = 1
 
     return binarized_traces
 
@@ -40,14 +40,18 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
 
 def preprocess_data(data, params):
     data['position'] = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
+    data['position'] = data['position']/np.max(data['position'].flatten())
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
+    data['max_velocity'] = np.max(data['velocity'])
+    data['velocity'] = data['velocity']/data['max_velocity']
 
     if params['data_type']=='binarized':
         data['caTrace'] = binarize_ca_traces(data['caTrace'],
-                                          z_threshold=params['z_threshold'],
-                                          sampling_frequency=params['sampling_frequency'])
-    #else: # Normalize
-        #data_mean         
+                                             z_threshold=params['z_threshold'],
+                                             sampling_frequency=params['sampling_frequency']
+                                             )
+    else: # Scale data to maximum value
+        data['caTrace'] = data['caTrace']/np.max(data['caTrace'].flatten())
 
     if params['remove_immobility']:
         data['caTrace'] = data['caTrace'][data['running_ts'],:] # Transpose to get matrix = samples x neurons

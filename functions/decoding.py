@@ -9,7 +9,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
     for param in embedding_model.parameters(): 
         param.requires_grad = False # Freeze all weights from embedding model
     
-    if params['embedding_model']=='AE_MLP':
+    if params['embedding_model']=='MLP_AE':
         decoder = linear_decoder(input_dims=params['embedding_dims'], output_dims=2)
     elif params['embedding_model']=='TCAE':
         decoder = TCN10_decoder(in_channels=params['embedding_dims'], out_channels=2)

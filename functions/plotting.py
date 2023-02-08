@@ -47,11 +47,7 @@ def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'
     plt.title(title)
     plt.legend()
 
-def plot_embedding_results(data, embedding_model, embedding_decoder, reconstruction_Fscore, decoding_error):
-    original = torch.tensor(data['caTrace'],dtype=torch.float)
-    reconstruction, embedding = embedding_model(original)
-    pred = embedding_decoder(embedding)
-
+def plot_embedding_results_binary(original, reconstruction, embedding, reconstruction_Fscore, decoding_error, actual_var, pred_var, time):
     plt.figure(figsize=(4,4))
     plt.subplot(341)
     plt.imshow(original,aspect='auto',interpolation='none')
@@ -63,12 +59,12 @@ def plot_embedding_results(data, embedding_model, embedding_decoder, reconstruct
     plt.colorbar()
 
     plt.subplot(343)
-    plt.scatter(embedding[:,0],embedding[:,1],c=data['position'][:,0])
+    plt.scatter(embedding[:,0],embedding[:,1],c=actual_var)
     plt.title('Embedding: position')
     plt.colorbar()
 
     plt.subplot(344)
-    plt.scatter(embedding[:,0],embedding[:,1],c=data['caTime'])
+    plt.scatter(embedding[:,0],embedding[:,1],c=time)
     plt.title('Embedding: time')
     plt.colorbar()
 
@@ -82,8 +78,55 @@ def plot_embedding_results(data, embedding_model, embedding_decoder, reconstruct
     plt.ylabel('Error (cm)')
 
     plt.subplot(313)
-    plt.plot(data['position'][:,0], label='Actual')
-    plt.plot(pred.detach().cpu().numpy().flatten(), label='Decoded')
+    plt.plot(actual_var[:,0], label='Actual')
+    plt.plot(pred_var.detach(), label='Decoded')
+    plt.title('Decoder')
+
+    plt.tight_layout()
+
+def plot_embedding_results_raw(params, original, reconstruction, embedding, reconstruction_R, decoding_error, actual_var, pred_var, time):
+    plt.figure(figsize=(4,4))
+    plt.subplot(341)
+    cells2plot = 50
+    for i in range(cells2plot):
+        plt.plot(torch.tensor(original,dtype=torch.float)[:,i]*params['plot_gain']+i/params['plot_gain'],
+                c=(1-i/50,.6,i/50),
+                linewidth=.3)    
+        plt.xlim([3850,4000])
+    plt.title(f'Original')
+
+    max_val=torch.max(reconstruction)
+    plt.subplot(342)
+    for i in range(cells2plot):
+        plt.plot(reconstruction[:,i]*params['plot_gain']+i/params['plot_gain'],
+                c=(1-i/cells2plot,.6,i/cells2plot),
+                linewidth=.3)
+        plt.xlim([3850,4000])
+    plt.title('Reconstruction')
+
+    plt.subplot(343)
+    plt.scatter(embedding[:,0],embedding[:,1],c=actual_var)
+    plt.title('Embedding: position')
+    plt.colorbar()
+
+    plt.subplot(344)
+    plt.scatter(embedding[:,0],embedding[:,1],c=time)
+    plt.title('Embedding: time')
+    plt.colorbar()
+
+    plt.subplot(323)
+    plt.scatter(original.flatten(),reconstruction.flatten())
+    plt.title(f'Reconstruction\n R: {reconstruction_R.round(4)}')
+
+    plt.subplot(324)
+    plt.scatter(actual_var,pred_var)
+    plt.title(f'Decoding error: {decoding_error.round(4)}')
+    plt.ylabel('Actual')
+    plt.ylabel('Decoded')
+
+    plt.subplot(313)
+    plt.plot(actual_var, label='Actual')
+    plt.plot(pred_var, label='Decoded')
     plt.title('Decoder')
 
     plt.tight_layout()

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import torch
 from scipy.stats import pearsonr as corr
 
-def reconstruction_accuracy(reconstruction, original):
+def reconstruction_binary_accuracy(reconstruction, original):
     # Compute accuracy
     reconstruction = reconstruction.round()
     accuracy = sum(original==reconstruction)/len(original)
@@ -29,11 +29,10 @@ def analyze_AE_reconstruction(params, model, data_loader):
         with torch.no_grad():
             reconstruction, _ = model(x)
 
-
             total_inputs = np.append(total_inputs, x.view(-1,params['input_neurons']), axis=0)
             total_reconstructions = np.append(total_reconstructions, reconstruction.view(-1,params['input_neurons']), axis=0)
-
-    accuracy, precision, recall, F1 = reconstruction_accuracy(total_reconstructions, total_inputs)
+    
+    accuracy, precision, recall, F1 = reconstruction_binary_accuracy(total_reconstructions, total_inputs)
 
     return accuracy, precision, recall, F1 
 

@@ -9,6 +9,12 @@ class generateDataset(Dataset):
         neural_data = torch.tensor(data['caTrace'][:,0:params['input_neurons']],dtype=torch.float)
         position = torch.tensor(data['position'],dtype=torch.float)
         velocity = torch.tensor(data['velocity'],dtype=torch.float)
+
+        # Normalize data if raw
+        # neural_data = (neural_data-np.mean(neural_data,axis=0))/np.std(neural_data,axis=0)
+        # position = (position-np.mean(position,axis=0))/np.std(position,axis=0)
+        # velocity = (velocity-np.mean(velocity,axis=0))/np.std(velocity,axis=0)
+
         #TODO implement other variables
         #TODO error checking
 

@@ -13,7 +13,7 @@ def train_embedding_model(params, train_loader, test_loader):
     device = torch.device('cpu')
     torch.manual_seed(params['seed']) # Seed for reproducibility
     np.random.seed(params['seed'])
-    if params['embedding_model']=='AE_MLP':
+    if params['embedding_model']=='MLP_AE':
         model = AE_MLP(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
     elif params['embedding_model']=='TCAE':
         model = TCN_10(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)

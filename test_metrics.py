@@ -9,7 +9,7 @@ plt.style.use('plot_style.mplstyle')
 numNeurons = 100
 recordingLength = 2000
 threshold = .95
-isNoiseAdditive = True
+isNoiseAdditive = False
 
 original = torch.rand((recordingLength,numNeurons))
 original[original<=threshold] = 0

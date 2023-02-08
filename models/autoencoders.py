@@ -7,6 +7,7 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
         self.encoder = nn.Sequential(
             nn.Linear(in_features=input_dim, out_features=64),
             nn.ReLU(),
+            nn.Dropout(.5),
             nn.Linear(in_features=64, out_features=output_dim),
         )
 
@@ -14,8 +15,8 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
         self.decoder = nn.Sequential(
             nn.Linear(in_features=output_dim, out_features=64),
             nn.ReLU(),
+            nn.Dropout(.5),
             nn.Linear(in_features=64, out_features=input_dim),
-        #    nn.Sigmoid()
         )
  
     def forward(self, x):
@@ -68,7 +69,6 @@ class TCN_10(nn.Module):
             nn.ReLU(),
             nn.Dropout(.5),
             nn.ConvTranspose1d(in_channels=64, out_channels=input_dim, kernel_size=2, stride=1,padding=0),
-            nn.Sigmoid()
         )
  
     def forward(self, x):
