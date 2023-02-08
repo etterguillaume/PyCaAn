@@ -28,16 +28,9 @@ data = load_data(session_path)
 
 #%% Preprocessing 
 data = preprocess_data(data,params)
-data['caTrace']=data['caTrace'][:,0:params['input_neurons']] # Select only a subset of neurons
 
 #%%
-# from umap import UMAP
-# embedding = UMAP(n_neighbors=50, min_dist=0.8,n_components=2,metric='cosine').fit_transform(data['caTrace'])
-# import matplotlib.pyplot as plt
-# plt.scatter(embedding[:,0],embedding[:,1],c=data['position'][:,0])
-
-#%%
-dataset = generateDataset(data)
+dataset = generateDataset(data, params)
 
 #%% Split dataset into 
 train_loader, test_loader = split_to_loaders(dataset, params)
