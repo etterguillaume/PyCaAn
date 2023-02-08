@@ -1,5 +1,5 @@
 import torch
-from models.decoders import linear_decoder
+from models.decoders import linear_decoder, TCN10_decoder
 from tqdm import tqdm
 
 def train_linear_decoder(params, embedding_model, train_loader, test_loader):
@@ -8,8 +8,11 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
     
     for param in embedding_model.parameters(): 
         param.requires_grad = False # Freeze all weights from embedding model
-
-    decoder = linear_decoder(input_dims=params['embedding_dims'], output_dims=1) #TODO flexibility for output dims
+    
+    if params['embedding_model']=='AE_MLP':
+        decoder = linear_decoder(input_dims=params['embedding_dims'], output_dims=2)
+    elif params['embedding_model']=='TCAE':
+        decoder = TCN10_decoder(in_channels=params['embedding_dims'], out_channels=2)
     criterion = torch.nn.MSELoss()
     
     optimizer = torch.optim.AdamW(decoder.parameters(), lr=params['decoder_learning_rate'])
@@ -28,7 +31,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
             x = x.to(device)
             _, embedding = embedding_model(x)
             pred = decoder(embedding)
-            loss = criterion(pred.flatten(), position[:,0]) # TODO this is only for linear position
+            loss = criterion(pred, position) # TODO this is only for linear position
             loss.backward()
             optimizer.step()
             run_train_loss += loss.item()
@@ -42,7 +45,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
             with torch.no_grad():
                 _, embedding = embedding_model(x)
                 pred = decoder(embedding)
-                loss = criterion(pred.flatten(), position[:,0]) # TODO this is only for linear position
+                loss = criterion(pred, position) # TODO this is only for linear position
                 run_test_loss += loss.item()
         if run_train_loss/n_train < run_test_loss/n_test:
             early_stop += 1

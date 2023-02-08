@@ -3,7 +3,7 @@ import torch
 from models.autoencoders import TCN_10
 
 #%%
-model = TCN_10(input_dim=100,latent_dim=16,output_dim=2)
+model = TCN_10(input_dim=100,output_dim=2)
 # %%
 model
 # %%
@@ -17,4 +17,8 @@ reconstruction = model.decoder(embedding)
 assert reconstruction.shape[1] == data.shape[1], f"Expected model output channels to be {data.shape[1]} but got {reconstruction.shape[1]} instead"
 assert reconstruction.shape[2] == data.shape[2], f"Expected model output channels to be {data.shape[2]} but got {reconstruction.shape[2]} instead"
 
+# %%
+from models.decoders import TCN10_decoder
+# %%
+decoder = torch.nn.ConvTranspose1d(in_channels=2, out_channels=1, kernel_size=10)
 # %%
