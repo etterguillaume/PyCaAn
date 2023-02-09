@@ -27,7 +27,10 @@ def analyze_AE_reconstruction(params, model, data_loader):
     for i, (x, _, _) in enumerate(data_loader):
         x = x.to(device)
         with torch.no_grad():
-            reconstruction, _ = model(x)
+            if params['embedding_model']=='bVAE':
+                reconstruction, _, _, _ = model(x)
+            else:
+                reconstruction, _ = model(x)
 
             total_inputs = np.append(total_inputs, x.view(-1,params['input_neurons']), axis=0)
             total_reconstructions = np.append(total_reconstructions, reconstruction.view(-1,params['input_neurons']), axis=0)
@@ -43,7 +46,10 @@ def analyze_decoding(params, model, decoder, data_loader):
         device = torch.device(params['device'])
         x = x.to(device)
         with torch.no_grad():
-            _, embedding = model(x)
+            if params['embedding_model']=='bVAE':
+                _, embedding, _, _ = model(x)
+            else:
+                _, embedding = model(x)
             pred = decoder(embedding)
 
         total_positions = np.append(total_positions, position.view(-1,2), axis=0)

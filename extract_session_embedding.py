@@ -54,7 +54,10 @@ test_decoding_error, test_decoder_stats = analyze_decoding(params, embedding_mod
 
 # %% Visualize results
 original = torch.tensor(data['procData'][:,0:params['input_neurons']], dtype=torch.float)
-reconstruction, embedding = embedding_model(original)
+if params['embedding_model']=='bVAE':
+    reconstruction, embedding, _, _ = embedding_model(original)
+else:
+    reconstruction, embedding = embedding_model(original)
 pred = embedding_decoder(embedding)
 if params['data_type']=='raw':
     reconstruction_R, p_value = corr(original.flatten(),reconstruction.detach().flatten())

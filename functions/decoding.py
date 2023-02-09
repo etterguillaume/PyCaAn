@@ -30,7 +30,10 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
         for i, (x, position, _) in enumerate(train_loader):
             optimizer.zero_grad()
             x = x.to(device)
-            _, embedding = embedding_model(x)
+            if params['embedding_model']=='bVAE':
+                _, embedding, _, _ = embedding_model(x)
+            else:
+                _, embedding = embedding_model(x)
             pred = decoder(embedding)
             loss = criterion(pred, position) # TODO this is only for linear position
             loss.backward()
@@ -44,7 +47,10 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
         for i, (x, position, _) in enumerate(test_loader):
             x = x.to(device)
             with torch.no_grad():
-                _, embedding = embedding_model(x)
+                if params['embedding_model']=='bVAE':
+                    _, embedding, _, _ = embedding_model(x)
+                else:
+                    _, embedding = embedding_model(x)
                 pred = decoder(embedding)
                 loss = criterion(pred, position) # TODO this is only for linear position
                 run_test_loss += loss.item()
