@@ -9,7 +9,7 @@ import yaml
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data
 import torch
-from umap import UMAP
+from umap.umap_ import UMAP
 
 import numpy as np
 
@@ -26,17 +26,17 @@ params['data_type'] = 'raw'
 data = preprocess_data(data,params)
 #%%
 # Create chunks
-numChunks = len(data['caTrace'])-params['data_block_size']+1 # Compute number of chunks
-neural_data = np.zeros((numChunks, data['caTrace'].shape[1],params['data_block_size']))
+numChunks = len(data['procData'])-params['data_block_size']+1 # Compute number of chunks
+neural_data = np.zeros((numChunks, data['procData'].shape[1],params['data_block_size']))
 position = np.zeros((numChunks,2,params['data_block_size']))
 velocity = np.zeros((numChunks,1,params['data_block_size']))
 for chunk in range(numChunks):
-    neural_data[chunk,:,:] = data['caTrace'][chunk:chunk+params['data_block_size'],:].T
+    neural_data[chunk,:,:] = data['procData'][chunk:chunk+params['data_block_size'],:].T
     position[chunk,:,:] = data['position'][chunk:chunk+params['data_block_size'],:].T
     velocity[chunk,0,:] = data['velocity'][chunk:chunk+params['data_block_size']]
 
 #%%
-embedding_raw_chunks = UMAP(n_neighbors=50, min_dist=0.0125,n_components=2,metric='cosine').fit_transform(neural_data.reshape(-1,data['caTrace'].shape[1]))
+embedding_raw_chunks = UMAP(n_neighbors=50, min_dist=0.0125,n_components=2,metric='cosine').fit_transform(neural_data.reshape(-1,data['procData'].shape[1]))
 
 #%%
 data = load_data(session_path)
@@ -44,17 +44,17 @@ params['data_type'] = 'binarized'
 data = preprocess_data(data,params)
 
 # Create chunks
-numChunks = len(data['caTrace'])-params['data_block_size']+1 # Compute number of chunks
-neural_data = np.zeros((numChunks, data['caTrace'].shape[1],params['data_block_size']))
+numChunks = len(data['procData'])-params['data_block_size']+1 # Compute number of chunks
+neural_data = np.zeros((numChunks, data['procData'].shape[1],params['data_block_size']))
 position = np.zeros((numChunks,2,params['data_block_size']))
 velocity = np.zeros((numChunks,1,params['data_block_size']))
 for chunk in range(numChunks):
-    neural_data[chunk,:,:] = data['caTrace'][chunk:chunk+params['data_block_size'],:].T
+    neural_data[chunk,:,:] = data['procData'][chunk:chunk+params['data_block_size'],:].T
     position[chunk,:,:] = data['position'][chunk:chunk+params['data_block_size'],:].T
     velocity[chunk,0,:] = data['velocity'][chunk:chunk+params['data_block_size']]
 
 #%%
-embedding_binarized_chunks = UMAP(n_neighbors=50, min_dist=0.0125,n_components=2,metric='cosine').fit_transform(neural_data.reshape(-1,data['caTrace'].shape[1]))
+embedding_binarized_chunks = UMAP(n_neighbors=50, min_dist=0.0125,n_components=2,metric='cosine').fit_transform(neural_data.reshape(-1,data['procData'].shape[1]))
 
 #%%
 data = load_data(session_path)
@@ -64,7 +64,7 @@ params['data_type'] = 'raw'
 data = preprocess_data(data,params)
 
 #%%
-embedding_raw = UMAP(n_neighbors=50, min_dist=0.0125,n_components=2,metric='cosine').fit_transform(data['caTrace'])
+embedding_raw = UMAP(n_neighbors=50, min_dist=0.0125,n_components=2,metric='cosine').fit_transform(data['procData'])
 
 #%%
 data = load_data(session_path)
@@ -72,7 +72,7 @@ params['data_type'] = 'binarized'
 data = preprocess_data(data,params)
 
 #%%
-embedding_binarized = UMAP(n_neighbors=50, min_dist=0.0125,n_components=2,metric='cosine').fit_transform(data['caTrace'])
+embedding_binarized = UMAP(n_neighbors=50, min_dist=0.0125,n_components=2,metric='cosine').fit_transform(data['procData'])
 
 # %% Position
 plt.figure(figsize=(3,3))

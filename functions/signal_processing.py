@@ -40,21 +40,21 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
 
 def preprocess_data(data, params):
     data['position'] = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
-    data['position'] = data['position']/np.max(data['position'].flatten())
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
+    data['position'] = data['position']/np.max(data['position'].flatten())
     data['max_velocity'] = np.max(data['velocity'])
     data['velocity'] = data['velocity']/data['max_velocity']
 
     if params['data_type']=='binarized':
-        data['caTrace'] = binarize_ca_traces(data['caTrace'],
+        data['procData'] = binarize_ca_traces(data['caTrace'],
                                              z_threshold=params['z_threshold'],
                                              sampling_frequency=params['sampling_frequency']
                                              )
     else: # Scale data to maximum value
-        data['caTrace'] = data['caTrace']/np.max(data['caTrace'].flatten())
+        data['procData'] = data['caTrace']/np.max(data['caTrace'].flatten())
 
     if params['remove_immobility']:
-        data['caTrace'] = data['caTrace'][data['running_ts'],:] # Transpose to get matrix = samples x neurons
+        data['procData'] = data['procData'][data['running_ts'],:] # Transpose to get matrix = samples x neurons
         data['caTime'] = data['caTime'][data['running_ts']]
         data['velocity'] = data['velocity'][data['running_ts']]
         data['position'] = data['position'][data['running_ts'],:]

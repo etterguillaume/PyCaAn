@@ -50,12 +50,14 @@ def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'
 def plot_embedding_results_binary(original, reconstruction, embedding, reconstruction_Fscore, decoding_error, actual_var, pred_var, time):
     plt.figure(figsize=(4,4))
     plt.subplot(341)
-    plt.imshow(original,aspect='auto',interpolation='none')
+    plt.imshow(original.T,aspect='auto',interpolation='none')
+    plt.xlim([3850,4000])
     plt.title('Neural data')
 
     plt.subplot(342)
-    plt.imshow(reconstruction,aspect='auto',interpolation='none',vmin=0,vmax=1)
+    plt.imshow(reconstruction.T,aspect='auto',interpolation='none',vmin=0,vmax=1)
     plt.title('Reconstruction')
+    plt.xlim([3850,4000])
     plt.colorbar()
 
     plt.subplot(343)
@@ -73,13 +75,14 @@ def plot_embedding_results_binary(original, reconstruction, embedding, reconstru
     plt.title('Reconstruction\nF-score: test set')
 
     plt.subplot(324)
-    plt.hist(decoding_error, bins='auto')
-    plt.title('Decoding error: test set')
-    plt.ylabel('Error (cm)')
+    plt.scatter(actual_var,pred_var)
+    plt.title(f'Decoding error: {decoding_error.round(4)}')
+    plt.ylabel('Actual')
+    plt.ylabel('Decoded')
 
     plt.subplot(313)
-    plt.plot(actual_var[:,0], label='Actual')
-    plt.plot(pred_var.detach(), label='Decoded')
+    plt.plot(actual_var, label='Actual')
+    plt.plot(pred_var, label='Decoded')
     plt.title('Decoder')
 
     plt.tight_layout()

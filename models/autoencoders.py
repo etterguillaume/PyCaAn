@@ -1,22 +1,40 @@
 from torch import nn
 
 class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dropout input layer
-    def __init__(self, input_dim, output_dim): # TODO parameterize num_layer and dimensions as vector eg [64,32,16,8]
+    def __init__(self, input_dim, hidden_dims, output_dim): # TODO parameterize num_layer and dimensions as vector eg [64,32,16,8]
         super(AE_MLP, self).__init__()
         # encoder
         self.encoder = nn.Sequential(
-            nn.Linear(in_features=input_dim, out_features=64),
+            nn.Linear(in_features=input_dim, out_features=hidden_dims[0]),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.Linear(in_features=64, out_features=output_dim),
+            nn.Linear(hidden_dims[0], out_features=hidden_dims[1]),
+            nn.ReLU(),
+            nn.Dropout(.5),
+            nn.Linear(in_features=hidden_dims[1], out_features=hidden_dims[2]),
+            nn.ReLU(),
+            nn.Dropout(.5),
+            nn.Linear(in_features=hidden_dims[2], out_features=hidden_dims[3]),
+            nn.ReLU(),
+            nn.Dropout(.5),
+            nn.Linear(in_features=hidden_dims[3], out_features=output_dim),
         )
 
         # decoder 
         self.decoder = nn.Sequential(
-            nn.Linear(in_features=output_dim, out_features=64),
+            nn.Linear(in_features=output_dim, out_features=hidden_dims[3]),
             nn.ReLU(),
             nn.Dropout(.5),
-            nn.Linear(in_features=64, out_features=input_dim),
+            nn.Linear(in_features=hidden_dims[3], out_features=hidden_dims[2]),
+            nn.ReLU(),
+            nn.Dropout(.5),
+            nn.Linear(in_features=hidden_dims[2], out_features=hidden_dims[1]),
+            nn.ReLU(),
+            nn.Dropout(.5),
+            nn.Linear(in_features=hidden_dims[1], out_features=hidden_dims[0]),
+            nn.ReLU(),
+            nn.Dropout(.5),
+            nn.Linear(in_features=hidden_dims[0], out_features=input_dim),
         )
  
     def forward(self, x):
@@ -24,6 +42,27 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron backend and dr
         reconstruction = self.decoder(embedding)
         return reconstruction, embedding
 
+class test_AE(nn.Module): # Autoencoder with multilayer perceptron backend and dropout input layer
+    def __init__(self, input_dim, hidden_dims, output_dim): # TODO parameterize num_layer and dimensions as vector eg [64,32,16,8]
+        super(test_AE, self).__init__()
+        # encoder
+        self.encoder = nn.Sequential(
+            nn.Linear(in_features=input_dim, out_features=input_dim),
+            nn.ReLU(),
+            nn.Linear(in_features=input_dim, out_features=output_dim),
+        )
+
+        # decoder 
+        self.decoder = nn.Sequential(
+            nn.Linear(in_features=output_dim, out_features=input_dim),
+            nn.ReLU(),
+            nn.Linear(in_features=input_dim, out_features=input_dim),
+        )
+ 
+    def forward(self, x):
+        embedding = self.encoder(x)
+        reconstruction = self.decoder(embedding)
+        return reconstruction, embedding
 
 class TCN_10(nn.Module):
     def __init__(self, input_dim, output_dim):

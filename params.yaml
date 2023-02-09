@@ -10,7 +10,7 @@ path_to_results: /results
 overwrite_data: True # If file is present, re-analyse?
 
 # Analysis parameters
-data_type: raw # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
+data_type: binarized # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
 sampling_frequency: 30 # frames per second
 z_threshold: 2 # Used to detect periods of putative activity
 
@@ -37,18 +37,17 @@ num_permutations: 1000 # Number of circular permutations
 # Chronic alignment parameters
 
 # Embeddings
-embedding_model: MLP_AE # UMAP, TCAE, VAE
+embedding_model: test_AE # UMAP, TCAE, VAE, MLP_AE test_AE
 input_neurons: 100
 data_block_size: 1 # If >1, will create blocks of neural activity. Else will only use single timestamps
-hidden_layers: [64,32,16,8] # Not used
+hidden_dims: [64,32,16,8] # Dimensions of hidden layers
 embedding_dims: 2
 model_learning_rate: 0.0001
-decoder_learning_rate: 0.2
+decoder_learning_rate: 0.001
 maxTrainSteps: 100
 train_test_ratio: .8 # portion of recording used to train embedding model
-AE_dropout_rate: .8
-batch_size: 512
-patience: 5 # Number of steps after which training will stop if test loss does not improve
+batch_size: 32
+patience: -1 # Number of steps after which training will stop if test loss does not improve. -1 for no early stopping
 
 # Decoder parameters
 decoding_training_set: .8 # portion of recording used to train decoder

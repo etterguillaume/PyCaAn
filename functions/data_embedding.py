@@ -1,8 +1,7 @@
 import torch
 import numpy as np
-from models.autoencoders import AE_MLP, TCN_10
+from models.autoencoders import AE_MLP, TCN_10, test_AE
 from tqdm import tqdm
-from umap import UMAP
 
 def add_noise(inputs,noise_factor=0.5):
 	noisy = inputs+torch.randn_like(inputs) * noise_factor
@@ -14,7 +13,9 @@ def train_embedding_model(params, train_loader, test_loader):
     torch.manual_seed(params['seed']) # Seed for reproducibility
     np.random.seed(params['seed'])
     if params['embedding_model']=='MLP_AE':
-        model = AE_MLP(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
+        model = AE_MLP(input_dim=params['input_neurons'], hidden_dims = params['hidden_dims'], output_dim=params['embedding_dims']).to(device)
+    elif params['embedding_model']=='test_AE':
+        model = test_AE(input_dim=params['input_neurons'], hidden_dims = params['hidden_dims'], output_dim=params['embedding_dims']).to(device)
     elif params['embedding_model']=='TCAE':
         model = TCN_10(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=params['model_learning_rate'])

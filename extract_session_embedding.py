@@ -53,12 +53,12 @@ train_decoding_error, train_decoder_stats = analyze_decoding(params, embedding_m
 test_decoding_error, test_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, test_loader)
 
 # %% Visualize results
+original = torch.tensor(data['procData'][:,0:params['input_neurons']], dtype=torch.float)
+reconstruction, embedding = embedding_model(original)
+pred = embedding_decoder(embedding)
 if params['data_type']=='raw':
-    original = torch.tensor(data['caTrace'][:,0:params['input_neurons']], dtype=torch.float)
-    reconstruction, embedding = embedding_model(original)
-    pred = embedding_decoder(embedding)
     reconstruction_R, p_value = corr(original.flatten(),reconstruction.detach().flatten())
     plot_embedding_results_raw(params, original, reconstruction, embedding, reconstruction_R, test_decoding_error, data['position'][:,0], pred[:,0].detach(), data['caTime'])
 elif params['data_type']=='binarized':
-    plot_embedding_results_binary(data, embedding_model, embedding_decoder, test_F1, test_decoding_error)
+    plot_embedding_results_binary(original, reconstruction, embedding, test_F1, test_decoding_error, data['position'][:,0], pred[:,0].detach(), data['caTime'])
 # %%
