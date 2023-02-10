@@ -76,7 +76,8 @@ def plot_embedding_results_binary(original, reconstruction, embedding, reconstru
 
     plt.subplot(324)
     plt.scatter(actual_var,pred_var)
-    plt.title(f'Decoding error: {decoding_error.round(4)}')
+    plt.plot([0,1],[0,1],'r--')
+    plt.title(f'Decoding R: {decoding_error.round(4)}')
     plt.ylabel('Actual')
     plt.ylabel('Decoded')
 
@@ -119,11 +120,13 @@ def plot_embedding_results_raw(params, original, reconstruction, embedding, reco
 
     plt.subplot(323)
     plt.scatter(original.flatten(),reconstruction.flatten())
+    plt.plot([0,1],[0,1],'r--')
     plt.title(f'Reconstruction\n R: {reconstruction_R.round(4)}')
 
     plt.subplot(324)
     plt.scatter(actual_var,pred_var)
-    plt.title(f'Decoding error: {decoding_error.round(4)}')
+    plt.plot([0,1],[0,1],'r--')
+    plt.title(f'Decoding R: {decoding_error.round(4)}')
     plt.ylabel('Actual')
     plt.ylabel('Decoded')
 

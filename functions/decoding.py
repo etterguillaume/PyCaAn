@@ -16,7 +16,7 @@ def train_linear_decoder(params, embedding_model, train_loader, test_loader):
     
     criterion = torch.nn.MSELoss()
     
-    optimizer = torch.optim.AdamW(decoder.parameters(), lr=params['decoder_learning_rate'])
+    optimizer = torch.optim.AdamW(decoder.parameters(), lr=params['model_learning_rate'])
     n_train = len(train_loader)
     n_test = len(test_loader)
     

@@ -52,6 +52,7 @@ test_accuracy, test_precision, test_recall, test_F1 = analyze_AE_reconstruction(
 train_decoding_error, train_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, train_loader)
 test_decoding_error, test_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, test_loader)
 
+
 # %% Visualize results
 original = torch.tensor(data['procData'][:,0:params['input_neurons']], dtype=torch.float)
 if params['embedding_model']=='bVAE':
@@ -61,7 +62,7 @@ else:
 pred = embedding_decoder(embedding)
 if params['data_type']=='raw':
     reconstruction_R, p_value = corr(original.flatten(),reconstruction.detach().flatten())
-    plot_embedding_results_raw(params, original, reconstruction, embedding, reconstruction_R, test_decoding_error, data['position'][:,0], pred[:,0].detach(), data['caTime'])
+    plot_embedding_results_raw(params, original, reconstruction, embedding, reconstruction_R, test_decoder_stats[0], data['position'][:,0], pred[:,0].detach(), data['caTime'])
 elif params['data_type']=='binarized':
-    plot_embedding_results_binary(original, reconstruction, embedding, test_F1, test_decoding_error, data['position'][:,0], pred[:,0].detach(), data['caTime'])
+    plot_embedding_results_binary(original, reconstruction, embedding, test_F1, test_decoder_stats[0], data['position'][:,0], pred[:,0].detach(), data['caTime'])
 # %%
