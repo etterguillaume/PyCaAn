@@ -23,6 +23,10 @@ from functions.plotting import plot_losses, plot_embedding_results_raw, plot_emb
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 
+#%% TODO parameter override here
+
+#%% TODO create experimental folder, to save results, figs, params
+
 #%% Load session
 session_path = '../../datasets/calcium_imaging/M246/M246_LT_6'
 data = load_data(session_path)
