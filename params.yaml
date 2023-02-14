@@ -12,12 +12,14 @@ overwrite_data: True # If file is present, re-analyse?
 # Analysis parameters
 data_type: raw # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
 sampling_frequency: 30 # frames per second
+
+# Binarization params
 z_threshold: 2 # Used to detect periods of putative activity
+remove_inactivity: False # If true and data is binarized, will remove epochs where no cell was active
 
 # Locomotor info
 speed_threshold: 5 # cm.s-1
 remove_immobility: False
-remove_inactivity: False # If true and data is binarized, will remove epochs where no cell was active
 
 # Data curation thresholds
 distance_travelled_threshold: 3000 #cm
@@ -42,7 +44,7 @@ beta: 1 # Only for bVAE model
 input_neurons: 100
 data_block_size: 1 # If >1, will create blocks of neural activity. Else will only use single timestamps
 hidden_dims: [64,32,16,8] # Dimensions of hidden layers
-embedding_dims: 2
+embedding_dims: 8
 model_learning_rate: 0.0001
 decoder_learning_rate: 0.001
 maxTrainSteps: 100
