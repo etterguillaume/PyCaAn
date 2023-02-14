@@ -18,6 +18,11 @@ class AE_MLP(nn.Module): # Autoencoder with multilayer perceptron
             nn.Linear(in_features=hidden_dims[0], out_features=input_dim),
         )
 
+    def forward(self, x):
+        embedding = self.encoder(x)
+        reconstruction = self.decoder(embedding)
+        return reconstruction, embedding
+
 class bVAE(nn.Module): # Autoencoder with multilayer perceptron
     def __init__(self, input_dim, hidden_dims, output_dim): # TODO parameterize num_layer and dimensions as vector eg [64,32,16,8]
         super(bVAE, self).__init__()
