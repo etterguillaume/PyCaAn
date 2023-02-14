@@ -33,24 +33,24 @@ class TCN(nn.Module): # Autoencoder with multilayer perceptron
         self.block_length = kernel_size
         # encoder
         self.conv_in = nn.Sequential(
-            nn.Conv1d(in_channels=input_dim, out_channels=input_dim, kernel_size=kernel_size, stride=1,padding=0),
+            nn.Conv1d(in_channels=input_dim, out_channels=8, kernel_size=kernel_size, stride=1,padding=0),
             nn.LeakyReLU()
             )
         self.encoder = nn.Sequential(
-            nn.Linear(in_features=input_dim, out_features=hidden_dims[0]),
+            nn.Linear(in_features=8, out_features=4),
             nn.LeakyReLU(),
-            nn.Linear(in_features=hidden_dims[0], out_features=output_dim),
+            nn.Linear(in_features=4, out_features=output_dim),
         )
 
         # decoder 
         self.decoder = nn.Sequential(
-            nn.Linear(in_features=output_dim, out_features=hidden_dims[0]),
+            nn.Linear(in_features=output_dim, out_features=4),
             nn.LeakyReLU(),
-            nn.Linear(in_features=hidden_dims[0], out_features=input_dim),
+            nn.Linear(in_features=4, out_features=8),
             nn.LeakyReLU()
             )
         self.conv_out = nn.Sequential(
-            nn.ConvTranspose1d(in_channels=input_dim, out_channels=input_dim, kernel_size=10, stride=1,padding=0)
+            nn.ConvTranspose1d(in_channels=8, out_channels=input_dim, kernel_size=10, stride=1,padding=0)
         )
 
     def forward(self, x):

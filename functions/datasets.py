@@ -14,28 +14,41 @@ class generateDataset(Dataset):
         #TODO error checking
 
         if params['data_block_size'] > 1:
-            # Split into data chunks
-            numChunks = len(neural_data)-params['data_block_size']+1 # Compute number of chunks
+            # # Split into overlapping data chunks
+            # numChunks = len(neural_data)-params['data_block_size']+1 # Compute number of chunks
+            # self.neural_data = torch.zeros((numChunks, params['input_neurons'],params['data_block_size']))
+            # self.position = torch.zeros((numChunks,2,params['data_block_size']))
+            # self.velocity = torch.zeros((numChunks,1,params['data_block_size']))
+            # for chunk in range(numChunks):
+            #     self.neural_data[chunk,:,:] = torch.transpose(neural_data[chunk:chunk+params['data_block_size'],:],0,1)
+            #     self.position[chunk,:,:] = torch.transpose(position[chunk:chunk+params['data_block_size'],:],0,1)
+            #     self.velocity[chunk,0,:] = velocity[chunk:chunk+params['data_block_size']]
+
+            neural_data = torch.split(neural_data, params['data_block_size'])
+            position = torch.split(position, params['data_block_size'])
+            velocity = torch.split(velocity, params['data_block_size'])
+            
+            #Remove last uneven block
+            neural_data = neural_data[:-1]
+            position = position[:-1]
+            velocity = velocity[:-1]
+
+            # Convert into tensor
+            numChunks = len(neural_data)
             self.neural_data = torch.zeros((numChunks, params['input_neurons'],params['data_block_size']))
             self.position = torch.zeros((numChunks,2,params['data_block_size']))
             self.velocity = torch.zeros((numChunks,1,params['data_block_size']))
+
+            # Populate tensor
             for chunk in range(numChunks):
-                self.neural_data[chunk,:,:] = torch.transpose(neural_data[chunk:chunk+params['data_block_size'],:],0,1)
-                self.position[chunk,:,:] = torch.transpose(position[chunk:chunk+params['data_block_size'],:],0,1)
-                self.velocity[chunk,0,:] = velocity[chunk:chunk+params['data_block_size']]
+                self.neural_data[chunk,:,:] = torch.transpose(neural_data[chunk],0,1)
+                self.position[chunk,:,:] = torch.transpose(position[chunk],0,1)
+                self.velocity[chunk,0,:] = velocity[chunk]
 
         else: # Do not use any chunks and just index 
             self.neural_data = neural_data
             self.position = position
             self.velocity = velocity
-
-            # self.neural_data = torch.split(self.neural_data, params['data_block_size'])
-            # self.position = torch.split(self.position, params['data_block_size'])
-            # self.velocity = torch.split(self.velocity, params['data_block_size'])
-            # Remove last uneven block
-            # self.neural_data = self.neural_data[:-1]
-            # self.position = self.position[:-1]
-            # self.velocity = self.velocity[:-1]
 
     def __len__(self):
         return len(self.neural_data)
