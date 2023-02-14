@@ -4,11 +4,15 @@ from models.autoencoders import TCN_10, TCN
 import matplotlib.pyplot as plt
 
 #%%
-model = TCN_10(input_dim=100,output_dim=2)
-# %%
-model
-# %%
 data = torch.randn((64,100,10)) # Create 10 frames x 100 neurons random datablock
+
+#%%
+test_conv1d = torch.nn.Conv1d(in_channels=100, out_channels=2, kernel_size=10, stride=1,padding=0)
+test_conv2d = torch.nn.Conv2d(in_channels=100, out_channels=2, kernel_size=(10,1), stride=1,padding=0)
+
+#%%
+model = TCN_10(input_dim=100,output_dim=2)
+
 # %%
 reconstruction, embedding = model(data)
 
@@ -30,8 +34,7 @@ decoder = torch.nn.ConvTranspose1d(in_channels=2, out_channels=1, kernel_size=10
 # %%
 model = TCN(input_dim=100, hidden_dims = [64,32,16,8], output_dim=2, kernel_size=10)
 model
-# %%
-data = torch.rand((64,100,10)) # Create 64 batches x 100 neurons x 10 frames random datablock
+
 # %%
 reconstruction, embedding = model(data)
 
