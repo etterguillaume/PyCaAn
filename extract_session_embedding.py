@@ -56,7 +56,6 @@ test_accuracy, test_precision, test_recall, test_F1 = analyze_AE_reconstruction(
 train_decoding_error, train_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, train_loader)
 test_decoding_error, test_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, test_loader)
 
-
 # %% Visualize results
 original = torch.tensor(data['procData'][:,0:params['input_neurons']], dtype=torch.float)
 if params['embedding_model']=='bVAE':

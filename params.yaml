@@ -10,7 +10,7 @@ path_to_results: /results
 overwrite_data: True # If file is present, re-analyse?
 
 # Analysis parameters
-data_type: raw # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
+data_type: binarized # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
 sampling_frequency: 30 # frames per second
 
 # Binarization params
@@ -39,12 +39,12 @@ num_permutations: 1000 # Number of circular permutations
 # Chronic alignment parameters
 
 # Embeddings
-embedding_model: MLP_AE # UMAP, TCAE, bVAE, MLP_AE test_AE
+embedding_model: TCN # UMAP, TCN, TCAE, bVAE, MLP_AE test_AE
 beta: 1 # Only for bVAE model
 input_neurons: 100
-data_block_size: 1 # If >1, will create blocks of neural activity. Else will only use single timestamps
+data_block_size: 10 # If >1, will create blocks of neural activity. Else will only use single timestamps
 hidden_dims: [64,32,16,8] # Dimensions of hidden layers
-embedding_dims: 8
+embedding_dims: 2
 model_learning_rate: 0.0001
 decoder_learning_rate: 0.001
 maxTrainSteps: 100
