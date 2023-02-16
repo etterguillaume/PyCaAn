@@ -19,7 +19,7 @@ def reconstruction_binary_accuracy(reconstruction, original):
 
     return accuracy, precision, recall, F1 
 
-def analyze_AE_reconstruction(params, model, data_loader):
+def analyze_binary_reconstruction(params, model, data_loader):
     device = torch.device(params['device'])
     total_inputs = np.empty((0,params['input_neurons']))
     total_reconstructions = np.empty((0,params['input_neurons']))
@@ -27,11 +27,7 @@ def analyze_AE_reconstruction(params, model, data_loader):
     for i, (x, _, _) in enumerate(data_loader):
         x = x.to(device)
         with torch.no_grad():
-            if params['embedding_model']=='bVAE':
-                reconstruction, _, _, _ = model(x)
-            else:
-                reconstruction, _ = model(x)
-
+            reconstruction, _ = model(x)
             total_inputs = np.append(total_inputs, x.view(-1,params['input_neurons']), axis=0)
             total_reconstructions = np.append(total_reconstructions, reconstruction.view(-1,params['input_neurons']), axis=0)
     
@@ -46,16 +42,13 @@ def analyze_decoding(params, model, decoder, data_loader):
         device = torch.device(params['device'])
         x = x.to(device)
         with torch.no_grad():
-            if params['embedding_model']=='bVAE':
-                _, embedding, _, _ = model(x)
-            else:
-                _, embedding = model(x)
+            _, embedding = model(x)
             pred = decoder(embedding)
 
         total_positions = np.append(total_positions, position.view(-1,2), axis=0)
         total_predictions = np.append(total_predictions, pred.view(-1,2), axis=0)
 
-    decoding_error = np.linalg.norm(total_predictions-total_positions) # Euclidean distance
+    decoding_error = np.linalg.norm(total_predictions-total_positions) # Euclidean distance #TODO test
 
     decoder_stats = corr(total_positions.flatten(),total_predictions.flatten())
 

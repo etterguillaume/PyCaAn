@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from models.autoencoders import AE_MLP, TCN_10, test_AE, bVAE, bVAE_loss, TCN
+from models.autoencoders import embedder
 from tqdm import tqdm
 
 def add_noise(inputs,noise_factor=0.5):
@@ -12,16 +12,7 @@ def train_embedding_model(params, train_loader, test_loader):
     device = torch.device('cpu')
     torch.manual_seed(params['seed']) # Seed for reproducibility
     np.random.seed(params['seed'])
-    if params['embedding_model']=='MLP_AE':
-        model = AE_MLP(input_dim=params['input_neurons'], hidden_dims = params['hidden_dims'], output_dim=params['embedding_dims']).to(device)
-    elif params['embedding_model']=='bVAE':
-        model = bVAE(input_dim=params['input_neurons'], hidden_dims = params['hidden_dims'], output_dim=params['embedding_dims']).to(device)
-    elif params['embedding_model']=='test_AE':
-        model = test_AE(input_dim=params['input_neurons'], hidden_dims = params['hidden_dims'], output_dim=params['embedding_dims']).to(device)
-    elif params['embedding_model']=='TCAE':
-        model = TCN_10(input_dim=params['input_neurons'], output_dim=params['embedding_dims']).to(device)
-    elif params['embedding_model']=='TCN':
-        model = TCN(input_dim=params['input_neurons'], hidden_dims = params['hidden_dims'], output_dim=params['embedding_dims'], kernel_size=params['data_block_size']).to(device)
+    model = embedder(input_dim=params['input_neurons'], hidden_dims = params['hidden_dims'], output_dim=params['embedding_dims']).to(device)
     
     optimizer = torch.optim.AdamW(model.parameters(), lr=params['model_learning_rate'])
     criterion = torch.nn.MSELoss()
@@ -36,13 +27,8 @@ def train_embedding_model(params, train_loader, test_loader):
         model.train()
         for i, (x, _, _) in enumerate(train_loader):
             x = x.to(device)
-            if params['embedding_model']=='bVAE':
-                reconstruction, embedding, mu, sigma = model(x)
-                VAE_loss = criterion(reconstruction, x)
-                loss = bVAE_loss(VAE_loss, mu, sigma, params['beta'])
-            else:
-                reconstruction, _ = model(x)
-                loss = criterion(reconstruction, x)
+            reconstruction, _ = model(x)
+            loss = criterion(reconstruction, x) # Only look at last frame
             loss.backward()
             optimizer.step()
             run_train_loss += loss.item()
@@ -54,14 +40,9 @@ def train_embedding_model(params, train_loader, test_loader):
         for i, (x, _, _) in enumerate(test_loader):
             x = x.to(device)
             with torch.no_grad():
-                if params['embedding_model']=='bVAE':
-                    reconstruction, embedding, mu, sigma = model(x)
-                    VAE_loss = criterion(reconstruction, x)
-                    loss = bVAE_loss(VAE_loss, mu, sigma, params['beta'])
-                else:
-                    reconstruction, _ = model(x)
-                    loss = criterion(reconstruction, x)
-                    run_test_loss += loss.item()
+                reconstruction, _ = model(x)
+                loss = criterion(reconstruction, x)
+                run_test_loss += loss.item()
         if run_train_loss/n_train < run_test_loss/n_test:
             early_stop += 1
         test_loss.append(run_test_loss/n_test)

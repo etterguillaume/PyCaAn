@@ -50,12 +50,12 @@ def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'
 def plot_embedding_results_binary(original, reconstruction, embedding, reconstruction_Fscore, decoding_error, actual_var, pred_var, time):
     plt.figure(figsize=(4,4))
     plt.subplot(341)
-    plt.imshow(original.T,aspect='auto',interpolation='none')
+    plt.imshow(original[:,:,0].T,aspect='auto',interpolation='none')
     plt.xlim([3850,4000])
     plt.title('Neural data')
 
     plt.subplot(342)
-    plt.imshow(reconstruction.T,aspect='auto',interpolation='none',vmin=0,vmax=1)
+    plt.imshow(reconstruction[:,:,0].T,aspect='auto',interpolation='none',vmin=0,vmax=1)
     plt.title('Reconstruction')
     plt.xlim([3850,4000])
     plt.colorbar()
@@ -67,7 +67,7 @@ def plot_embedding_results_binary(original, reconstruction, embedding, reconstru
 
     plt.subplot(344)
     plt.scatter(embedding[:,0],embedding[:,1],c=time)
-    plt.title('Embedding: time')
+    plt.title('Embedding: velocity')
     plt.colorbar()
 
     plt.subplot(323)
@@ -88,12 +88,12 @@ def plot_embedding_results_binary(original, reconstruction, embedding, reconstru
 
     plt.tight_layout()
 
-def plot_embedding_results_raw(params, original, reconstruction, embedding, reconstruction_R, decoding_error, actual_var, pred_var, time):
+def plot_embedding_results_raw(params, original, reconstruction, embedding, reconstruction_R, decoding_error, position, pred_position, velocity):
     plt.figure(figsize=(4,4))
     plt.subplot(341)
     cells2plot = 50
     for i in range(cells2plot):
-        plt.plot(torch.tensor(original,dtype=torch.float)[:,i]*params['plot_gain']+i/params['plot_gain'],
+        plt.plot(original[:,i]*params['plot_gain']+i/params['plot_gain'],
                 c=(1-i/50,.6,i/50),
                 linewidth=.3)    
         plt.xlim([3850,4000])
@@ -109,13 +109,13 @@ def plot_embedding_results_raw(params, original, reconstruction, embedding, reco
     plt.title('Reconstruction')
 
     plt.subplot(343)
-    plt.scatter(embedding[:,0],embedding[:,1],c=actual_var)
+    plt.scatter(embedding[:,0],embedding[:,1],c=position)
     plt.title('Embedding: position')
     plt.colorbar()
 
     plt.subplot(344)
-    plt.scatter(embedding[:,0],embedding[:,1],c=time)
-    plt.title('Embedding: time')
+    plt.scatter(embedding[:,0],embedding[:,1],c=velocity)
+    plt.title('Embedding: velocity')
     plt.colorbar()
 
     plt.subplot(323)
@@ -124,15 +124,15 @@ def plot_embedding_results_raw(params, original, reconstruction, embedding, reco
     plt.title(f'Reconstruction\n R: {reconstruction_R.round(4)}')
 
     plt.subplot(324)
-    plt.scatter(actual_var,pred_var)
+    plt.scatter(position,pred_position)
     plt.plot([0,1],[0,1],'r--')
     plt.title(f'Decoding R: {decoding_error.round(4)}')
     plt.ylabel('Actual')
     plt.ylabel('Decoded')
 
     plt.subplot(313)
-    plt.plot(actual_var, label='Actual')
-    plt.plot(pred_var, label='Decoded')
+    plt.plot(position, label='Actual')
+    plt.plot(pred_position, label='Decoded')
     plt.title('Decoder')
 
     plt.tight_layout()
