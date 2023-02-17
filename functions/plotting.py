@@ -47,95 +47,59 @@ def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'
     plt.title(title)
     plt.legend()
 
-def plot_embedding_results_binary(original, reconstruction, embedding, reconstruction_Fscore, decoding_error, actual_var, pred_var, time):
-    plt.figure(figsize=(4,4))
-    plt.subplot(341)
-    plt.imshow(original[:,:,0].T,aspect='auto',interpolation='none')
-    plt.xlim([3850,4000])
-    plt.title('Neural data')
+def plot_embedding_results(params, original, reconstruction, embedding, reconstruction_stats, decoding_error, actual, predicted):
+    fig=plt.figure(figsize=(3,4.5))
+    if params['data_type']=='binarized':
+        plt.subplot(341)
+        plt.imshow(original.T,aspect='auto',interpolation='none')
+        plt.xlim(0,int(len(original)*params['portion_to_plot']))
+        plt.title(f'Original')
+        
+        plt.subplot(342)
+        plt.imshow(reconstruction.T,aspect='auto',interpolation='none')
+        plt.xlim(0,int(len(original)*params['portion_to_plot']))
+        plt.title('Reconstruction')
+    else:
+        plt.subplot(321)
+        cells2plot = 10
+        for i in range(cells2plot):
+            plt.plot(original[:,i]*params['plot_gain']+i,
+                    c=(0,0,0),
+                    linewidth=.3)
+            plt.plot(reconstruction[:,i]*params['plot_gain']+i,
+                    c=(.8,0,0,.3),
+                    linewidth=.5)
+        plt.xlim(0,int(len(original)*params['portion_to_plot']))
 
-    plt.subplot(342)
-    plt.imshow(reconstruction[:,:,0].T,aspect='auto',interpolation='none',vmin=0,vmax=1)
-    plt.title('Reconstruction')
-    plt.xlim([3850,4000])
-    plt.colorbar()
-
-    plt.subplot(343)
-    plt.scatter(embedding[:,0],embedding[:,1],c=actual_var)
-    plt.title('Embedding: position')
-    plt.colorbar()
-
-    plt.subplot(344)
-    plt.scatter(embedding[:,0],embedding[:,1],c=time)
-    plt.title('Embedding: velocity')
-    plt.colorbar()
+    plt.subplot(322)
+    plt.scatter(embedding[:,0],embedding[:,1],c=actual, cmap='Spectral', s=1)
+    plt.axis('scaled')
+    plt.title('position')
 
     plt.subplot(323)
-    plt.hist(reconstruction_Fscore, bins='auto')
-    plt.title('Reconstruction\nF-score: test set')
+    if params['data_type']=='binarized':
+        plt.hist(reconstruction_stats, bins='auto')
+        plt.title('Reconstruction\nF-score: test set')
+    else:
+        plt.scatter(original.flatten(),reconstruction.flatten(), s=1)
+        plt.plot([0,1],[0,1],'r--')
+        plt.title(f'Reconstruction\n R: {reconstruction_stats.round(4)}')
 
     plt.subplot(324)
-    plt.scatter(actual_var,pred_var)
+    plt.scatter(actual,predicted, s=1)
     plt.plot([0,1],[0,1],'r--')
     plt.title(f'Decoding R: {decoding_error.round(4)}')
     plt.ylabel('Actual')
     plt.ylabel('Decoded')
 
     plt.subplot(313)
-    plt.plot(actual_var, label='Actual')
-    plt.plot(pred_var, label='Decoded')
-    plt.title('Decoder')
-
+    plt.plot(actual, label='Actual')
+    plt.plot(predicted, label='Decoded')
+    plt.title('Position')
+    #plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
     plt.tight_layout()
-
-def plot_embedding_results_raw(params, original, reconstruction, embedding, reconstruction_R, decoding_error, position, pred_position, velocity):
-    plt.figure(figsize=(4,4))
-    plt.subplot(341)
-    cells2plot = 50
-    for i in range(cells2plot):
-        plt.plot(original[:,i]*params['plot_gain']+i/params['plot_gain'],
-                c=(1-i/50,.6,i/50),
-                linewidth=.3)    
-        plt.xlim([3850,4000])
-    plt.title(f'Original')
-
-    max_val=torch.max(reconstruction)
-    plt.subplot(342)
-    for i in range(cells2plot):
-        plt.plot(reconstruction[:,i]*params['plot_gain']+i/params['plot_gain'],
-                c=(1-i/cells2plot,.6,i/cells2plot),
-                linewidth=.3)
-        plt.xlim([3850,4000])
-    plt.title('Reconstruction')
-
-    plt.subplot(343)
-    plt.scatter(embedding[:,0],embedding[:,1],c=position)
-    plt.title('Embedding: position')
-    plt.colorbar()
-
-    plt.subplot(344)
-    plt.scatter(embedding[:,0],embedding[:,1],c=velocity)
-    plt.title('Embedding: velocity')
-    plt.colorbar()
-
-    plt.subplot(323)
-    plt.scatter(original.flatten(),reconstruction.flatten())
-    plt.plot([0,1],[0,1],'r--')
-    plt.title(f'Reconstruction\n R: {reconstruction_R.round(4)}')
-
-    plt.subplot(324)
-    plt.scatter(position,pred_position)
-    plt.plot([0,1],[0,1],'r--')
-    plt.title(f'Decoding R: {decoding_error.round(4)}')
-    plt.ylabel('Actual')
-    plt.ylabel('Decoded')
-
-    plt.subplot(313)
-    plt.plot(position, label='Actual')
-    plt.plot(pred_position, label='Decoded')
-    plt.title('Decoder')
-
-    plt.tight_layout()
+    
+    return fig
 
     
 def interactive_plot_manifold3D(x,y,z,color):

@@ -9,12 +9,12 @@ import yaml
 import numpy as np
 import matplotlib.pyplot as plt
 from umap.umap_ import UMAP
-from sklearn.svm import SVC
+from sklearn.linear_model import LinearRegression
 from scipy.stats import pearsonr as corr
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data
-from functions.analysis import analyze_binary_reconstruction, analyze_decoding
-from functions.plotting import plot_losses, plot_embedding_results_raw, plot_embedding_results_binary
+from functions.analysis import reconstruction_binary_accuracy
+from functions.plotting import plot_embedding_results
 
 #%% Load parameters
 with open('params.yaml','r') as file:
@@ -32,16 +32,20 @@ data = load_data(session_path)
 data = preprocess_data(data,params)
 
 #%% Split dataset into
-np.random.seed(42)
+np.random.seed(params['seed'])
 trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
-trainingFrames[np.random.choice(np.arange(len(data['caTime'])), size=int(len(data['caTime'])*params['train_test_ratio']), replace=False)] = True
+
+if params['train_set_selection']=='random':
+    trainingFrames[np.random.choice(np.arange(len(data['caTime'])), size=int(len(data['caTime'])*params['train_test_ratio']), replace=False)] = True
+elif params['train_set_selection']=='split':
+    trainingFrames[0:int(params['train_test_ratio']*len(data['caTime']))] = True 
 data['trainingFrames']=trainingFrames
 
 #%% Train embedding model
-embedding_model = UMAP(n_neighbors=50,
+embedding_model = UMAP(n_components=params['embedding_dims'],
+                       n_neighbors=50,
                        min_dist=.1,
-                       n_components=params['embedding_dims'],
-                       metric='euclidean',
+                       metric=('euclidean'),
                        random_state=42).fit(data['procData'][data['trainingFrames'],0:params['input_neurons']])
 
 #%%
@@ -75,39 +79,27 @@ test_stats = corr(data['procData'][~data['trainingFrames'],0:params['input_neuro
 
 # %% Compute reconstruction accuracy if binarized
 if params['data_type']=='binarized':
-    train_accuracy, train_precision, train_recall, train_F1 = analyze_binary_reconstruction(params, embedding_model, train_loader)
-    test_accuracy, test_precision, test_recall, test_F1 = analyze_binary_reconstruction(params, embedding_model, test_loader)
-    print(f'Train F1: {np.mean(train_F1).round(4)}, Test F1: {np.mean(test_F1).round(4)}')
+    train_accuracy, train_precision, train_recall, train_F1 = reconstruction_binary_accuracy(train_reconstruction, data['procData'][data['trainingFrames'],0:params['input_neurons']])
+    test_accuracy, test_precision, test_recall, reconstruction_stats = reconstruction_binary_accuracy(test_reconstruction, data['procData'][~data['trainingFrames'],0:params['input_neurons']])
+    print(f'Train F1: {np.mean(train_F1).round(4)}, Test F1: {np.mean(reconstruction_stats).round(4)}')
 
 #%% Train decoder
 pos_decoder = LinearRegression().fit(train_embedding, data['position'][data['trainingFrames'],:])
 score=pos_decoder.score(test_embedding, data['position'][~data['trainingFrames'],:])
+train_pred_pos = pos_decoder.predict(train_embedding)
 test_pred_pos = pos_decoder.predict(test_embedding)
-#%%
 
+#%% Decoding accuracy
+train_pred_pos_stats = corr(train_pred_pos.flatten(),data['position'][data['trainingFrames'],:].flatten())
 test_pred_pos_stats = corr(test_pred_pos.flatten(),data['position'][~data['trainingFrames'],:].flatten())
 
-
-
-
-# %% Compute decoding errors #TODO only when speed > threshold
-train_decoding_error, train_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, train_loader)
-test_decoding_error, test_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, test_loader)
-
-
-
-
-
 # %% Reconstruct original data
-original = torch.tensor(data['procData'][:,0:params['input_neurons']],dtype=torch.float)
-reconstruction, embedding = embedding_model(original)
-pred_position = embedding_decoder(embedding)
+full_embedding = embedding_model.transform(data['procData'][:,0:params['input_neurons']])
+full_reconstruction = embedding_model.inverse_transform(full_embedding)
+pred_position = pos_decoder.predict(full_embedding)
 
-#%%
-if params['data_type']=='raw':
-    reconstruction_R, p_value = corr(original.flatten(),reconstruction.detach().flatten())
-    plot_embedding_results_raw(params, original, reconstruction.detach(), embedding, reconstruction_R, test_decoder_stats[0], data['position'][:,0], pred_position[:,0].detach(), data['velocity'])
-elif params['data_type']=='binarized':
-    plot_embedding_results_binary(original, reconstruction, embedding, test_F1, test_decoder_stats[0], data['position'][:,0], pred_position[:,0].detach(), data['velocity'])
+#%% Plot summary
+fig = plot_embedding_results(params, data['procData'][:,0:params['input_neurons']], full_reconstruction, full_embedding, test_stats, test_pred_pos_stats[0], data['position'][:,0], pred_position[:,0])
 
 # %% Save results
+# %%

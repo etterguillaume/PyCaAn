@@ -39,23 +39,12 @@ num_permutations: 1000 # Number of circular permutations
 # Chronic alignment parameters
 
 # Embeddings
-embedding_model: TCN # UMAP, TCN, TCAE, bVAE, MLP_AE test_AE
-beta: 1 # Only for bVAE model
 input_neurons: 100
-data_block_size: 10
-hidden_dims: [64,32,16,8] # Dimensions of hidden layers
 embedding_dims: 2
-model_learning_rate: 0.0001
-decoder_learning_rate: 0.001
-maxTrainSteps: 100
+train_set_selection: split # 'random', random frames. 'split', split recording using train_test_ratio
 train_test_ratio: .8 # portion of recording used to train embedding model
-batch_size: 32
-patience: -1 # Number of steps after which training will stop if test loss does not improve. -1 for no early stopping
-
-# Decoder parameters
-decoding_training_set: .8 # portion of recording used to train decoder
-decoding_set_selection: random
 
 # Plotting
 max_ca_traces_to_plot: 50
 plot_gain: 3
+portion_to_plot: 0.2 # Only plot the first portion of the recording
