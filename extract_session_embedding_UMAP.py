@@ -43,8 +43,8 @@ data['trainingFrames']=trainingFrames
 
 #%% Train embedding model
 embedding_model = UMAP(n_components=params['embedding_dims'],
-                       n_neighbors=50,
-                       min_dist=.1,
+                       n_neighbors=params['n_neighbors'],
+                       min_dist=params['min_dist'],
                        metric=('euclidean'),
                        random_state=42).fit(data['procData'][data['trainingFrames'],0:params['input_neurons']])
 
