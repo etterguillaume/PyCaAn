@@ -99,7 +99,7 @@ full_reconstruction = embedding_model.inverse_transform(full_embedding)
 pred_position = pos_decoder.predict(full_embedding)
 
 #%% Plot summary
-fig = plot_embedding_results(params, data['procData'][:,0:params['input_neurons']], full_reconstruction, full_embedding, test_stats, test_pred_pos_stats[0], data['position'][:,0], pred_position[:,0])
+plot_embedding_results(params, data['procData'][:,0:params['input_neurons']], full_reconstruction, full_embedding, test_stats, test_pred_pos_stats[0], data['position'][:,0], pred_position[:,0])
 
 # %% Save results
 # %%

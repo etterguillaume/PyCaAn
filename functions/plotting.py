@@ -48,7 +48,7 @@ def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'
     plt.legend()
 
 def plot_embedding_results(params, original, reconstruction, embedding, reconstruction_stats, decoding_error, actual, predicted):
-    fig=plt.figure(figsize=(3,4.5))
+    plt.figure(figsize=(3,4.5))
     if params['data_type']=='binarized':
         plt.subplot(341)
         plt.imshow(original.T,aspect='auto',interpolation='none')
@@ -83,7 +83,7 @@ def plot_embedding_results(params, original, reconstruction, embedding, reconstr
     else:
         plt.scatter(original.flatten(),reconstruction.flatten(), s=1)
         plt.plot([0,1],[0,1],'r--')
-        plt.title(f'Reconstruction\n R: {reconstruction_stats.round(4)}')
+        plt.title(f'Reconstruction\n R: {reconstruction_stats[0].round(4)}')
 
     plt.subplot(324)
     plt.scatter(actual,predicted, s=1)
@@ -98,9 +98,6 @@ def plot_embedding_results(params, original, reconstruction, embedding, reconstr
     plt.title('Position')
     #plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
     plt.tight_layout()
-    
-    return fig
-
     
 def interactive_plot_manifold3D(x,y,z,color):
     fig = go.Figure()

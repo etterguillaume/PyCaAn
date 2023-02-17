@@ -25,7 +25,7 @@ remove_immobility: False
 distance_travelled_threshold: 3000 #cm
 occupancy_frame_threshold: 20 # min number of frames per location
 portion_surface_covered_threshold: .8 # 0-1, default=1 (all bins explored)
-min_num_neurons: 100 # Minimum number of neurons for a session to be included
+min_num_neurons: 128 # Minimum number of neurons for a session to be included
 
 # Tuning curve computations
 bin_size: 2.5 # cm
@@ -39,10 +39,14 @@ num_permutations: 1000 # Number of circular permutations
 # Chronic alignment parameters
 
 # Embeddings
-input_neurons: 100
-embedding_dims: 2
-train_set_selection: split # 'random', random frames. 'split', split recording using train_test_ratio
+input_neurons: 128
+embedding_dims: 3
+train_set_selection: random # 'random', random frames. 'split', split recording using train_test_ratio
 train_test_ratio: .8 # portion of recording used to train embedding model
+
+# UMAP-specific settings
+min_dist: .1
+n_neighbors: 50
 
 # Plotting
 max_ca_traces_to_plot: 50
