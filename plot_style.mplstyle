@@ -36,6 +36,6 @@ image.cmap: viridis
 legend.loc: best
 legend.frameon: False
 
-#savefig.bbox : tight
+savefig.bbox : tight
 savefig.pad_inches : 0.01  # Use virtually all space when we specify figure dimensions
 

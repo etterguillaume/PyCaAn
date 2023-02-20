@@ -35,10 +35,10 @@ def load_data(path):
         f = h5py.File(path + '/behav.mat','r')
         data.update(
                     {
-                    'position':np.array(f.get('behav/position')),
-                    'behavTime':np.array(f.get('behav/time'))/1000, # convert ms->s
-                    'mazeWidth_px':np.array(f.get('behav/width')),
-                    'mazeWidth_cm':np.array(f.get('behav/trackLength'))
+                    'position':np.array(f.get('behav/position')).T,
+                    'behavTime':np.array(f.get('behav/time'))[0]/1000, # convert ms->s
+                    'mazeWidth_px':np.array(f.get('behav/width'))[0][0],
+                    'mazeWidth_cm':np.array(f.get('behav/trackLength'))[0][0]
                     }
                     )
     except:

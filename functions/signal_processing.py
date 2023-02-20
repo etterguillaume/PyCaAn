@@ -41,7 +41,7 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
 def preprocess_data(data, params):
     data['position'] = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
-    data['position'] = data['position']/np.max(data['position'].flatten())
+    data['position'] = data['position']/data['mazeWidth_cm']
     data['max_velocity'] = np.max(data['velocity'])
     data['velocity'] = data['velocity']/data['max_velocity']
 
