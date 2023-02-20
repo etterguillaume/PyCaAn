@@ -1,7 +1,7 @@
 # Figure size, resolution
-figure.figsize : 1, 1  # max width is 3.5 for single column
+figure.figsize : 1.5, 1  # max width is 3.5 for single column
 figure.dpi: 300
-#figure.facecolor: none # Remove background
+figure.facecolor: none # Remove background
 
 # Fonts
 font.family: sans
@@ -12,16 +12,17 @@ font.style: normal
 axes.titlesize : 7
 axes.labelsize: 7
 xtick.labelsize: 7
+axes.labelweight: bold
 ytick.labelsize: 7
 legend.fontsize: 7
 font.size: 7
 axes.spines.top: False
 axes.spines.right: False
-#axes.facecolor: none
+axes.facecolor: none
 
 # Lines and markers
 lines.linewidth : .5
-lines.markersize : 3
+lines.markersize : 1
 
 # Colors
 #blue2red = ['#00004d', '#3b0555', '#630e5c', '#891a63', '#b0276a', '#d73571', '#ff4377']
