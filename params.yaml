@@ -10,10 +10,7 @@ path_to_results: /results
 overwrite_data: True # If file is present, re-analyse?
 
 # Analysis parameters
-data_type: raw # Use 'raw', 'binarized', or 'deconvolved' traces for analysis
 sampling_frequency: 30 # frames per second
-
-# Binarization params
 z_threshold: 2 # Used to detect periods of putative activity
 remove_inactivity: False # If true and data is binarized, will remove epochs where no cell was active
 
