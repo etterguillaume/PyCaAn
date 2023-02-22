@@ -46,11 +46,11 @@ embedding_model = UMAP(n_components=params['embedding_dims'],
                        n_neighbors=params['n_neighbors'],
                        min_dist=params['min_dist'],
                        metric=('euclidean'),
-                       random_state=42).fit(data['procData'][data['trainingFrames'],0:params['input_neurons']])
+                       random_state=42).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 
 #%%
-train_embedding = embedding_model.transform(data['procData'][data['trainingFrames'],0:params['input_neurons']])
-test_embedding = embedding_model.transform(data['procData'][~data['trainingFrames'],0:params['input_neurons']])
+train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
+test_embedding = embedding_model.transform(data['neuralData'][~data['trainingFrames'],0:params['input_neurons']])
 #%% Plot embeddings
 plt.figure(figsize=(3,1.5))
 plt.subplot(121)
@@ -74,14 +74,14 @@ train_reconstruction = embedding_model.inverse_transform(train_embedding)
 test_reconstruction = embedding_model.inverse_transform(test_embedding)
 
 #%%
-train_stats = corr(data['procData'][data['trainingFrames'],0:params['input_neurons']].flatten(),train_reconstruction.flatten())
-test_stats = corr(data['procData'][~data['trainingFrames'],0:params['input_neurons']].flatten(),test_reconstruction.flatten())
+train_stats = corr(data['neuralData'][data['trainingFrames'],0:params['input_neurons']].flatten(),train_reconstruction.flatten())
+test_stats = corr(data['neuralData'][~data['trainingFrames'],0:params['input_neurons']].flatten(),test_reconstruction.flatten())
 
 # %% Compute reconstruction accuracy if binarized
-if params['data_type']=='binarized':
-    train_accuracy, train_precision, train_recall, train_F1 = reconstruction_binary_accuracy(train_reconstruction, data['procData'][data['trainingFrames'],0:params['input_neurons']])
-    test_accuracy, test_precision, test_recall, reconstruction_stats = reconstruction_binary_accuracy(test_reconstruction, data['procData'][~data['trainingFrames'],0:params['input_neurons']])
-    print(f'Train F1: {np.mean(train_F1).round(4)}, Test F1: {np.mean(reconstruction_stats).round(4)}')
+
+# train_accuracy, train_precision, train_recall, train_F1 = reconstruction_binary_accuracy(train_reconstruction, data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
+# test_accuracy, test_precision, test_recall, reconstruction_stats = reconstruction_binary_accuracy(test_reconstruction, data['neuralcData'][~data['trainingFrames'],0:params['input_neurons']])
+# print(f'Train F1: {np.mean(train_F1).round(4)}, Test F1: {np.mean(reconstruction_stats).round(4)}')
 
 #%% Train decoder
 pos_decoder = LinearRegression().fit(train_embedding, data['position'][data['trainingFrames'],:])
@@ -94,12 +94,12 @@ train_pred_pos_stats = corr(train_pred_pos.flatten(),data['position'][data['trai
 test_pred_pos_stats = corr(test_pred_pos.flatten(),data['position'][~data['trainingFrames'],:].flatten())
 
 # %% Reconstruct original data
-full_embedding = embedding_model.transform(data['procData'][:,0:params['input_neurons']])
+full_embedding = embedding_model.transform(data['neuralData'][:,0:params['input_neurons']])
 full_reconstruction = embedding_model.inverse_transform(full_embedding)
 pred_position = pos_decoder.predict(full_embedding)
 
 #%% Plot summary
-plot_embedding_results(params, data['procData'][:,0:params['input_neurons']], full_reconstruction, full_embedding, test_stats, test_pred_pos_stats[0], data['position'][:,0], pred_position[:,0])
+plot_embedding_results(params, data['neuralData'][:,0:params['input_neurons']], full_reconstruction, full_embedding, test_stats, test_pred_pos_stats[0], data['position'][:,0], pred_position[:,0])
 
 # %% Save results
 # %%

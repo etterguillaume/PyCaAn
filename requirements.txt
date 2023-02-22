@@ -12,5 +12,7 @@ torchvision>=0.14.1
 h5py
 
 umap-learn
+tensorflow-macos
+tensorflow-probabilities
 scikit-learn
 plotly

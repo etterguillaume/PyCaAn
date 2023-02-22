@@ -49,27 +49,25 @@ def plot_losses(train_loss, test_loss, loss_label='Loss', title='Model training'
 
 def plot_embedding_results(params, original, reconstruction, embedding, reconstruction_stats, decoding_error, actual, predicted):
     plt.figure(figsize=(3,4.5))
-    if params['data_type']=='binarized':
-        plt.subplot(341)
-        plt.imshow(original.T,aspect='auto',interpolation='none')
-        plt.xlim(0,int(len(original)*params['portion_to_plot']))
-        plt.title(f'Original')
-        
-        plt.subplot(342)
-        plt.imshow(reconstruction.T,aspect='auto',interpolation='none')
-        plt.xlim(0,int(len(original)*params['portion_to_plot']))
-        plt.title('Reconstruction')
-    else:
-        plt.subplot(321)
-        cells2plot = 10
-        for i in range(cells2plot):
-            plt.plot(original[:,i]*params['plot_gain']+i,
-                    c=(0,0,0),
-                    linewidth=.3)
-            plt.plot(reconstruction[:,i]*params['plot_gain']+i,
-                    c=(.8,0,0,.3),
-                    linewidth=.5)
-        plt.xlim(0,int(len(original)*params['portion_to_plot']))
+    # plt.subplot(341)
+    # plt.imshow(original.T,aspect='auto',interpolation='none')
+    # plt.xlim(0,int(len(original)*params['portion_to_plot']))
+    # plt.title(f'Original')
+    
+    # plt.subplot(342)
+    # plt.imshow(reconstruction.T,aspect='auto',interpolation='none')
+    # plt.xlim(0,int(len(original)*params['portion_to_plot']))
+    # plt.title('Reconstruction')
+    plt.subplot(321)
+    cells2plot = 10
+    for i in range(cells2plot):
+        plt.plot(original[:,i]*params['plot_gain']+i,
+                c=(0,0,0),
+                linewidth=.3)
+        plt.plot(reconstruction[:,i]*params['plot_gain']+i,
+                c=(.8,0,0,.3),
+                linewidth=.5)
+    plt.xlim(0,int(len(original)*params['portion_to_plot']))
 
     plt.subplot(322)
     plt.scatter(embedding[:,0],embedding[:,1],c=actual, cmap='Spectral', s=1)
@@ -77,13 +75,11 @@ def plot_embedding_results(params, original, reconstruction, embedding, reconstr
     plt.title('position')
 
     plt.subplot(323)
-    if params['data_type']=='binarized':
-        plt.hist(reconstruction_stats, bins='auto')
-        plt.title('Reconstruction\nF-score: test set')
-    else:
-        plt.scatter(original.flatten(),reconstruction.flatten(), s=1)
-        plt.plot([0,1],[0,1],'r--')
-        plt.title(f'Reconstruction\n R: {reconstruction_stats[0].round(4)}')
+    # plt.hist(reconstruction_stats, bins='auto')
+    # plt.title('Reconstruction\nF-score: test set')
+    plt.scatter(original.flatten(),reconstruction.flatten(), s=1)
+    plt.plot([0,1],[0,1],'r--')
+    plt.title(f'Reconstruction\n R: {reconstruction_stats[0].round(4)}')
 
     plt.subplot(324)
     plt.scatter(actual,predicted, s=1)

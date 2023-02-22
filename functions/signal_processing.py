@@ -17,7 +17,8 @@ def binarize_ca_traces(ca_traces, z_threshold, sampling_frequency): #TODO MAKE S
         d1_trace = diff(filtered_trace)
         d1_trace = np.append(d1_trace,0)
         binarized_traces[(norm_trace > z_threshold) & (d1_trace > 0),trace_num] = 1
-        filtnorm_traces[:,trace_num] = filtered_trace/max_val
+        #filtnorm_traces[:,trace_num] = filtered_trace/max_val
+        filtnorm_traces[:,trace_num] = filtered_trace
 
     return binarized_traces, filtnorm_traces
 
