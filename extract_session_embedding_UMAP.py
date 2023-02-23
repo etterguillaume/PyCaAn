@@ -8,7 +8,9 @@ plt.style.use('plot_style.mplstyle')
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
+#from umap.parametric_umap import ParametricUMAP
 from umap.parametric_umap import ParametricUMAP
+import tensorflow as tf
 from sklearn.linear_model import LinearRegression
 from scipy.stats import pearsonr as corr
 from functions.dataloaders import load_data
@@ -40,11 +42,14 @@ elif params['train_set_selection']=='split':
 data['trainingFrames']=trainingFrames
 
 #%% Train embedding model
-embedding_model = ParametricUMAP(autoencoder_loss = True,
+embedding_model = ParametricUMAP(
+                       parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
+                       autoencoder_loss = False,
+                       parametric_reconstruction= True,
                        n_components=params['embedding_dims'],
                        n_neighbors=params['n_neighbors'],
                        min_dist=params['min_dist'],
-                       metric=('euclidean'),
+                       metric='euclidean',
                        random_state=42).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 
 #%%
@@ -123,24 +128,15 @@ plt.axis('scaled')
 plt.axis('off')
 plt.colorbar(label='Location (cm)', fraction=0.025, pad=.001)
 
-# %%
-#plt.figure(figsize=(1.5,1))
-plt.scatter(full_embedding[:,0],full_embedding[:,1],c=data['caTime'], cmap='Spectral', s=1)
-plt.title('embedding')
-#plt.xlabel('$D_{1}$')
-#plt.ylabel('$D_{2}$')
-plt.axis('scaled')
-plt.axis('off')
-plt.colorbar(label='Time (s)', fraction=0.025, pad=.001)
-
 #%%
 plt.figure(figsize=(.75,.75))
-plt.scatter(data['neuralData'][:,0:params['input_neurons']].flatten(), full_reconstruction.flatten(), s=1)
-#plt.plot([0,1],[0,1],'r--')
+plt.title('reconstruction')
+plt.scatter(data['neuralData'][~data['trainingFrames'],0:params['input_neurons']].flatten(),test_reconstruction.flatten(), s=1)
+#plt.plot([0,100],[0,100],'r--')
+#plt.xlim([0,100])
+#plt.ylim([0,100])
 plt.title(f'$R^2=${test_stats[0].round(4)}')
-#plt.xlim([0,1])
-#plt.ylim([0,1])
-plt.xlabel('actual')
+plt.xlabel('original')
 plt.ylabel('reconstructed')
 
 #%%
@@ -155,17 +151,6 @@ plt.xlabel('actual')
 plt.ylabel('predicted')
 
 #%%
-plt.figure(figsize=(.75,.75))
-plt.title('time')
-plt.scatter(data['caTime'].flatten(),pred_time.flatten(), s=1)
-#plt.plot([0,100],[0,100],'r--')
-#plt.xlim([0,100])
-#plt.ylim([0,100])
-plt.title(f'$R^2=${test_pred_time_stats[0].round(4)}')
-plt.xlabel('actual')
-plt.ylabel('predicted')
-
-#%%
 plt.figure(figsize=(3,1))
 plt.plot(data['caTime'],data['position'][:,0], label='Actual')
 plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([])
@@ -174,15 +159,5 @@ plt.plot(data['caTime'],pred_position[:,0], label='Decoded')
 #plt.ylim([0,100])
 plt.xlabel('Time (s)')
 plt.ylabel('Location (cm)')
-plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
-# %%
-plt.figure(figsize=(3,1))
-plt.plot(data['caTime'],data['caTime'], label='Actual')
-plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([])
-plt.plot(data['caTime'],pred_time, label='Decoded')
-#plt.xlim([50,60])
-#plt.ylim([0,100])
-plt.xlabel('Time (s)')
-plt.ylabel('Time (s)')
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 # %%
