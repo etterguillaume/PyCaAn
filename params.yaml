@@ -25,16 +25,18 @@ tone_threshold: .2
 distance_travelled_threshold: 3000 #cm
 occupancy_frame_threshold: 20 # min number of frames per location
 portion_surface_covered_threshold: .8 # 0-1, default=1 (all bins explored)
+split_half_threshold: .3 # threshold for stability. Default = .3
 min_num_neurons: 128 # Minimum number of neurons for a session to be included
 
 # Tuning curve computations
-bin_size: 2.5 # cm
-#linear_track_length: 134 # cm
-#open_field_width: 50 # cm
-rate_map_smoothing_sigma: 5 # cm, sigma for gaussian smoothing, 0 for no smoothing
+temporalBinSize: 1
+spatialBinSize: 2.5
+max_cum_spatial_length: 536
+max_cum_temporal_length: 10
+#rate_map_smoothing_sigma: 2 # cm, sigma for gaussian smoothing, 0 for no smoothing
 rate_map_smoothing_size: 5 # cm, size for gaussian smoothing, 0 for no smoothing
-split_half_threshold: .3 # threshold for stability. Default = .3
-num_permutations: 1000 # Number of circular permutations
+
+num_surrogates: 1000 # Number of circular permutations
 
 # Chronic alignment parameters
 
