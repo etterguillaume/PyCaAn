@@ -1,9 +1,38 @@
 import h5py
 import numpy as np
 import scipy.io as sio
+import os
 
 def load_data(path):
     data = {}
+    split_path = path.split(os.sep)
+    split_name = split_path[-1].split('_')
+    data.update(
+                {
+                'day': int(split_name[-1]),
+                'task':split_name[1],
+                'subject':split_path[-2],
+                'region': split_path[-3],
+                'sex': 'unknown',
+                'age': 'unknown',
+                'condition': 'normal',
+                'darkness': False,
+                'optoStim': False,
+                'rewards': True
+                }
+    )
+
+    if 'dark' in split_name:
+        data['darkness'] = True
+    if '8Hz' in split_name:
+        data['optoStim'] = '8Hz'
+    if 'scrambled' in split_name:
+        data['optoStim'] = 'scrambled'
+    if 'norewards' in split_name:
+        data['rewards'] = False
+    if 'AD' in split_name:
+        data['condition'] = 'AD'
+
     try: # If recent MATLAB format
         f = h5py.File(path + '/ms.mat','r')
         data.update(
@@ -37,14 +66,17 @@ def load_data(path):
         f = h5py.File(path + '/behav.mat','r')
         data.update(
                     {
-                    'background':np.array(f.get('behav/background')),
-                    'tone':np.array(f.get('behav/optosignal')),
                     'position':np.array(f.get('behav/position')).T,
                     'behavTime':np.array(f.get('behav/time'))[0]/1000, # convert ms->s
                     'mazeWidth_px':np.array(f.get('behav/width'))[0][0],
                     'mazeWidth_cm':np.array(f.get('behav/trackLength'))[0][0]
                     }
                     )
+        if 'background' in f['behav']:
+            data.update({'background':np.array(f.get('behav/background'))})
+        if 'optosignal' in f['behav']:
+            data.update({'tone':np.array(f.get('behav/optosignal'))[:,0]})
+
     except:
         f = sio.loadmat(path + '/behav.mat')
         data.update(

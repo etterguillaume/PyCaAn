@@ -23,14 +23,21 @@ def binarize_ca_traces(ca_traces, z_threshold, sampling_frequency): #TODO MAKE S
 
     return binarized_traces, neural_data
 
-def interpolate_behavior(position, behav_time, ca_time):
-    interpolated_position = np.zeros((len(ca_time),2))
-    interp_func_x = interp1d(behav_time, position[:,0], fill_value="extrapolate")
-    interp_func_y = interp1d(behav_time, position[:,1], fill_value="extrapolate")
-    interpolated_position[:,0] = interp_func_x(ca_time)   # use interpolation function returned by `interp1d`
-    interpolated_position[:,1] = interp_func_y(ca_time)   # use interpolation function returned by `interp1d`
+def interpolate_2D(signal, behav_time, ca_time):
+    interpolated_signal = np.zeros((len(ca_time),2))
+    interp_func_x = interp1d(behav_time, signal[:,0], fill_value="extrapolate")
+    interp_func_y = interp1d(behav_time, signal[:,1], fill_value="extrapolate")
+    interpolated_signal[:,0] = interp_func_x(ca_time)   # use interpolation function returned by `interp1d`
+    interpolated_signal[:,1] = interp_func_y(ca_time)   # use interpolation function returned by `interp1d`
     
-    return interpolated_position
+    return interpolated_signal
+
+def interpolate_1D(signal, behav_time, ca_time):
+    interpolated_signal = np.zeros((len(ca_time),2))
+    interp_func_x = interp1d(behav_time, signal, fill_value="extrapolate")
+    interpolated_signal = interp_func_x(ca_time)   # use interpolation function returned by `interp1d`
+    
+    return interpolated_signal
 
 def compute_velocity(interpolated_position, caTime, speed_threshold):
     velocity = np.zeros(interpolated_position.shape[0])
@@ -43,36 +50,21 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
     
     return velocity, running_ts
 
-def preprocess_data(data, params):
-    data['position'] = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
-    data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
-    
-    # Normalize values
-    data['normPosition'] = normalize(data['position'])
-    data['normVelocity'] = normalize(data['velocity'])
-
-    data['binaryData'], data['neuralData'] = binarize_ca_traces(data['caTrace'],
-                                             z_threshold=params['z_threshold'],
-                                             sampling_frequency=params['sampling_frequency']
-                                             )
-
-    return data
-
 def extract_tone(data, params):
-    threshold = 0.2
     Fs = params['sampling_frequency']
     tone = data['tone']
+    threshold = params['tone_threshold']
 
     # Init vectors 
-    binary_signal = np.zeros(len(tone))
+    binary_signal = np.zeros_like(tone)
 
     binary_signal[tone>threshold]=1
     onset_signal = diff(binary_signal)
     onset_signal = np.append(onset_signal,0)
-    flash_ts = np.where(onset_signal==1)
+    flash_ts = np.where(onset_signal==1)[0]
     flash_int = diff(flash_ts/Fs)
     flash_int = np.append(flash_int,0)
-    flash_freq = 1/flash_int
+    flash_freq = 1./flash_int
 
     # Create lists of transitions
     blank_to_slow=[]
@@ -83,17 +75,16 @@ def extract_tone(data, params):
     blank_to_slow.append(0)
 
     for i in range(1,len(flash_freq)):
-        if flash_freq[i-1] < 4 & flash_freq[i] > 4:
+        if (flash_freq[i-1] < 4) & (flash_freq[i] > 4):
             blank_to_slow.append(i)
-        elif flash_freq[i-1] < 6 & flash_freq[i] > 6:
-            slow_to_fast.append[i]
-        elif flash_freq[i-1] > 6 & flash_freq[i] < 4:
+        elif (flash_freq[i-1] < 6) & (flash_freq[i] > 6):
+            slow_to_fast.append(i)
+        elif (flash_freq[i-1] > 6) & (flash_freq[i] < 4):
             fast_to_solid.append(i)
 
-
     # Assumed drop in frequency corresponding to solid light
-    flash_ts = np.append(flash_ts,flash_ts[-1])
-    fast_to_solid = np.append(fast_to_solid, len(flash_ts))
+    flash_ts = np.append(flash_ts, flash_ts[-1] + 1)
+    fast_to_solid.append(len(flash_ts)-1)
 
     # Initialize state writes
     state = binary_signal*3+1
@@ -104,42 +95,62 @@ def extract_tone(data, params):
     ct=0
 
     for i in range (len(state)-frame_buffer):
-        if (state2write == 1) & (ct<=len(blank_to_slow)) & (flash_ts[blank_to_slow[ct]]<i):
+        if state2write == 1 and ct<len(blank_to_slow) and flash_ts[blank_to_slow[ct]]<i:
             blank_to_slow.pop(0)
         
-        if (state2write == 2) & (ct<=len(slow_to_fast)) & (flash_ts[slow_to_fast[ct]]<i):
+        if state2write == 2 and ct<len(slow_to_fast) and flash_ts[slow_to_fast[ct]]<i:
             slow_to_fast.pop(0)
         
-        if (state2write == 3) & (ct<=len(fast_to_solid)) & (flash_ts[fast_to_solid[ct]]<i):
+        if state2write == 3 and ct<len(fast_to_solid) and flash_ts[fast_to_solid[ct]]<i:
             fast_to_solid.pop(0)
         
         # Re-order state-transitions
-        while (len(slow_to_fast)>=(ct+frame_buffer)) & (slow_to_fast[ct]<=(blank_to_slow[ct]+frame_buffer)):
+        while len(slow_to_fast)>=(ct+frame_buffer) and slow_to_fast[ct]<=(blank_to_slow[ct]+frame_buffer):
             slow_to_fast.pop(0)
 
-        while (len(fast_to_solid)>=(ct+frame_buffer)) & (fast_to_solid[ct]<=(blank_to_slow[ct]+frame_buffer)):
+        while len(fast_to_solid)>=(ct+frame_buffer) and fast_to_solid[ct]<=(blank_to_slow[ct]+frame_buffer):
             fast_to_solid.pop(0)
 
-        while (len(fast_to_solid)>=(ct+frame_buffer)) & (fast_to_solid[ct]<=(slow_to_fast[ct]+frame_buffer)):
+        while len(fast_to_solid)>=(ct+frame_buffer) and fast_to_solid[ct]<=(slow_to_fast[ct]+frame_buffer):
             fast_to_solid.pop(0)
 
     
         # Detect state transitions
-    if (state2write==1) & (ct<=len(blank_to_slow)) & (flash_ts(blank_to_slow[ct])==i):
-        state2write = 2
-    elif (state2write==2) & (ct<=len(slow_to_fast)) & (flash_ts(slow_to_fast[ct])==i):
-        state2write = 3
-    elif (state2write==3) & (ct<=len(fast_to_solid)) & (flash_ts(fast_to_solid[ct])==i):
-        state2write = 4
-    elif (state2write==4) & (state(i)==1):
-        state2write = 1
-        if (ct+1<=len(blank_to_slow)) & (ct+1<=len(slow_to_fast)) & (ct+1<=len(fast_to_solid)):
-            ct+=1
-            while (flash_ts(blank_to_slow[ct]) < i):
-                blank_to_slow.pop(0)
+        if state2write==1 and ct<len(blank_to_slow) and flash_ts[blank_to_slow[ct]]==i:
+            state2write = 2
+        elif state2write==2 and ct<len(slow_to_fast) and flash_ts[slow_to_fast[ct]]==i:
+            state2write = 3
+        elif state2write==3 and ct<len(fast_to_solid) and flash_ts[fast_to_solid[ct]]==i:
+            state2write = 4
+        elif state2write==4 and state[i]==1:
+            state2write = 1
+            if ct+1<=len(blank_to_slow) and ct+1<=len(slow_to_fast) and ct+1<=len(fast_to_solid):
+                ct+=1
+                while flash_ts[blank_to_slow[ct]] < i:
+                    blank_to_slow.pop(0)
 
-    state[i]=state2write
+        state[i]=state2write
 
     data['seqLT_state'] = state
+
+    return data
+
+def preprocess_data(data, params):
+    data['position'] = interpolate_2D(data['position'], data['behavTime'], data['caTime'])
+    data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
+    
+    # Normalize values
+    data['normPosition'] = normalize(data['position'])
+    data['normVelocity'] = normalize(data['velocity'])
+
+    data['binaryData'], data['neuralData'] = binarize_ca_traces(data['rawData'],
+                                             z_threshold=params['z_threshold'],
+                                             sampling_frequency=params['sampling_frequency']
+                                             )
+    if 'tone' in data: # If contains tones
+        data['tone'] = interpolate_1D(data['tone'], data['behavTime'], data['caTime'])
+
+        if data['task'] == 'legoSeqLT':
+            data = extract_tone(data,params)
 
     return data

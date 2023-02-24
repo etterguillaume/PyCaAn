@@ -18,6 +18,9 @@ remove_inactivity: False # If true and data is binarized, will remove epochs whe
 speed_threshold: 5 # cm.s-1
 remove_immobility: False
 
+# seqLT params
+tone_threshold: .2
+
 # Data curation thresholds
 distance_travelled_threshold: 3000 #cm
 occupancy_frame_threshold: 20 # min number of frames per location
