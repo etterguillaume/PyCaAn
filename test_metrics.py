@@ -1,9 +1,19 @@
 #%% Imports
-from functions.analysis import reconstruction_accuracy
+#from functions.analysis import reconstruction_accuracy
 import torch
 from copy import deepcopy
 import matplotlib.pyplot as plt
+from sklearn.metrics import mutual_info_score, adjusted_mutual_info_score, normalized_mutual_info_score
 plt.style.use('plot_style.mplstyle')
+
+#%%
+activity=[0,0,0,0,0,0,1,1,1,0,0,0,0,0,0]
+bin_val=[1,1,1,2,2,2,3,3,3,4,4,4,5,5,5]
+
+MI = mutual_info_score(activity,bin_val); print(f'MI: {MI}')
+NMI = normalized_mutual_info_score(activity,bin_val); print(f'NMI: {NMI}')
+AMI = adjusted_mutual_info_score(activity,bin_val); print(f'AMI: {AMI}')
+
 
 #%% Generate data
 numNeurons = 100
