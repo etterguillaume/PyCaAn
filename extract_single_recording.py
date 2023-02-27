@@ -37,19 +37,28 @@ tuning_curves = extract_tuning_curves(data, params)
 # save tuning_curves and in one file
 #TODO extract fields
 
-#%% Test bimodality for mutual information, activity, stability etc etc
-
 #%% Extract tuning correlatins
 
 
 #%% Decode
 
 
-#%%
-# Save the data in a neat format!
-# TODO save region, age, etc etc
+##%
+# This file is to extract information across session
+# Define across what (days, vs regions, mice etc)
+
+#%% POOLED DATA ANALYSIS
+#TODO create new folder with pooled results
+
+#%% Test bimodality for mutual information, activity, stability etc etc
 
 
 
-#%%
-# Model w/ artificial agent
+#%% Chronic alignment (across days)
+# Using SFPs+ corrProj, pnrProj, meanProj; output identity matrix as dictionary?
+#TODO create new folder with alignment results
+
+#%% UMAP hyperalignment (across days, mice, regions)
+#TODO create new folder with hyperalignment results
+
+

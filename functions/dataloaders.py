@@ -7,6 +7,8 @@ def load_data(path):
     data = {}
     split_path = path.split(os.sep)
     split_name = split_path[-1].split('_')
+    
+    # Basic information
     data.update(
                 {
                 'day': int(split_name[-1]),
@@ -22,6 +24,7 @@ def load_data(path):
                 }
     )
 
+    # Extra conditions
     if 'dark' in split_name:
         data['darkness'] = True
     if '8Hz' in split_name:
@@ -41,7 +44,6 @@ def load_data(path):
                     'pnrProj': np.array(f.get('ms/PeakToNoiseProj')),
                     'meanProj':np.array(f.get('ms/meanFrame')),
                     'experiment':np.array(f.get('ms/Experiment')),
-                    'date':f.get('ms/dateNum')[0][0],
                     'SFPs':np.array(f.get('ms/SFPs')),
                     'caTime':np.array(f.get('ms/time'))[0]/1000, # convert ms->s
                     'rawData':np.array(f.get('ms/RawTraces')).T
