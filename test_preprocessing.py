@@ -6,8 +6,8 @@ plt.style.use('plot_style.mplstyle')
 
 #%% Import dependencies
 import yaml
-from functions.dataloaders import load_data
-from functions.signal_processing import preprocess_data
+#from .. import functions.dataloaders import load_data
+from ..functions.dataloaders import load_data
 
 #%% Load parameters
 with open('params.yaml','r') as file:
