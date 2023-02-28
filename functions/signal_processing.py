@@ -43,6 +43,21 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
     
     return velocity, running_ts
 
+def compute_distance_time(interpolated_position, velocity, caTime, speed_threshold):
+    elapsed_time = np.zeros(len(caTime))
+    traveled_distance = np.zeros(len(caTime))
+    time_counter=0
+    distance_counter=0
+    for i in range(1,len(velocity)):
+        if (velocity[i-1] <= speed_threshold) and (velocity[i] > speed_threshold):
+            time_counter += caTime[i]
+
+        if (velocity[i-1] > speed_threshold) and (velocity[i] <= speed_threshold):
+            time_counter = 0
+        elapsed_time[i] = time_counter
+    
+    return elapsed_time, traveled_distance
+
 def preprocess_data(data, params):
     data['position'] = interpolate_behavior(data['position'], data['behavTime'], data['caTime'])
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
