@@ -55,63 +55,63 @@ def extract_1D_tuning(binarized_trace, interpolated_var, inclusion_ts, var_lengt
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
     return AMI, occupancy_frames, active_frames_in_bin, tuning_curve
 
-def extract_tuning_curves(data,params):
-    np.random.seed(params['seed'])
-    numFrames = data['binaryData'].shape[0]
-    numNeurons = data['binaryData'].shape[1] 
-    tuning_data={}
+# def extract_tuning_curves(data,params):
+    
+#     numFrames = data['binaryData'].shape[0]
+#     numNeurons = data['binaryData'].shape[1] 
+#     tuning_data={}
     
     
     
     
     
-    if data['task']=='OF':
-        MI_pvalue = np.zeros(numNeurons)
-        tuning_curves = np.zeros(numNeurons)
-        for cell_i in range(numNeurons): #TODO extract all at the same time
-            AMI, occupancy, tuning_curves = extract_2D_tuning(data['binaryData'][:,cell_i],
-                                                              data['position'],
-                                                              data['running_ts'],
-                                                              var_length=45,
-                                                              params=params['bin_size'])
+#     if data['task']=='OF':
+#         MI_pvalue = np.zeros(numNeurons)
+#         tuning_curves = np.zeros(numNeurons)
+#         for cell_i in range(numNeurons): #TODO extract all at the same time
+#             AMI, occupancy, tuning_curves = extract_2D_tuning(data['binaryData'][:,cell_i],
+#                                                               data['position'],
+#                                                               data['running_ts'],
+#                                                               var_length=45,
+#                                                               params=params['bin_size'])
             
-        tuning_data.update({
-            'spatial': {
-            'MI': MI,
-            'PI_pvalue': MI_pvalue,
-            'tuning_curves': tuning_curves,
-            'occupancy':
-            }
-        })
+#         tuning_data.update({
+#             'spatial': {
+#             'MI': MI,
+#             'PI_pvalue': MI_pvalue,
+#             'tuning_curves': tuning_curves,
+#             'occupancy':
+#             }
+#         })
 
-    if data['task']=='legoOF':
-        spatial_tuning_data = extract_2D_tuning(data['binaryData'],
-                                        data['position'],
-                                        data['running_ts'],
-                                        var_length=50,
-                                        params=params['bin_size'])
-    if data['task']=='LT':
-        spatial_tuning_data = extract_1D_tuning(data['binaryData'],
-                                        data['position'],
-                                        data['running_ts'],
-                                        var_length=100,
-                                        params=params['bin_size'])
+#     if data['task']=='legoOF':
+#         spatial_tuning_data = extract_2D_tuning(data['binaryData'],
+#                                         data['position'],
+#                                         data['running_ts'],
+#                                         var_length=50,
+#                                         params=params['bin_size'])
+#     if data['task']=='LT':
+#         spatial_tuning_data = extract_1D_tuning(data['binaryData'],
+#                                         data['position'],
+#                                         data['running_ts'],
+#                                         var_length=100,
+#                                         params=params['bin_size'])
     
-    if data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
-        spatial_tuning_data = extract_1D_tuning(data['binaryData'],
-                                        data['position'],
-                                        data['running_ts'],
-                                        var_length=134,
-                                        params=params['bin_size'])
+#     if data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
+#         spatial_tuning_data = extract_1D_tuning(data['binaryData'],
+#                                         data['position'],
+#                                         data['running_ts'],
+#                                         var_length=134,
+#                                         params=params['bin_size'])
         
-    if data['task']=='legoToneLT':
-        #TODO tuning to tone vs reward?
+#     if data['task']=='legoToneLT':
+#         #TODO tuning to tone vs reward?
 
-    if data['task']=='legoToneLT':
-        #TODO tuning to reward
-        #TODO tuning to time
-        #TODO tuning to tone
+#     if data['task']=='legoToneLT':
+#         #TODO tuning to reward
+#         #TODO tuning to time
+#         #TODO tuning to tone
 
-    #TODO tuning to speed? time? direction?
+#     #TODO tuning to speed? time? direction?
     
-    return tuning_data
+#     return tuning_data
