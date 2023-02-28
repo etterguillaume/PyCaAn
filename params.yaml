@@ -1,13 +1,12 @@
 # General
-device: cpu # Preferred device to training. Supported: 'cuda' (nvidia), 'mps' (apple metal shaders). If not available, will revert back to cpu
 seed: 42
 
 # Paths
 path_to_dataset: ../../datasets/calcium_imaging
 path_to_results: /results
 
-# Experiment
-overwrite_data: True # If file is present, re-analyse?
+# Overwriting parameters
+overwrite_behavior: 'changes_only' # 'always', 'never', 'changes_only' for when params changed
 
 # Analysis parameters
 sampling_frequency: 30 # frames per second
@@ -31,14 +30,19 @@ min_num_neurons: 128 # Minimum number of neurons for a session to be included
 # Tuning curve computations
 temporalBinSize: 1
 spatialBinSize: 2.5
-max_cum_spatial_length: 536
-max_cum_temporal_length: 10
+max_seqLT_spatial_length: 536
+max_seqLT_temporal_length: 10
+
+# Tuning curve analysis
 #rate_map_smoothing_sigma: 2 # cm, sigma for gaussian smoothing, 0 for no smoothing
 rate_map_smoothing_size: 5 # cm, size for gaussian smoothing, 0 for no smoothing
 
+# Chance analysis
 num_surrogates: 1000 # Number of circular permutations
 
-# Chronic alignment parameters
+# Chronic alignment
+max_centroid_dist: 5 # maximum distance between cell centroids in µm
+min_spatial_corr: .65 # minimum spatial footprint correlation
 
 # Embeddings
 input_neurons: 128
@@ -47,7 +51,7 @@ train_set_selection: random # 'random', random frames. 'split', split recording 
 train_test_ratio: .8 # portion of recording used to train embedding model
 
 # UMAP-specific settings
-min_dist: .8
+min_dist: .8 # high values encourage smooth latents, low values encourage clustering
 n_neighbors: 30
 
 # Plotting
