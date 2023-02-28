@@ -10,8 +10,6 @@ jupyterlab
 matplotlib
 tqdm
 
-torch>=1.13.1
-torchvision>=0.14.1
 umap-learn==0.5
 tensorflow-macos
 tensorflow-probability

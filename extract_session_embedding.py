@@ -14,7 +14,7 @@ from functions.decoding import train_linear_decoder
 from functions.datasets import generateDataset, split_to_loaders
 from scipy.stats import pearsonr as corr
 
-from functions.analysis import analyze_binary_reconstruction, analyze_decoding
+from functions.metrics import analyze_binary_reconstruction, analyze_decoding
 
 import numpy as np
 from functions.plotting import plot_losses, plot_embedding_results_raw, plot_embedding_results_binary

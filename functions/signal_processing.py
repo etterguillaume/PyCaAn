@@ -50,20 +50,32 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
     
     return velocity, running_ts
 
+def extract_LT_direction(interpolated_position):
+    LT_direction=diff(interpolated_position)
+    LT_direction=np.append(LT_direction,0) # Add last missing datapoint
+    LT_direction[LT_direction>0] = 1
+    LT_direction[LT_direction<=0] = -1
+
+    return LT_direction
+
 def compute_distance_time(interpolated_position, velocity, caTime, speed_threshold):
     elapsed_time = np.zeros(len(caTime))
-    traveled_distance = np.zeros(len(caTime))
+    distance_travelled = np.zeros(len(caTime))
     time_counter=0
     distance_counter=0
     for i in range(1,len(velocity)):
-        if (velocity[i-1] <= speed_threshold) and (velocity[i] > speed_threshold):
-            time_counter += caTime[i]
+        if (velocity[i] > speed_threshold): # Start of locomotor trajectory
+            time_counter += caTime[i]-caTime[i-1]
+            distance_counter += sqrt((interpolated_position[i,0]-interpolated_position[i-1,0])**2 + (interpolated_position[i,1]-interpolated_position[i-1,1])**2) # Euclidean distance
 
-        if (velocity[i-1] > speed_threshold) and (velocity[i] <= speed_threshold):
-            time_counter = 0
+        if (velocity[i] <= speed_threshold): # End of locomotor trajectory
+            time_counter = 0 # Reset counter
+            distance_counter = 0
+
         elapsed_time[i] = time_counter
+        distance_travelled[i] = distance_counter
     
-    return elapsed_time, traveled_distance
+    return elapsed_time, distance_travelled
 
 def extract_tone(data, params):
     Fs = params['sampling_frequency']
@@ -155,17 +167,24 @@ def preprocess_data(data, params):
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
     
     # Normalize values
-    data['normPosition'] = normalize(data['position'])
-    data['normVelocity'] = normalize(data['velocity'])
+    #data['normPosition'] = normalize(data['position'])
+    #data['normVelocity'] = normalize(data['velocity'])
 
     data['binaryData'], data['neuralData'] = binarize_ca_traces(data['rawData'],
                                              z_threshold=params['z_threshold'],
                                              sampling_frequency=params['sampling_frequency']
-                                             )
-    if 'tone' in data: # If contains tones
+                                                 )
+    # Interpolate tone if present
+    if 'tone' in data:
         data['tone'] = interpolate_1D(data['tone'], data['behavTime'], data['caTime'])
 
-        if data['task'] == 'legoSeqLT':
-            data = extract_tone(data,params)
+    # Extract seqLT state if seqLT task
+    if data['task'] == 'legoSeqLT':
+        data = extract_tone(data,params)
+    else: # Otherwise, extract time/distance per trajectory
+        data['elapsed_time'], data['distance_travelled'] = compute_distance_time(data['position'], 
+                                                                                 data['velocity'], 
+                                                                                 data['caTime'], 
+                                                                                 params['speed_threshold'])
 
     return data

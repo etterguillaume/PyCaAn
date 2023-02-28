@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import sqrt
 import matplotlib.pyplot as plt
 import torch
 from scipy.stats import pearsonr as corr
@@ -35,21 +36,23 @@ def analyze_binary_reconstruction(params, model, data_loader):
 
     return accuracy, precision, recall, F1 
 
-def analyze_decoding(params, model, decoder, data_loader):
-    total_predictions = np.empty((0,2)) # For x and y position
-    total_positions = np.empty((0,2)) # For x and y position
-    for i, (x, position, _) in enumerate(data_loader):
-        device = torch.device(params['device'])
-        x = x.to(device)
-        with torch.no_grad():
-            _, embedding = model(x)
-            pred = decoder(embedding)
+def extract_decoding_error(actual,decoded):
+    decoding_error=[]
+    # Do something
+    return decoding_error
 
-        total_positions = np.append(total_positions, position.view(-1,2), axis=0)
-        total_predictions = np.append(total_predictions, pred.view(-1,2), axis=0)
+def extract_binary_stats(binary_data):
+    numFrames, numNeurons = binary_data.shape
+    trans_probability = []
+    prob_being_active = np.zeros(numNeurons)
 
-    decoding_error = np.linalg.norm(total_predictions-total_positions) # Euclidean distance #TODO test
+    for i in range(numNeurons):
+        prob_being_active[i] = np.sum(binary_data[:,i])/numFrames
+        
+    return prob_being_active, trans_probability
 
-    decoder_stats = corr(total_positions.flatten(),total_predictions.flatten())
-
-    return decoding_error, decoder_stats
+def extract_total_distance_travelled(interpolated_position):
+    total_distance_travelled = 0
+    for i in range(1,len(interpolated_position)):
+        total_distance_travelled += sqrt((interpolated_position[i,0]-interpolated_position[i-1,0])**2 + (interpolated_position[i,1]-interpolated_position[i-1,1])**2) # Euclidean distance
+    return total_distance_travelled

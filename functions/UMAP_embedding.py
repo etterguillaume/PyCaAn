@@ -9,7 +9,6 @@ from sklearn.linear_model import LinearRegression
 from scipy.stats import pearsonr as corr
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data
-import argparse
 
 #%% Load parameters
 with open('params.yaml','r') as file:
