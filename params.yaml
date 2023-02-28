@@ -21,16 +21,15 @@ remove_immobility: False
 tone_threshold: .2
 
 # Data curation thresholds
-distance_travelled_threshold: 3000 #cm
-occupancy_frame_threshold: 20 # min number of frames per location
+distance_travelled_threshold: 1000 # cm
+occupancy_frame_threshold: 10 # min number of frames per location
 portion_surface_covered_threshold: .8 # 0-1, default=1 (all bins explored)
-split_half_threshold: .3 # threshold for stability. Default = .3
-min_num_neurons: 128 # Minimum number of neurons for a session to be included
+input_neurons: 128 # Number of neurons to be used. Also minimum number required
 
 # Tuning curve computations
-temporalBinSize: 1
+temporalBinSize: .25
 spatialBinSize: 2.5
-max_seqLT_spatial_length: 536
+max_seqLT_distance_length: 100 # 536?
 max_seqLT_temporal_length: 10
 
 # Tuning curve analysis
@@ -45,7 +44,6 @@ max_centroid_dist: 5 # maximum distance between cell centroids in µm
 min_spatial_corr: .65 # minimum spatial footprint correlation
 
 # Embeddings
-input_neurons: 128
 embedding_dims: 2
 train_set_selection: random # 'random', random frames. 'split', split recording using train_test_ratio
 train_test_ratio: .8 # portion of recording used to train embedding model

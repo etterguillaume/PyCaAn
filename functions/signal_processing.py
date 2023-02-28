@@ -165,15 +165,11 @@ def extract_tone(data, params):
 def preprocess_data(data, params):
     data['position'] = interpolate_2D(data['position'], data['behavTime'], data['caTime'])
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
+    data['elapsed_time'], data['distance_travelled'] = compute_distance_time(data['position'], 
+                                                                             data['velocity'], 
+                                                                             data['caTime'], 
+                                                                             params['speed_threshold'])
     
-    # Normalize values
-    #data['normPosition'] = normalize(data['position'])
-    #data['normVelocity'] = normalize(data['velocity'])
-
-    data['binaryData'], data['neuralData'] = binarize_ca_traces(data['rawData'],
-                                             z_threshold=params['z_threshold'],
-                                             sampling_frequency=params['sampling_frequency']
-                                                 )
     # Interpolate tone if present
     if 'tone' in data:
         data['tone'] = interpolate_1D(data['tone'], data['behavTime'], data['caTime'])
@@ -181,10 +177,11 @@ def preprocess_data(data, params):
     # Extract seqLT state if seqLT task
     if data['task'] == 'legoSeqLT':
         data = extract_tone(data,params)
-    else: # Otherwise, extract time/distance per trajectory
-        data['elapsed_time'], data['distance_travelled'] = compute_distance_time(data['position'], 
-                                                                                 data['velocity'], 
-                                                                                 data['caTime'], 
-                                                                                 params['speed_threshold'])
+
+    # Extract binary data
+    data['binaryData'], data['neuralData'] = binarize_ca_traces(data['rawData'],
+                                             z_threshold=params['z_threshold'],
+                                             sampling_frequency=params['sampling_frequency']
+                                            )
 
     return data
