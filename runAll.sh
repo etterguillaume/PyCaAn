@@ -1,0 +1,2 @@
+python3 curate_dataset.py
+python3 extract_tuning_data.py

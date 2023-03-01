@@ -4,6 +4,7 @@ import os
 from tqdm import tqdm
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data
+from functions.metrics import extract_total_distance_travelled
 
 #%% Load YAML file
 with open('params.yaml','r') as file:
@@ -38,19 +39,21 @@ for region in regionList:
             if os.path.isfile(os.path.join(session_path,'ms.mat')) and os.path.isfile(os.path.join(session_path,'behav.mat')):
                 try:
                     data = load_data(session_path)
+                    data = preprocess_data(data, params)
                 except:
                     error_list.append(session_path)
                     print(f'Could not open {session_path}')
                 else: #TODO add other conditions, like num cells, neurons, overwrite, etc
                     numFrames, numNeurons = data['rawData'].shape
-                    if numNeurons>=params['input_neurons']
+                    distance_travelled=extract_total_distance_travelled(data['position'])
+                    if numNeurons>=params['input_neurons'] and distance_travelled>=params['distance_travelled_threshold']:
                         path_list.append(session_path)
                     else:
                         excluded_list.append(session_path)
 
 #%% Save list of sessions and stats in yaml files
 sessions_dict = {'sessions':path_list}
-with open('batchList.yaml','w') as file:
+with open('sessionList.yaml','w') as file:
     yaml.dump(sessions_dict,file)
 
 excluded_dict = {'sessions':excluded_list}

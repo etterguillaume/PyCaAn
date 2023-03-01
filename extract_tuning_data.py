@@ -30,8 +30,11 @@ for i, session in enumerate(tqdm(session_list)):
     # If subject folder does not exist, create it
     if not os.path.exists(os.path.join('output',data['region'],data['subject'])): # If folder does not exist, create it
         os.mkdir(os.path.join('output',data['region'],data['subject']))
+
+    if not os.path.exists(os.path.join('output',data['region'],data['subject'],data['task'])): # If folder does not exist, create it
+        os.mkdir(os.path.join('output',data['region'],data['subject'],data['task']))
     
-    working_directory = os.path.join('output',data['region'],data['subject'],str(data['day']))
+    working_directory = os.path.join('output',data['region'],data['subject'],data['task'],str(data['day']))
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
 
@@ -61,12 +64,12 @@ for i, session in enumerate(tqdm(session_list)):
                 'speed_threshold': params['speed_threshold']
         }
 
-    if not os.path.exists(os.path.join('output',data['region'],data['subject'],str(data['day']),'info.yaml')) or params['overwrite_mode']=='always':
+    if not os.path.exists(os.path.join(working_directory,'info.yaml')) or params['overwrite_mode']=='always':
         with open(os.path.join(working_directory,'info.yaml'),"w") as file:
             yaml.dump(info_dict,file)
 
     # Extract tuning to time
-    if not os.path.exists(os.path.join('output',data['region'],data['subject'],str(data['day']),'temporal_tuning.h5')) or params['overwrite_mode']=='always':
+    if not os.path.exists(os.path.join(working_directory,'temporal_tuning.h5')) or params['overwrite_mode']=='always':
         AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                             data['elapsed_time'],
                                                             data['running_ts'],
@@ -84,7 +87,7 @@ for i, session in enumerate(tqdm(session_list)):
                 f.create_dataset(k, data=v)
 
     # Extract tuning to distance
-    if not os.path.exists(os.path.join('output',data['region'],data['subject'],str(data['day']),'distance_tuning.h5')) or params['overwrite_mode']=='always':
+    if not os.path.exists(os.path.join(working_directory,'distance_tuning.h5')) or params['overwrite_mode']=='always':
         AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                             data['distance_travelled'],
                                                             data['running_ts'],
@@ -102,7 +105,7 @@ for i, session in enumerate(tqdm(session_list)):
                 f.create_dataset(k, data=v)
 
     # Extract tuning to velocity
-    if not os.path.exists(os.path.join('output',data['region'],data['subject'],str(data['day']),'velocity_tuning.h5')) or params['overwrite_mode']=='always':
+    if not os.path.exists(os.path.join(working_directory,'velocity_tuning.h5')) or params['overwrite_mode']=='always':
         AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                             data['velocity'],
                                                             data['running_ts'],
@@ -120,7 +123,7 @@ for i, session in enumerate(tqdm(session_list)):
                 f.create_dataset(k, data=v)
 
     # Extract spatial tuning
-    if not os.path.exists(os.path.join('output',data['region'],data['subject'],str(data['day']),'spatial_tuning.h5')) or params['overwrite_mode']=='always':
+    if not os.path.exists(os.path.join(working_directory,'spatial_tuning.h5')) or params['overwrite_mode']=='always':
         if data['task']=='OF':
             AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
                                                             data['position'],

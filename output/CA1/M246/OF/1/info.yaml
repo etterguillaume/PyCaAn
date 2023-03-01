@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: false
+day: '1'
+duration: 900.023
+numFrames: 26250
+numNeurons: 302
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M246
+task: OF
+total_distance_travelled: 6418.97119481768
