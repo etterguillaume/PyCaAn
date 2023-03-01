@@ -12,6 +12,7 @@ with open('params.yaml','r') as file:
 #%% Establish list of regions
 path_list = []
 error_list = []
+excluded_list = []
 regionList = os.listdir(params['path_to_dataset'])
 for i, folder in enumerate(regionList):
   if folder.startswith('.'):
@@ -41,12 +42,20 @@ for region in regionList:
                     error_list.append(session_path)
                     print(f'Could not open {session_path}')
                 else: #TODO add other conditions, like num cells, neurons, overwrite, etc
-                    path_list.append(session_path) 
+                    numFrames, numNeurons = data['rawData'].shape
+                    if numNeurons>=params['input_neurons']
+                        path_list.append(session_path)
+                    else:
+                        excluded_list.append(session_path)
 
 #%% Save list of sessions and stats in yaml files
 sessions_dict = {'sessions':path_list}
 with open('batchList.yaml','w') as file:
     yaml.dump(sessions_dict,file)
+
+excluded_dict = {'sessions':excluded_list}
+with open('excludedList.yaml','w') as file:
+    yaml.dump(excluded_dict,file)
 
 # Save files that could not be opened for reference
 error_file_dict = {'sessions':error_list}

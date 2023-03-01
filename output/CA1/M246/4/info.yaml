@@ -1,7 +1,7 @@
 age: 0
 condition: normal
 darkness: false
-day: 4
+day: '4'
 duration: 900.034
 numFrames: 26900
 numNeurons: 419

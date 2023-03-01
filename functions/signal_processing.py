@@ -151,7 +151,7 @@ def extract_tone(data, params):
             state2write = 4
         elif state2write==4 and state[i]==1:
             state2write = 1
-            if ct+1<=len(blank_to_slow) and ct+1<=len(slow_to_fast) and ct+1<=len(fast_to_solid):
+            if ct+1<len(blank_to_slow) and ct+1<len(slow_to_fast) and ct+1<len(fast_to_solid):
                 ct+=1
                 while flash_ts[blank_to_slow[ct]] < i:
                     blank_to_slow.pop(0)
