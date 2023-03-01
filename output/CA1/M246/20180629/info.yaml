@@ -1,10 +1,10 @@
 age: 0
 condition: normal
 darkness: false
-day: '20180621'
-duration: 900.058
-numFrames: 26988
-numNeurons: 307
+day: '20180629'
+duration: 900.028
+numFrames: 26987
+numNeurons: 191
 optoStim: false
 region: CA1
 rewards: true
@@ -12,4 +12,4 @@ sex: U
 speed_threshold: 5
 subject: M246
 task: legoOF
-total_distance_travelled: 10421.502908669043
+total_distance_travelled: 7568.073776986938

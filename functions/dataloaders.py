@@ -11,7 +11,7 @@ def load_data(path):
     # Basic information
     data.update(
                 {
-                'day': int(split_name[-1]),
+                'day': split_name[-1],
                 'task':split_name[1],
                 'subject':split_path[-2],
                 'region': split_path[-3],

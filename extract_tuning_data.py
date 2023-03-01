@@ -16,21 +16,29 @@ with open('params.yaml','r') as file:
 with open('batchList.yaml','r') as file:
     session_file = yaml.full_load(file)
 session_list = session_file['sessions']
-
+print(f'{len(session_list)} sessions to process')
 #session_list=['../../datasets/calcium_imaging/CA1/M246/M246_legoOF_20180621']
 
-for session in tqdm(session_list):
-    data = load_data(session_list[session])
+#%%
+for i, session in enumerate(tqdm(session_list)):
+    data = load_data(session)
 
-    #%% Create folder if it does not exist
+    # If region folder does not exist, create it
+    if not os.path.exists(os.path.join('output',data['region'])): # If folder does not exist, create it
+        os.mkdir(os.path.join('output',data['region']))
+
+    # If subject folder does not exist, create it
+    if not os.path.exists(os.path.join('output',data['region'],data['subject'])): # If folder does not exist, create it
+        os.mkdir(os.path.join('output',data['region'],data['subject']))
+    
     working_directory = os.path.join('output',data['region'],data['subject'],str(data['day']))
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
 
-    #%% Pre-process data
+    # Pre-process data
     data=preprocess_data(data,params)
 
-    #%% Save basic info
+    # Save basic info
     numFrames, numNeurons = data['rawData'].shape
     total_distance_travelled = extract_total_distance_travelled(data['position'])
     info_dict = {
@@ -58,7 +66,7 @@ for session in tqdm(session_list):
     with open(os.path.join(working_directory,'info.yaml'),"w") as file:
         yaml.dump(info_dict,file)
 
-    #%% Extract tuning to time
+    # Extract tuning to time
     AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                         data['elapsed_time'],
                                                         data['running_ts'],
@@ -74,7 +82,7 @@ for session in tqdm(session_list):
         for k, v in data_dict.items():
             f.create_dataset(k, data=v)
 
-    #%% Extract tuning to distance
+    # Extract tuning to distance
     AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                         data['distance_travelled'],
                                                         data['running_ts'],
@@ -91,7 +99,7 @@ for session in tqdm(session_list):
         for k, v in data_dict.items():
             f.create_dataset(k, data=v)
 
-    #%% Extract tuning to velocity
+    # Extract tuning to velocity
     AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                         data['velocity'],
                                                         data['running_ts'],
@@ -108,7 +116,7 @@ for session in tqdm(session_list):
         for k, v in data_dict.items():
             f.create_dataset(k, data=v)
 
-    #%% Extract spatial tuning
+    # Extract spatial tuning
     if data['task']=='OF':
         AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
                                                         data['position'],
@@ -125,14 +133,14 @@ for session in tqdm(session_list):
 
     elif data['task']=='LT':
         AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                        data['position'],
+                                                        data['position'][:,0],
                                                         data['running_ts'],
                                                         var_length=100,
                                                         bin_size=params['spatialBinSize'])
         
     elif data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
         AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                        data['position'],
+                                                        data['position'][:,0],
                                                         data['running_ts'],
                                                         var_length=134,
                                                         bin_size=params['spatialBinSize'])
@@ -147,28 +155,28 @@ for session in tqdm(session_list):
         for k, v in data_dict.items():
             f.create_dataset(k, data=v)
 
-    #%% Extract direction tuning
+    # Extract direction tuning
     # if data['task']=='legoOF' or data['task']=='OF':
     #     HD=[] # TODO extract head direction tuning?
 
-    if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-        AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                        data['LT_direction'],
-                                                        data['running_ts'],
-                                                        var_length=2,
-                                                        bin_size=1)
+    # if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+    #     AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+    #                                                     data['LT_direction'],
+    #                                                     data['running_ts'],
+    #                                                     var_length=2,
+    #                                                     bin_size=1)
 
-    data_dict={
-        'AMI':AMI,
-        'occupancy_frames': occupancy_frames,
-        'active_frames_in_bin': active_frames_in_bin,
-        'tuning_curves': tuning_curves
-    }
-    with h5py.File(os.path.join(working_directory,'direction_tuning.h5'),'w') as f:
-        for k, v in data_dict.items():
-            f.create_dataset(k, data=v)
+    # data_dict={
+    #     'AMI':AMI,
+    #     'occupancy_frames': occupancy_frames,
+    #     'active_frames_in_bin': active_frames_in_bin,
+    #     'tuning_curves': tuning_curves
+    # }
+    # with h5py.File(os.path.join(working_directory,'direction_tuning.h5'),'w') as f:
+    #     for k, v in data_dict.items():
+    #         f.create_dataset(k, data=v)
 
-    #%% Extract tuning to tone
+    # Extract tuning to tone
     # if data['task'] == 'legoToneLT':
     #     AMI, occupancy, tuning_curves = extract_1D_tuning(data['binaryData'],
     #                                                     data['tone'],
@@ -187,3 +195,12 @@ for session in tqdm(session_list):
 
     # TODO check if folder exists, check if params['overwrite'] is 'changes_only', 'always' or 'never'
     # TODO if exists, check results contents. If params_old==params_new, decide whether overwrite
+    
+    # Update batchfile to remove processed file
+
+    session_list.pop(i)
+    sessions_dict = {'sessions':session_list}
+    with open('batchList.yaml','w') as file:
+        yaml.dump(sessions_dict,file)
+    
+# %%

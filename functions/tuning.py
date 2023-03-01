@@ -1,4 +1,5 @@
 import numpy as np
+np.seterr(divide='ignore', invalid='ignore') # Ignore zero divide warnings
 from sklearn.metrics import adjusted_mutual_info_score
 
 def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size):

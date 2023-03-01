@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: false
+day: '20180717'
+duration: 600.004
+numFrames: 17992
+numNeurons: 125
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M246
+task: legoLT
+total_distance_travelled: 4644.127256221458

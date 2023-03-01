@@ -1,19 +1,17 @@
-#%%
-%load_ext autoreload
-%autoreload 2
-
 #%% Imports
 import yaml
 import os
-import tqdm
+from tqdm import tqdm
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data
 
 #%% Load YAML file
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
+
 #%% Establish list of regions
-sessionList = []
+path_list = []
+error_list = []
 regionList = os.listdir(params['path_to_dataset'])
 for i, folder in enumerate(regionList):
   if folder.startswith('.'):
@@ -28,7 +26,7 @@ for region in regionList:
         if folder.startswith('.'):
             subjectList.pop(i)
     numSubjects.update({region:len(subjectList)})
-    for subject in subjectList:
+    for subject in tqdm(subjectList):
         sessionList=os.listdir(os.path.join(params['path_to_dataset'],region, subject))
         for i, folder in enumerate(sessionList):
             if folder.startswith('.'):
@@ -37,14 +35,23 @@ for region in regionList:
         for session in sessionList:
             session_path = os.path.join(params['path_to_dataset'],region,subject,session)
             if os.path.isfile(os.path.join(session_path,'ms.mat')) and os.path.isfile(os.path.join(session_path,'behav.mat')):
-                sessionList.append(session_path)#TODO add other conditions, like num cells, neurons, etc
-            else:
-                break
+                try:
+                    data = load_data(session_path)
+                except:
+                    error_list.append(session_path)
+                    print(f'Could not open {session_path}')
+                else: #TODO add other conditions, like num cells, neurons, overwrite, etc
+                    path_list.append(session_path) 
 
 #%% Save list of sessions and stats in yaml files
-sessions_dict = {'sessions':sessionList}
+sessions_dict = {'sessions':path_list}
 with open('batchList.yaml','w') as file:
     yaml.dump(sessions_dict,file)
+
+# Save files that could not be opened for reference
+error_file_dict = {'sessions':error_list}
+with open('errorFileList.yaml','w') as file:
+    yaml.dump(error_file_dict,file)
                 
 dataset_stats_dict = {'numRegions': numRegions, 
                       'numSubjects': numSubjects, 
@@ -52,6 +59,3 @@ dataset_stats_dict = {'numRegions': numRegions,
 
 with open('output/dataset_stats.yaml','w') as file:
     yaml.dump(dataset_stats_dict,file)
-
-# %%
-session
