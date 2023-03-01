@@ -1,0 +1,15 @@
+age: 0
+condition: AD
+darkness: false
+day: '20180720'
+duration: 600.006
+numFrames: 17991
+numNeurons: 178
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M289
+task: legoLT
+total_distance_travelled: 2907.4995879656585

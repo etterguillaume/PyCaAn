@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: false
+day: '20190301'
+duration: 599.999
+numFrames: 17992
+numNeurons: 158
+optoStim: scrambled
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M988
+task: legoToneLT
+total_distance_travelled: 1173.3434707400459

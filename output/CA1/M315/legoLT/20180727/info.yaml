@@ -1,0 +1,15 @@
+age: 0
+condition: AD
+darkness: false
+day: '20180727'
+duration: 600.055
+numFrames: 17990
+numNeurons: 343
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M315
+task: legoLT
+total_distance_travelled: 2274.0522554779304

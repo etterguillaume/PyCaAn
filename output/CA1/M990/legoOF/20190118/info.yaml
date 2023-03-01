@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: false
+day: '20190118'
+duration: 600.019
+numFrames: 17980
+numNeurons: 528
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M990
+task: legoOF
+total_distance_travelled: 2777.9150438038905

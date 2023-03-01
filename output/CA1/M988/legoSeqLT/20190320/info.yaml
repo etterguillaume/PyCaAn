@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: false
+day: '20190320'
+duration: 599.971
+numFrames: 17990
+numNeurons: 188
+optoStim: 8Hz
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M988
+task: legoSeqLT
+total_distance_travelled: 2214.4103783298465

@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: false
+day: '20190226'
+duration: 600.044
+numFrames: 17993
+numNeurons: 507
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M990
+task: legoToneLT
+total_distance_travelled: 3228.4997582504443

@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: true
+day: '20190208'
+duration: 600.034
+numFrames: 17989
+numNeurons: 234
+optoStim: scrambled
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M986
+task: legoLT
+total_distance_travelled: 1137.1671122726673

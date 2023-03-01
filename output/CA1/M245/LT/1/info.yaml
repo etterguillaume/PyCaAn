@@ -1,0 +1,15 @@
+age: 0
+condition: AD
+darkness: false
+day: '1'
+duration: 899.988
+numFrames: 26871
+numNeurons: 165
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M245
+task: LT
+total_distance_travelled: 3468.5482739351496

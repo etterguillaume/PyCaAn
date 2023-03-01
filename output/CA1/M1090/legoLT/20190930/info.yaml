@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: false
+day: '20190930'
+duration: 599.969
+numFrames: 17991
+numNeurons: 168
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M1090
+task: legoLT
+total_distance_travelled: 4027.078951086132

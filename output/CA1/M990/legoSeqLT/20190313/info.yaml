@@ -1,0 +1,15 @@
+age: 0
+condition: normal
+darkness: false
+day: '20190313'
+duration: 599.965
+numFrames: 17991
+numNeurons: 461
+optoStim: false
+region: CA1
+rewards: true
+sex: U
+speed_threshold: 5
+subject: M990
+task: legoSeqLT
+total_distance_travelled: 3295.786034077534
