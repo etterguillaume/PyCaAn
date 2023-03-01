@@ -53,8 +53,8 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
 def extract_LT_direction(interpolated_position):
     LT_direction=diff(interpolated_position)
     LT_direction=np.append(LT_direction,0) # Add last missing datapoint
-    LT_direction[LT_direction>0] = 1
-    LT_direction[LT_direction<=0] = -1
+    LT_direction[LT_direction>0] = 1.5
+    LT_direction[LT_direction<=0] = .5
 
     return LT_direction
 
@@ -169,6 +169,9 @@ def preprocess_data(data, params):
                                                                              data['velocity'], 
                                                                              data['caTime'], 
                                                                              params['speed_threshold'])
+    
+    if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+        data['LT_direction'] = extract_LT_direction(data['position'])
     
     # Interpolate tone if present
     if 'tone' in data:
