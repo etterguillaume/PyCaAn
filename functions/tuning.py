@@ -8,8 +8,8 @@ def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
     binaryData = binaryData[inclusion_ts]
     interpolated_var = interpolated_var[inclusion_ts]
     numFrames, numNeurons = binaryData.shape
-    active_frames_in_bin = np.zeros((numNeurons,len(Y_bin_vector)-1,len(X_bin_vector)-1))
-    occupancy_frames = np.zeros((len(Y_bin_vector)-1,len(X_bin_vector)-1))
+    active_frames_in_bin = np.zeros((numNeurons,len(Y_bin_vector)-1,len(X_bin_vector)-1), dtype=int)
+    occupancy_frames = np.zeros((len(Y_bin_vector)-1,len(X_bin_vector)-1), dtype=int)
     AMI = np.zeros(numNeurons)
 
     # Compute occupancy
