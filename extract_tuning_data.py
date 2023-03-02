@@ -17,7 +17,6 @@ with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as fil
     session_file = yaml.full_load(file)
 session_list = session_file['sessions']
 print(f'{len(session_list)} sessions to process')
-#session_list=['../../datasets/calcium_imaging/CA1/M246/M246_legoOF_20180621']
 
 #%%
 for i, session in enumerate(tqdm(session_list)):
@@ -75,16 +74,12 @@ for i, session in enumerate(tqdm(session_list)):
                                                             data['running_ts'],
                                                             var_length=params['max_temporal_length'],
                                                             bin_size=params['temporalBinSize'])
-        data_dict={
-            'AMI':AMI,
-            'occupancy_frames': occupancy_frames,
-            'active_frames_in_bin': active_frames_in_bin,
-            'tuning_curves': tuning_curves
-        }
 
         with h5py.File(os.path.join(working_directory,'temporal_tuning.h5'),'w') as f:
-            for k, v in data_dict.items():
-                f.create_dataset(k, data=v)
+            f.create_dataset('AMI', data=AMI)
+            f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+            f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+            f.create_dataset('tuning_curves', data=tuning_curves)
 
     # Extract tuning to distance
     if not os.path.exists(os.path.join(working_directory,'distance_tuning.h5')) or params['overwrite_mode']=='always':
@@ -94,15 +89,11 @@ for i, session in enumerate(tqdm(session_list)):
                                                             var_length=params['max_distance_length'],
                                                             bin_size=params['spatialBinSize'])
 
-        data_dict={
-            'AMI':AMI,
-            'occupancy_frames': occupancy_frames,
-            'active_frames_in_bin': active_frames_in_bin,
-            'tuning_curves': tuning_curves
-        }
         with h5py.File(os.path.join(working_directory,'distance_tuning.h5'),'w') as f:
-            for k, v in data_dict.items():
-                f.create_dataset(k, data=v)
+            f.create_dataset('AMI', data=AMI)
+            f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+            f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+            f.create_dataset('tuning_curves', data=tuning_curves)
 
     # Extract tuning to velocity
     if not os.path.exists(os.path.join(working_directory,'velocity_tuning.h5')) or params['overwrite_mode']=='always':
@@ -112,15 +103,11 @@ for i, session in enumerate(tqdm(session_list)):
                                                             var_length=params['max_velocity_length'],
                                                             bin_size=params['velocityBinSize'])
 
-        data_dict={
-            'AMI':AMI,
-            'occupancy_frames': occupancy_frames,
-            'active_frames_in_bin': active_frames_in_bin,
-            'tuning_curves': tuning_curves
-        }
         with h5py.File(os.path.join(working_directory,'velocity_tuning.h5'),'w') as f:
-            for k, v in data_dict.items():
-                f.create_dataset(k, data=v)
+            f.create_dataset('AMI', data=AMI)
+            f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+            f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+            f.create_dataset('tuning_curves', data=tuning_curves)
 
     # Extract spatial tuning
     if not os.path.exists(os.path.join(working_directory,'spatial_tuning.h5')) or params['overwrite_mode']=='always':
@@ -152,15 +139,11 @@ for i, session in enumerate(tqdm(session_list)):
                                                             var_length=134,
                                                             bin_size=params['spatialBinSize'])
             
-        data_dict={
-            'AMI':AMI,
-            'occupancy_frames': occupancy_frames,
-            'active_frames_in_bin': active_frames_in_bin,
-            'tuning_curves': tuning_curves
-        }
         with h5py.File(os.path.join(working_directory,'spatial_tuning.h5'),'w') as f:
-            for k, v in data_dict.items():
-                f.create_dataset(k, data=v)
+            f.create_dataset('AMI', data=AMI)
+            f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+            f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+            f.create_dataset('tuning_curves', data=tuning_curves)
 
     # Extract direction tuning
     # if data['task']=='legoOF' or data['task']=='OF':
