@@ -24,17 +24,17 @@ for i, session in enumerate(tqdm(session_list)):
     data = load_data(session)
 
     # If region folder does not exist, create it
-    if not os.path.exists(os.path.join('output',data['region'])): # If folder does not exist, create it
-        os.mkdir(os.path.join('output',data['region']))
+    if not os.path.exists(os.path.join(params['path_to_results'],data['region'])): # If folder does not exist, create it
+        os.mkdir(os.path.join(params['path_to_results'],data['region']))
 
     # If subject folder does not exist, create it
-    if not os.path.exists(os.path.join('output',data['region'],data['subject'])): # If folder does not exist, create it
-        os.mkdir(os.path.join('output',data['region'],data['subject']))
+    if not os.path.exists(os.path.join(params['path_to_results'],data['region'],data['subject'])): # If folder does not exist, create it
+        os.mkdir(os.path.join(params['path_to_results'],data['region'],data['subject']))
 
-    if not os.path.exists(os.path.join('output',data['region'],data['subject'],data['task'])): # If folder does not exist, create it
-        os.mkdir(os.path.join('output',data['region'],data['subject'],data['task']))
+    if not os.path.exists(os.path.join(params['path_to_results'],data['region'],data['subject'],data['task'])): # If folder does not exist, create it
+        os.mkdir(os.path.join(params['path_to_results'],data['region'],data['subject'],data['task']))
     
-    working_directory = os.path.join('output',data['region'],data['subject'],data['task'],str(data['day']))
+    working_directory = os.path.join(params['path_to_results'],data['region'],data['subject'],data['task'],str(data['day']))
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
 
