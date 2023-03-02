@@ -25,6 +25,10 @@ def binarize_ca_traces(ca_traces, z_threshold, sampling_frequency): #TODO MAKE S
 
 def interpolate_2D(signal, behav_time, ca_time):
     interpolated_signal = np.zeros((len(ca_time),2))
+    nan_vec = np.isnan(np.sum(signal,axis=1))
+    if nan_vec is not None: # Remove nans to interpolate
+        behav_time=behav_time[~nan_vec]
+        signal=signal[~nan_vec]
     interp_func_x = interp1d(behav_time, signal[:,0], fill_value="extrapolate")
     interp_func_y = interp1d(behav_time, signal[:,1], fill_value="extrapolate")
     interpolated_signal[:,0] = interp_func_x(ca_time)   # use interpolation function returned by `interp1d`
@@ -34,6 +38,10 @@ def interpolate_2D(signal, behav_time, ca_time):
 
 def interpolate_1D(signal, behav_time, ca_time):
     interpolated_signal = np.zeros((len(ca_time),2))
+    nan_vec = np.isnan(signal)
+    if nan_vec is not None: # Remove nans to interpolate
+        behav_time=behav_time[~nan_vec]
+        signal=signal[~nan_vec]
     interp_func_x = interp1d(behav_time, signal, fill_value="extrapolate")
     interpolated_signal = interp_func_x(ca_time)   # use interpolation function returned by `interp1d`
     

@@ -38,17 +38,14 @@ def load_data(path):
 
     try: # If recent MATLAB format
         f = h5py.File(path + '/ms.mat','r')
-        data.update(
-                    {
+        data.update({
                     'corrProj':np.array(f.get('ms/CorrProj')),
                     'pnrProj': np.array(f.get('ms/PeakToNoiseProj')),
                     'meanProj':np.array(f.get('ms/meanFrame')),
                     'experiment':np.array(f.get('ms/Experiment')),
                     'SFPs':np.array(f.get('ms/SFPs')),
                     'caTime':np.array(f.get('ms/time'))[0]/1000, # convert ms->s
-                    'rawData':np.array(f.get('ms/RawTraces')).T
-                    }
-                    )
+                    'rawData':np.array(f.get('ms/RawTraces')).T})
     except: # If legacy MATLAB format
         f = sio.loadmat(path + '/ms.mat')
         data.update(
@@ -81,13 +78,24 @@ def load_data(path):
 
     except:
         f = sio.loadmat(path + '/behav.mat')
-        data.update(
-                    { # Note that older files do not have background/tones
-                    'position':f['behav']['position'][0][0],
-                    'behavTime':f['behav']['time'][0][0].T[0]/1000,
-                    'mazeWidth_px':f['behav']['width'][0][0],
-                    'mazeWidth_cm':f['behav']['trackLength'][0][0],
-                    }
-                    )
+        try: # If old format
+            data.update(
+                        { # Note that older files do not have background/tones
+                        'position':f['behav']['position'][0][0],
+                        'behavTime':f['behav']['time'][0][0].T[0]/1000,
+                        'mazeWidth_px':f['behav']['width'][0][0],
+                        'mazeWidth_cm':f['behav']['trackLength'][0][0],
+                        }
+                        )
+        except: # else must be recent Deeplabcut output
+            data.update(
+                        { # Note that older files do not have background/tones
+                        'position':f['behav']['ledPosition'][0][0], # Use LED to match older recordings
+                        'headDirection':f['behav']['headDirection'][0][0][0],
+                        'behavTime':f['behav']['time'][0][0][0]/1000,
+                        'mazeWidth_cm':f['behav']['width'][0][0],
+                        'mazeWidth_px':f['behav']['width'][0][0]/f['behav']['cmPerPixels'][0][0]
+                        }
+                        )
 
     return data
