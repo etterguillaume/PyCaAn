@@ -53,21 +53,21 @@ for region in regionList:
 
 #%% Save list of sessions and stats in yaml files
 sessions_dict = {'sessions':path_list}
-with open('sessionList.yaml','w') as file:
+with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'w') as file:
     yaml.dump(sessions_dict,file)
 
 excluded_dict = {'sessions':excluded_list}
-with open('excludedList.yaml','w') as file:
+with open(os.path.join(params['path_to_results'],'excludedList.yaml'),'w') as file:
     yaml.dump(excluded_dict,file)
 
 # Save files that could not be opened for reference
 error_file_dict = {'sessions':error_list}
-with open('errorFileList.yaml','w') as file:
+with open(os.path.join(params['path_to_results'],'errorFileList.yaml'),'w') as file:
     yaml.dump(error_file_dict,file)
                 
 dataset_stats_dict = {'numRegions': numRegions, 
                       'numSubjects': numSubjects, 
                       'numSessions': numSessions}
 
-with open('output/dataset_stats.yaml','w') as file:
+with open(os.path.join(params['path_to_results'],'dataset_stats.yaml'),'w') as file:
     yaml.dump(dataset_stats_dict,file)

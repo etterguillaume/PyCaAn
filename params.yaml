@@ -3,7 +3,7 @@ seed: 42
 
 # Paths
 path_to_dataset: ../../datasets/calcium_imaging
-path_to_results: ../../results
+path_to_results: ../../output
 
 # Overwriting parameters
 overwrite_mode: 'changes_only' # 'always', 'never', 'changes_only' for when params changed

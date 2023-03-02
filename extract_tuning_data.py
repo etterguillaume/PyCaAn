@@ -13,7 +13,7 @@ with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Load folders to analyze from yaml file?
-with open('sessionList.yaml','r') as file:
+with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
     session_file = yaml.full_load(file)
 session_list = session_file['sessions']
 print(f'{len(session_list)} sessions to process')
