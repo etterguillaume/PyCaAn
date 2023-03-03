@@ -3,7 +3,7 @@ import yaml
 import os
 from tqdm import tqdm
 from functions.dataloaders import load_data
-from functions.signal_processing import preprocess_data
+from functions.signal_processing import preprocess_data, extract_tone
 from functions.tuning import extract_1D_tuning, extract_2D_tuning
 from functions.metrics import extract_total_distance_travelled
 import h5py
@@ -22,18 +22,18 @@ print(f'{len(session_list)} sessions to process')
 for i, session in enumerate(tqdm(session_list)):
     data = load_data(session)
 
-    # If region folder does not exist, create it
-    if not os.path.exists(os.path.join(params['path_to_results'],data['region'])): # If folder does not exist, create it
-        os.mkdir(os.path.join(params['path_to_results'],data['region']))
+    # If tuning_data folder does not exist, create it
+    if not os.path.exists(params['path_to_results']):
+       os.mkdir(params['path_to_results'])
+    if not os.path.exists(os.path.join(params['path_to_results'],'tuning_data')):
+       os.mkdir(os.path.join(params['path_to_results'],'tuning_data'))
 
-    # If subject folder does not exist, create it
-    if not os.path.exists(os.path.join(params['path_to_results'],data['region'],data['subject'])): # If folder does not exist, create it
-        os.mkdir(os.path.join(params['path_to_results'],data['region'],data['subject']))
-
-    if not os.path.exists(os.path.join(params['path_to_results'],data['region'],data['subject'],data['task'])): # If folder does not exist, create it
-        os.mkdir(os.path.join(params['path_to_results'],data['region'],data['subject'],data['task']))
-    
-    working_directory = os.path.join(params['path_to_results'],data['region'],data['subject'],data['task'],str(data['day']))
+    # Create folder with convention (e.g. CA1_M246_LT_2017073)
+    working_directory=os.path.join( 
+        params['path_to_results'],
+        'tuning_data',
+        f"{data['region']}_{data['subject']}_{data['task']}_{data['day']}" 
+        )
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
 
@@ -148,44 +148,58 @@ for i, session in enumerate(tqdm(session_list)):
     # Extract direction tuning
     # if data['task']=='legoOF' or data['task']=='OF':
     #     HD=[] # TODO extract head direction tuning?
+    try:
+        if not os.path.exists(os.path.join(working_directory,'direction_tuning.h5')) or params['overwrite_mode']=='always':
+            if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+                AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                                data['LT_direction'],
+                                                                data['running_ts'],
+                                                                var_length=2,
+                                                                bin_size=1)
+                
+            with h5py.File(os.path.join(working_directory,'direction_tuning.h5'),'w') as f:
+                f.create_dataset('AMI', data=AMI)
+                f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+                f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+                f.create_dataset('tuning_curves', data=tuning_curves)
+    except:
+        print('Could not extract tuning to direction')
 
-    # if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-    #     AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-    #                                                     data['LT_direction'],
-    #                                                     data['running_ts'],
-    #                                                     var_length=2,
-    #                                                     bin_size=1)
-
-    # data_dict={
-    #     'AMI':AMI,
-    #     'occupancy_frames': occupancy_frames,
-    #     'active_frames_in_bin': active_frames_in_bin,
-    #     'tuning_curves': tuning_curves
-    # }
-    # with h5py.File(os.path.join(working_directory,'direction_tuning.h5'),'w') as f:
-    #     for k, v in data_dict.items():
-    #         f.create_dataset(k, data=v)
 
     # Extract tuning to tone
-    # if data['task'] == 'legoToneLT':
-    #     AMI, occupancy, tuning_curves = extract_1D_tuning(data['binaryData'],
-    #                                                     data['tone'],
-    #                                                     data['running_ts'],
-    #                                                     var_length=#TODO,
-    #                                                     bin_size=#TODO
-    #                                                     )
-        
-    # if data['task'] == 'legoSeqLT':
-    #     AMI, occupancy, tuning_curves = extract_1D_tuning(data['binaryData'],
-    #                                                     data['tone'],
-    #                                                     data['running_ts'],
-    #                                                     var_length=4,
-    #                                                     bin_size=1
-    #                                                     )
+    try:
+        if data['task'] == 'legoToneLT':
+            if not os.path.exists(os.path.join(working_directory,'tone_tuning.h5')) or params['overwrite_mode']=='always':
+            #TODO convert tone into discrete data (.5, 1.5)
+                AMI, occupancy, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                                data['tone'],
+                                                                data['running_ts'],
+                                                                var_length=2,
+                                                                bin_size=1
+                                                                )
+                with h5py.File(os.path.join(working_directory,'tone_tuning.h5'),'w') as f:
+                    f.create_dataset('AMI', data=AMI)
+                    f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+                    f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+                    f.create_dataset('tuning_curves', data=tuning_curves)
+            
+        elif data['task'] == 'legoSeqLT':
+           if not os.path.exists(os.path.join(working_directory,'seqTone_tuning.h5')) or params['overwrite_mode']=='always':
+                data = extract_tone(data,params)
+                AMI, occupancy, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                                data['legotone'],
+                                                                data['running_ts'],
+                                                                var_length=4,
+                                                                bin_size=1
+                                                                )
+                
+                with h5py.File(os.path.join(working_directory,'seqTone_tuning.h5'),'w') as f:
+                    f.create_dataset('AMI', data=AMI)
+                    f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+                    f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+                    f.create_dataset('tuning_curves', data=tuning_curves)
 
-    # TODO check if folder exists, check if params['overwrite'] is 'changes_only', 'always' or 'never'
-    # TODO if exists, check results contents. If params_old==params_new, decide whether overwrite
-    
-    # Update batchfile to remove processed file
+    except:
+        print('Could not extract tuning to tone')
     
 # %%

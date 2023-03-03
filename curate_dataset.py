@@ -52,6 +52,9 @@ for region in regionList:
                         excluded_list.append(session_path)
 
 #%% Save list of sessions and stats in yaml files
+if not os.path.exists(params['path_to_results']):
+    os.mkdir(params['path_to_results'])
+
 sessions_dict = {'sessions':path_list}
 with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'w') as file:
     yaml.dump(sessions_dict,file)

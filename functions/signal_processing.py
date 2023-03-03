@@ -4,6 +4,7 @@ import numpy as np
 from numpy import diff
 from numpy import std
 from numpy import sqrt
+from scipy.stats import zscore
 
 def normalize(data): # Normalize between 0-1
     return (data - np.min(data)) / (np.max(data) - np.min(data))
@@ -36,13 +37,13 @@ def interpolate_2D(signal, behav_time, ca_time):
     
     return interpolated_signal
 
-def interpolate_1D(signal, behav_time, ca_time):
+def interpolate_1D(signal, behav_time, ca_time, kind='nearest'):
     interpolated_signal = np.zeros((len(ca_time),2))
     nan_vec = np.isnan(signal)
     if nan_vec is not None: # Remove nans to interpolate
         behav_time=behav_time[~nan_vec]
         signal=signal[~nan_vec]
-    interp_func_x = interp1d(behav_time, signal, fill_value="extrapolate")
+    interp_func_x = interp1d(behav_time, signal, kind=kind, fill_value="extrapolate")
     interpolated_signal = interp_func_x(ca_time)   # use interpolation function returned by `interp1d`
     
     return interpolated_signal
@@ -86,83 +87,49 @@ def compute_distance_time(interpolated_position, velocity, caTime, speed_thresho
     return elapsed_time, distance_travelled
 
 def extract_tone(data, params):
-    Fs = params['sampling_frequency']
     tone = data['tone']
-    threshold = params['tone_threshold']
+    state=np.zeros(tone.shape,dtype=int)
+    window=params['sampling_frequency']*2
+    half_window, remainder=divmod(window,2) # divide by 2, get remainder
+    init_seg = tone[0:half_window] # pad by copying beggining
+    end_seg = tone[-1-half_window+remainder:-1] # pad by copying end
 
-    # Init vectors 
-    binary_signal = np.zeros_like(tone)
+    padded_tone = np.concatenate((init_seg,tone,end_seg))
 
-    binary_signal[tone>threshold]=1
-    onset_signal = diff(binary_signal)
-    onset_signal = np.append(onset_signal,0)
-    flash_ts = np.where(onset_signal==1)[0]
-    flash_int = diff(flash_ts/Fs)
-    flash_int = np.append(flash_int,0)
-    flash_freq = 1./flash_int
+    min_vec = np.zeros(len(tone))
+    max_vec = np.zeros(len(tone))
+    sum_vec = np.zeros(len(tone))
+    median_vec = np.zeros(len(tone))
 
-    # Create lists of transitions
-    blank_to_slow=[]
-    slow_to_fast=[]
-    fast_to_solid=[]
+    for i in range(len(tone)):
+        min_vec[i:i+window]=np.min(padded_tone[i:i+window])
+        max_vec[i:i+window]=np.max(padded_tone[i:i+window])
+        sum_vec[i:i+window]=np.sum(padded_tone[i:i+window])
+        median_vec[i:i+window]=np.median(padded_tone[i:i+window])
 
-    # First stim is obvious from deriv data
-    blank_to_slow.append(0)
+    sum_minus_median_zvec = zscore(sum_vec-median_vec)
+    min_minus_median_zvec = zscore(min_vec-median_vec)
+    min_zvec = zscore(min_vec)
+    max_zvec = zscore(max_vec)
 
-    for i in range(1,len(flash_freq)):
-        if (flash_freq[i-1] < 4) & (flash_freq[i] > 4):
-            blank_to_slow.append(i)
-        elif (flash_freq[i-1] < 6) & (flash_freq[i] > 6):
-            slow_to_fast.append(i)
-        elif (flash_freq[i-1] > 6) & (flash_freq[i] < 4):
-            fast_to_solid.append(i)
-
-    # Assumed drop in frequency corresponding to solid light
-    flash_ts = np.append(flash_ts, flash_ts[-1] + 1)
-    fast_to_solid.append(len(flash_ts)-1)
-
-    # Initialize state writes
-    state = binary_signal*3+1
-    state2write = 1
-
-    frame_buffer = 10
-
-    ct=0
-
-    for i in range (len(state)-frame_buffer):
-        if state2write == 1 and ct<len(blank_to_slow) and flash_ts[blank_to_slow[ct]]<i:
-            blank_to_slow.pop(0)
+    state2write=1
+    state[0]=1 #Assume starts in first state
+    for i in range(len(state)):
+        if sum_minus_median_zvec[i]<min_minus_median_zvec[i] and min_zvec[i]>max_zvec[i]:
+            # Blank
+            state2write=1
         
-        if state2write == 2 and ct<len(slow_to_fast) and flash_ts[slow_to_fast[ct]]<i:
-            slow_to_fast.pop(0)
-        
-        if state2write == 3 and ct<len(fast_to_solid) and flash_ts[fast_to_solid[ct]]<i:
-            fast_to_solid.pop(0)
-        
-        # Re-order state-transitions
-        while len(slow_to_fast)>=(ct+frame_buffer) and slow_to_fast[ct]<=(blank_to_slow[ct]+frame_buffer):
-            slow_to_fast.pop(0)
+        elif sum_minus_median_zvec[i]>min_minus_median_zvec[i] and min_zvec[i]>max_zvec[i] and state2write==3:
+            # Fast
+            state2write=4
 
-        while len(fast_to_solid)>=(ct+frame_buffer) and fast_to_solid[ct]<=(blank_to_slow[ct]+frame_buffer):
-            fast_to_solid.pop(0)
-
-        while len(fast_to_solid)>=(ct+frame_buffer) and fast_to_solid[ct]<=(slow_to_fast[ct]+frame_buffer):
-            fast_to_solid.pop(0)
-
-    
-        # Detect state transitions
-        if state2write==1 and ct<len(blank_to_slow) and flash_ts[blank_to_slow[ct]]==i:
-            state2write = 2
-        elif state2write==2 and ct<len(slow_to_fast) and flash_ts[slow_to_fast[ct]]==i:
-            state2write = 3
-        elif state2write==3 and ct<len(fast_to_solid) and flash_ts[fast_to_solid[ct]]==i:
-            state2write = 4
-        elif state2write==4 and state[i]==1:
-            state2write = 1
-            if ct+1<len(blank_to_slow) and ct+1<len(slow_to_fast) and ct+1<len(fast_to_solid):
-                ct+=1
-                while flash_ts[blank_to_slow[ct]] < i:
-                    blank_to_slow.pop(0)
+        elif sum_minus_median_zvec[i]>min_minus_median_zvec[i] and min_zvec[i]<max_zvec[i] and state2write==1:
+            # blank to slow
+            state2write=2
+            
+        elif sum_minus_median_zvec[i]<min_minus_median_zvec[i] and min_zvec[i]<max_zvec[i] and state2write==2:
+            # Slow to fast
+            state2write=3
 
         state[i]=state2write
 
@@ -183,11 +150,7 @@ def preprocess_data(data, params):
     
     # Interpolate tone if present
     if 'tone' in data:
-        data['tone'] = interpolate_1D(data['tone'], data['behavTime'], data['caTime'])
-
-    # Extract seqLT state if seqLT task
-    if data['task'] == 'legoSeqLT':
-        data = extract_tone(data,params)
+        data['tone'] = interpolate_1D(data['tone'], data['behavTime'], data['caTime'],kind='nearest')
 
     # Extract binary data
     data['binaryData'], data['neuralData'] = binarize_ca_traces(data['rawData'],
