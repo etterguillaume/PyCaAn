@@ -3,8 +3,8 @@ import yaml
 import os
 from tqdm import tqdm
 from functions.dataloaders import load_data
-from functions.signal_processing import preprocess_data, extract_tone
-from functions.tuning import extract_1D_tuning, extract_2D_tuning
+from functions.signal_processing import preprocess_data, extract_tone, extract_seqLT_tone
+from functions.tuning import extract_1D_tuning, extract_2D_tuning, extract_discrete_tuning
 from functions.metrics import extract_total_distance_travelled
 import h5py
 
@@ -170,12 +170,11 @@ for i, session in enumerate(tqdm(session_list)):
     try:
         if data['task'] == 'legoToneLT':
             if not os.path.exists(os.path.join(working_directory,'tone_tuning.h5')) or params['overwrite_mode']=='always':
-            #TODO convert tone into discrete data (.5, 1.5)
-                AMI, occupancy, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                                data['tone'],
+                data=extract_tone(data,params)
+                AMI, occupancy, tuning_curves = extract_discrete_tuning(data['binaryData'],
+                                                                data['binaryTone'],
                                                                 data['running_ts'],
-                                                                var_length=2,
-                                                                bin_size=1
+                                                                var_length=1,
                                                                 )
                 with h5py.File(os.path.join(working_directory,'tone_tuning.h5'),'w') as f:
                     f.create_dataset('AMI', data=AMI)
@@ -185,12 +184,11 @@ for i, session in enumerate(tqdm(session_list)):
             
         elif data['task'] == 'legoSeqLT':
            if not os.path.exists(os.path.join(working_directory,'seqTone_tuning.h5')) or params['overwrite_mode']=='always':
-                data = extract_tone(data,params)
-                AMI, occupancy, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                                data['legotone'],
+                data = extract_seqLT_tone(data,params)
+                AMI, occupancy, tuning_curves = extract_discrete_tuning(data['binaryData'],
+                                                                data['seqLT_state'],
                                                                 data['running_ts'],
-                                                                var_length=4,
-                                                                bin_size=1
+                                                                var_length=3,
                                                                 )
                 
                 with h5py.File(os.path.join(working_directory,'seqTone_tuning.h5'),'w') as f:

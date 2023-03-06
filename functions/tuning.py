@@ -67,7 +67,7 @@ def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
 
 
 def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_length):
-    discrete_bin_vector = np.arange(0,var_length)
+    discrete_bin_vector = np.arange(var_length)
     binaryData = binaryData[inclusion_ts]
     interpolated_var = interpolated_var[inclusion_ts]
     numFrames, numNeurons = binaryData.shape

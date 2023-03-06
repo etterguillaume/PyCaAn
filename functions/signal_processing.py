@@ -94,6 +94,14 @@ def compute_distance_time(interpolated_position, velocity, caTime, speed_thresho
     return elapsed_time, distance_travelled
 
 def extract_tone(data, params):
+    data['binaryTone'] = data['tone']
+    data['binaryTone'][data['tone']>=params['tone_threshold']]=1
+    data['binaryTone'][data['tone']<params['tone_threshold']]=0
+    data['binaryTone']=data['binaryTone'].astype(int)
+
+    return data
+
+def extract_seqLT_tone(data, params):
     tone = data['tone']
     state=np.zeros(tone.shape,dtype=int)
     window=params['sampling_frequency']*2
