@@ -8,7 +8,6 @@ plt.style.use('plot_style.mplstyle')
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
-#from umap.parametric_umap import ParametricUMAP
 from umap.parametric_umap import ParametricUMAP
 import tensorflow as tf
 from sklearn.linear_model import LinearRegression
@@ -22,7 +21,8 @@ with open('params.yaml','r') as file:
 
 #%% Load session
 #session_path = '../../datasets/calcium_imaging/M246/M246_LT_6'
-session_path = '../../datasets/calcium_imaging/M986/M986_legoSeqLT_20190313'
+session_path = '../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
+session_path = '../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
 data = load_data(session_path)
 
 #%% Preprocessing 
@@ -38,6 +38,9 @@ elif params['train_set_selection']=='split':
     trainingFrames[0:int(params['train_test_ratio']*len(data['caTime']))] = True 
 data['trainingFrames']=trainingFrames
 
+#%%
+data['trainingFrames']=data['running_ts']
+
 #%% Train embedding model
 embedding_model = ParametricUMAP(
                        parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
@@ -52,22 +55,45 @@ embedding_model = ParametricUMAP(
 #%%
 train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 test_embedding = embedding_model.transform(data['neuralData'][~data['trainingFrames'],0:params['input_neurons']])
+
 #%% Plot embeddings
-plt.figure(figsize=(3,1.5))
-plt.subplot(121)
+plt.figure(figsize=(1.5,1.5))
 plt.scatter(train_embedding[:, 0], train_embedding[:, 1], s= 1, 
 c=data['position'][data['trainingFrames'],0], cmap='Spectral')
 plt.axis('equal')
 plt.xlabel('$D_{1}$')
 plt.ylabel('$D_{2}$')
-plt.title('Train set')
-plt.subplot(122)
-plt.scatter(test_embedding[:, 0], test_embedding[:, 1], s= 1, 
-c=data['position'][~data['trainingFrames'],0], cmap='Spectral')
+plt.colorbar(label='Relative position')
+plt.tight_layout()
+
+#%% Plot embeddings - elapsed time
+plt.figure(figsize=(1.5,1.5))
+plt.scatter(train_embedding[:, 0], train_embedding[:, 1], s= 1, 
+c=data['elapsed_time'][data['trainingFrames']], cmap='Spectral')
 plt.axis('equal')
 plt.xlabel('$D_{1}$')
-plt.title('Test set')
-plt.colorbar(label='Relative position')
+plt.ylabel('$D_{2}$')
+plt.colorbar(label='Elapsed time (s)')
+plt.tight_layout()
+
+#%% Plot embeddings - distance travelled
+plt.figure(figsize=(1.5,1.5))
+plt.scatter(train_embedding[:, 0], train_embedding[:, 1], s= 1, 
+c=data['distance_travelled'][data['trainingFrames']], cmap='Spectral')
+plt.axis('equal')
+plt.xlabel('$D_{1}$')
+plt.ylabel('$D_{2}$')
+plt.colorbar(label='Distance travelled (cm)')
+plt.tight_layout()
+
+#%% Plot embeddings - direction
+plt.figure(figsize=(1.5,1.5))
+plt.scatter(train_embedding[:, 0], train_embedding[:, 1], s= 1, 
+c=data['heading'][data['trainingFrames']], cmap='Spectral')
+plt.axis('equal')
+plt.xlabel('$D_{1}$')
+plt.ylabel('$D_{2}$')
+plt.colorbar(label='Heading')
 plt.tight_layout()
 
 #%% Reconstruct inputs for both train and test sets
