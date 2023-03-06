@@ -62,10 +62,17 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
 def extract_LT_direction(interpolated_position):
     LT_direction=diff(interpolated_position)
     LT_direction=np.append(LT_direction,0) # Add last missing datapoint
-    LT_direction[LT_direction>0] = 1.5
-    LT_direction[LT_direction<=0] = .5
+    LT_direction[LT_direction>0] = 1
+    LT_direction[LT_direction<=0] = 0
 
-    return LT_direction
+    return LT_direction.astype(int)
+
+def compute_heading(interpolated_position):
+    heading = np.zeros(len(interpolated_position))
+    heading = np.mod(np.arctan2(diff(interpolated_position[:,0]), diff(interpolated_position[:,1]))*180/np.pi, 360)
+    heading=np.append(heading,np.nan)
+
+    return heading
 
 def compute_distance_time(interpolated_position, velocity, caTime, speed_threshold):
     elapsed_time = np.zeros(len(caTime))
@@ -112,24 +119,24 @@ def extract_tone(data, params):
     min_zvec = zscore(min_vec)
     max_zvec = zscore(max_vec)
 
-    state2write=1
-    state[0]=1 #Assume starts in first state
+    state2write=0
+
     for i in range(len(state)):
         if sum_minus_median_zvec[i]<min_minus_median_zvec[i] and min_zvec[i]>max_zvec[i]:
             # Blank
-            state2write=1
+            state2write=0
         
-        elif sum_minus_median_zvec[i]>min_minus_median_zvec[i] and min_zvec[i]>max_zvec[i] and state2write==3:
+        elif sum_minus_median_zvec[i]>min_minus_median_zvec[i] and min_zvec[i]>max_zvec[i] and state2write==2:
             # Fast
-            state2write=4
-
-        elif sum_minus_median_zvec[i]>min_minus_median_zvec[i] and min_zvec[i]<max_zvec[i] and state2write==1:
-            # blank to slow
-            state2write=2
-            
-        elif sum_minus_median_zvec[i]<min_minus_median_zvec[i] and min_zvec[i]<max_zvec[i] and state2write==2:
-            # Slow to fast
             state2write=3
+
+        elif sum_minus_median_zvec[i]>min_minus_median_zvec[i] and min_zvec[i]<max_zvec[i] and state2write==0:
+            # blank to slow
+            state2write=1
+            
+        elif sum_minus_median_zvec[i]<min_minus_median_zvec[i] and min_zvec[i]<max_zvec[i] and state2write==1:
+            # Slow to fast
+            state2write=2
 
         state[i]=state2write
 
@@ -146,8 +153,11 @@ def preprocess_data(data, params):
                                                                              params['speed_threshold'])
     
     if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-        data['LT_direction'] = extract_LT_direction(data['position'])
-    
+        data['LT_direction'] = extract_LT_direction(data['position'][:,0])
+
+    else: #Compute heading
+        data['heading'] = compute_heading(data['position'])
+
     # Interpolate tone if present
     if 'tone' in data:
         data['tone'] = interpolate_1D(data['tone'], data['behavTime'], data['caTime'],kind='nearest')
