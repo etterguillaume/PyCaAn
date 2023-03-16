@@ -27,11 +27,11 @@ portion_surface_covered_threshold: .8 # 0-1, default=1 (all bins explored)
 input_neurons: 128 # Number of neurons to be used. Also minimum number required
 
 # Tuning curve computations
-temporalBinSize: .25
-distanceBinSize: 4
-spatialBinSize: 4
-directionBinSize: 9
-velocityBinSize: 1
+temporalBinSize: .25 # s
+distanceBinSize: 4 # cm
+spatialBinSize: 4 # cm
+directionBinSize: 9 # º
+velocityBinSize: 4 # cm.s-1
 
 max_distance_length: 100
 max_temporal_length: 10

@@ -4,10 +4,8 @@ import os
 import numpy as np
 from tqdm import tqdm
 from functions.dataloaders import load_data
-from functions.signal_processing import preprocess_data, extract_tone, extract_seqLT_tone
-from functions.tuning import extract_1D_tuning, extract_2D_tuning, extract_discrete_tuning
-from functions.metrics import extract_total_distance_travelled
-import h5py
+from functions.signal_processing import preprocess_data
+from functions.tuning import extract_1D_tuning, extract_2D_tuning
 import matplotlib.pyplot as plt
 plt.style.use('plot_style.mplstyle')
 
@@ -22,6 +20,8 @@ distance_bins = [.125,.25,.5,1,2,4,8,16,32,64]
 speed_bins = [.125,.25,.5,1,2,4,8]
 heading_bins = [0.5625,1.125, 2.25, 4.5, 9, 18, 36]
 #TODO find ideal bins using max (and/or diff b/w mean and median)
+#TODO save results
+#TODO save plots
 
 #%%
 path = '../../datasets/calcium_imaging/CA1/M246/M246_legoOF_20180621'
