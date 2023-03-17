@@ -10,7 +10,7 @@ plt.style.use('plot_style.mplstyle')
 
 #%% Binary variable
 recording_length=1000
-ground_truth_info = .2
+ground_truth_info = 0
 sampling_vec = np.linspace(0.1,1,10)
 activity_prob = np.linspace(0.1,1,10) # How likely will the neuron fire
 
@@ -35,8 +35,8 @@ for i in tqdm(range(len(activity_prob))):
 
 #%% Plot
 plt.figure()
-plt.title('MI')
-plt.imshow(MI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto')
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(MI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=1)
 plt.colorbar(label='MI')
 plt.xlabel('activity probability')
 plt.ylabel('sampled portion')
@@ -44,8 +44,8 @@ plt.xticks(np.arange(len(activity_prob))[::5],activity_prob[::5])
 plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 
 plt.figure()
-plt.title('NMI')
-plt.imshow(NMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto')
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(NMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=1)
 plt.colorbar(label='normalized MI')
 plt.xlabel('activity probability')
 plt.ylabel('sampled portion')
@@ -53,18 +53,18 @@ plt.xticks(np.arange(len(activity_prob))[::5],activity_prob[::5])
 plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 
 plt.figure()
-plt.title('AMI')
-plt.imshow(AMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto')
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(AMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=1)
 plt.colorbar(label='adjusted MI')
 plt.xlabel('activity probability')
 plt.ylabel('sampled portion')
 plt.xticks(np.arange(len(activity_prob))[::5],activity_prob[::5])
 plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 #%% Behavioral variable with multiple bins
-ground_truth_info = .5
+ground_truth_info = 0
 activity_prob = .1
 sampling_vec = np.linspace(0.1,1,10)
-recording_length=10000
+recording_length=1000
 bin_vec = np.arange(2,100)
 
 MI_mx = np.zeros((len(sampling_vec),len(bin_vec)))
@@ -88,24 +88,24 @@ for i in range(len(bin_vec)):
 
 #%%
 plt.figure()
-plt.title('MI')
-plt.imshow(MI_mx,cmap='magma', interpolation='bicubic',origin='lower', aspect='auto',vmin=0,vmax=1)
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(MI_mx,cmap='magma', interpolation='bicubic',origin='lower', aspect='auto',vmin=0,vmax=.1)
 plt.colorbar(label='MI')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
 plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 
 plt.figure()
-plt.title('NMI')
-plt.imshow(NMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=1)
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(NMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=.1)
 plt.colorbar(label='normalized MI')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
 plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 
 plt.figure()
-plt.title('AMI')
-plt.imshow(AMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=1)
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(AMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=.1)
 plt.colorbar(label='adjusted MI')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
