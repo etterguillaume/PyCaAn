@@ -86,9 +86,10 @@ for i in range(len(bin_vec)):
         NMI_mx[j,i] = normalized_mutual_info_score(activity,behav_var)
         AMI_mx[j,i] = adjusted_mutual_info_score(activity,behav_var)
 
+#%%
 plt.figure()
 plt.title('MI')
-plt.imshow(MI_mx,cmap='magma', interpolation='bicubic',origin='lower', aspect='auto')
+plt.imshow(MI_mx,cmap='magma', interpolation='bicubic',origin='lower', aspect='auto',vmin=0,vmax=1)
 plt.colorbar(label='MI')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
@@ -96,7 +97,7 @@ plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 
 plt.figure()
 plt.title('NMI')
-plt.imshow(NMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto')
+plt.imshow(NMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=1)
 plt.colorbar(label='normalized MI')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
@@ -104,11 +105,18 @@ plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 
 plt.figure()
 plt.title('AMI')
-plt.imshow(AMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0)
+plt.imshow(AMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=1)
 plt.colorbar(label='adjusted MI')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
 plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
+
+
+
+
+
+
+
 
 #%% Generate data
 numNeurons = 100
