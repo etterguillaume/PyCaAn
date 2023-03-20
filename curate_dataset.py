@@ -31,10 +31,9 @@ for region in regionList:
     for subject in tqdm(subjectList):
         sessionList=os.listdir(os.path.join(params['path_to_dataset'],region, subject))
         for i, folder in enumerate(sessionList):
-            if folder.startswith('.'):
+            if folder.startswith('.') or not folder.endswith('.mat'):
                 sessionList.pop(i)
-            if not folder.endswith('.mat'): # Exclude other file types
-                sessionList.pop(i)
+
         numSessions.update({subject:len(sessionList)})
         for session in sessionList:
             session_path = os.path.join(params['path_to_dataset'],region,subject,session)
