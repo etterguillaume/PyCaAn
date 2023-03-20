@@ -6,22 +6,24 @@ import matplotlib.pyplot as plt
 
 from tqdm import tqdm
 from sklearn.metrics import mutual_info_score, adjusted_mutual_info_score, normalized_mutual_info_score
+from sklearn.feature_selection import chi2
 plt.style.use('plot_style.mplstyle')
 
 #%% Binary variable
 recording_length=1000
-ground_truth_info = 0
+ground_truth_info = 1
 sampling_vec = np.linspace(0.1,1,10)
 activity_prob = np.linspace(0.1,1,10) # How likely will the neuron fire
 
 MI_mx = np.zeros((len(sampling_vec),len(activity_prob)))
 NMI_mx = np.zeros((len(sampling_vec),len(activity_prob)))
 AMI_mx = np.zeros((len(sampling_vec),len(activity_prob)))
+X2_mx = np.zeros((len(sampling_vec),len(activity_prob)))
 
 for i in tqdm(range(len(activity_prob))):
     for j in range(len(sampling_vec)):
-        activity = np.zeros(recording_length,dtype='bool')
-        behav_var = np.zeros(recording_length,dtype='bool')
+        activity = np.zeros(recording_length)
+        behav_var = np.zeros(recording_length)
         activity_idx = np.random.choice(np.arange(recording_length),int(recording_length*activity_prob[i]),replace=False)
         activity[activity_idx]=True # Set active frames
 
@@ -32,6 +34,7 @@ for i in tqdm(range(len(activity_prob))):
         MI_mx[j,i] = mutual_info_score(activity,behav_var)
         NMI_mx[j,i] = normalized_mutual_info_score(activity,behav_var)
         AMI_mx[j,i] = adjusted_mutual_info_score(activity,behav_var)
+        X2_mx[j,i] = chi2(activity[:,None],behav_var[:,None])[1]
 
 #%% Plot
 plt.figure()
@@ -60,9 +63,18 @@ plt.xlabel('activity probability')
 plt.ylabel('sampled portion')
 plt.xticks(np.arange(len(activity_prob))[::5],activity_prob[::5])
 plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
+
+plt.figure()
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(X2_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=1)
+plt.colorbar(label='Chi2 p-value')
+plt.xlabel('activity probability')
+plt.ylabel('sampled portion')
+plt.xticks(np.arange(len(activity_prob))[::5],activity_prob[::5])
+plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 #%% Behavioral variable with multiple bins
-ground_truth_info = 0
-activity_prob = .1
+ground_truth_info = .5
+activity_prob = .01
 sampling_vec = np.linspace(0.1,1,10)
 recording_length=1000
 bin_vec = np.arange(2,100)
@@ -70,6 +82,7 @@ bin_vec = np.arange(2,100)
 MI_mx = np.zeros((len(sampling_vec),len(bin_vec)))
 NMI_mx = np.zeros((len(sampling_vec),len(bin_vec)))
 AMI_mx = np.zeros((len(sampling_vec),len(bin_vec)))
+X2_mx = np.zeros((len(sampling_vec),len(bin_vec)))
 
 for i in range(len(bin_vec)):
     for j in range(len(sampling_vec)):
@@ -85,6 +98,7 @@ for i in range(len(bin_vec)):
         MI_mx[j,i] = mutual_info_score(activity,behav_var)
         NMI_mx[j,i] = normalized_mutual_info_score(activity,behav_var)
         AMI_mx[j,i] = adjusted_mutual_info_score(activity,behav_var)
+        X2_mx[j,i] = chi2(activity[:,None],behav_var[:,None])[1]
 
 #%%
 plt.figure()
@@ -111,7 +125,13 @@ plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
 plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 
-
+plt.figure()
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(X2_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto')
+plt.colorbar(label='Chi2 p-value')
+plt.xlabel('num. bins')
+plt.ylabel('sampled portion')
+plt.yticks(np.arange(len(sampling_vec))[::5],sampling_vec[::5])
 
 
 
