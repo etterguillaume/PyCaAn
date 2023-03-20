@@ -33,6 +33,8 @@ for region in regionList:
         for i, folder in enumerate(sessionList):
             if folder.startswith('.'):
                 sessionList.pop(i)
+            if not folder.endswith('.mat'): # Exclude other file types
+                sessionList.pop(i)
         numSessions.update({subject:len(sessionList)})
         for session in sessionList:
             session_path = os.path.join(params['path_to_dataset'],region,subject,session)
@@ -44,11 +46,10 @@ for region in regionList:
                     error_list.append(session_path)
                     print(f'Could not open {session_path}')
                 else: #TODO add other conditions, like num cells, neurons, overwrite, etc
+                    path_list.append(session_path)
                     numFrames, numNeurons = data['rawData'].shape
                     distance_travelled=extract_total_distance_travelled(data['position'])
-                    if numNeurons>=params['input_neurons'] and distance_travelled>=params['distance_travelled_threshold']:
-                        path_list.append(session_path)
-                    else:
+                    if not numNeurons>=params['input_neurons'] and distance_travelled>=params['distance_travelled_threshold']:
                         excluded_list.append(session_path)
 
 #%% Save list of sessions and stats in yaml files
