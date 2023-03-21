@@ -13,7 +13,8 @@ plt.style.use('plot_style.mplstyle')
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 #%%
-path = '../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
+#path = '../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
+path = '../../datasets/calcium_imaging/CA3/M83/M83_LT_20210528'
 #path = '../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
 #path='/Users/guillaumeetter/Documents/datasets/calcium_imaging/CA1/M991/M991_legoSeqLT_20190313'
 #path = '../../datasets/calcium_imaging/CA1/M989/M989_legoSeqLT_20190313'
@@ -27,3 +28,5 @@ data = preprocess_data(data, params)
 
 #%%
 data = extract_tone(data, params)
+
+# %%

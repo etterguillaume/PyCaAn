@@ -79,6 +79,7 @@ def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_leng
     active_frames_in_bin = np.zeros((numNeurons,len(discrete_bin_vector)), dtype=int)
     occupancy_frames = np.zeros(len(discrete_bin_vector), dtype=int)
     AMI = np.zeros(numNeurons)
+    p_value = np.zeros(numNeurons)
 
     # Compute occupancy
     bin_vector = np.zeros(numFrames, dtype=int) # Vector that will specificy the bin# for each frame
@@ -97,6 +98,7 @@ def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_leng
                 active_frames_in_bin[neuron,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
 
         AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector)
+        p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])
     
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
-    return AMI, occupancy_frames, active_frames_in_bin, tuning_curve
+    return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
