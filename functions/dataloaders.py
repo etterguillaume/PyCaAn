@@ -41,7 +41,7 @@ def load_data(path):
         data.update({
                     'corrProj':np.array(f.get('ms/CorrProj')),
                     'pnrProj': np.array(f.get('ms/PeakToNoiseProj')),
-                    'meanProj':np.array(f.get('ms/meanFrame')),
+                    #'meanProj':np.array(f.get('ms/meanFrame')),
                     #'experiment':np.array(f.get('ms/Experiment')),
                     'SFPs':np.array(f.get('ms/SFPs')),
                     'caTime':np.array(f.get('ms/time'))[0]/1000, # convert ms->s
@@ -52,7 +52,7 @@ def load_data(path):
                     {
                     'corrProj':f['ms']['CorrProj'][0][0],
                     'pnrProj': f['ms']['PeakToNoiseProj'][0][0],
-                    'meanProj': f['ms']['meanFrame'][0][0],
+                    #'meanProj': f['ms']['meanFrame'][0][0],
                     #'experiment':f['ms']['Experiment'][0][0],
                     'SFPs':f['ms']['SFPs'][0][0],
                     'caTime':f['ms']['time'][0][0].T[0]/1000, # convert ms->s

@@ -24,6 +24,15 @@ def binarize_ca_traces(ca_traces, z_threshold, sampling_frequency): #TODO MAKE S
 
     return binarized_traces, neural_data
 
+def clean_timestamps(data):
+    _, unique_timestamps = np.unique(data['behavTime'],return_index=True) # Find unique timestamps
+    data['behavTime'] = data['behavTime'][unique_timestamps]
+    data['position'] = data['position'][unique_timestamps,:]
+    if 'tone' in data:
+        data['tone'] = data['tone'][unique_timestamps]
+    
+    return data
+
 def interpolate_2D(signal, behav_time, ca_time):
     interpolated_signal = np.zeros((len(ca_time),2))
     nan_vec = np.isnan(np.sum(signal,axis=1))
@@ -153,6 +162,7 @@ def extract_seqLT_tone(data, params):
     return data
 
 def preprocess_data(data, params):
+    data = clean_timestamps(data) # only include unique timestamps
     data['position'] = interpolate_2D(data['position'], data['behavTime'], data['caTime'])
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
     data['elapsed_time'], data['distance_travelled'] = compute_distance_time(data['position'], 
