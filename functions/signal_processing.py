@@ -25,6 +25,12 @@ def binarize_ca_traces(ca_traces, z_threshold, sampling_frequency): #TODO MAKE S
     return binarized_traces, neural_data
 
 def clean_timestamps(data):
+    # CI data
+    _, unique_timestamps = np.unique(data['caTime'],return_index=True) # Find unique timestamps
+    data['caTime'] = data['caTime'][unique_timestamps]
+    data['rawData'] = data['rawData'][unique_timestamps,:]
+
+    # Behavior
     _, unique_timestamps = np.unique(data['behavTime'],return_index=True) # Find unique timestamps
     data['behavTime'] = data['behavTime'][unique_timestamps]
     data['position'] = data['position'][unique_timestamps,:]
