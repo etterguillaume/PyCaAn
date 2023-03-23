@@ -5,6 +5,7 @@ from numpy import diff
 from numpy import std
 from numpy import sqrt
 from scipy.stats import zscore
+from scipy.ndimage import gaussian_filter1d, gaussian_filter
 
 def normalize(data): # Normalize between 0-1
     return (data - np.min(data)) / (np.max(data) - np.min(data))
@@ -62,6 +63,14 @@ def interpolate_1D(signal, behav_time, ca_time, kind='nearest'):
     interpolated_signal = interp_func_x(ca_time)   # use interpolation function returned by `interp1d`
     
     return interpolated_signal
+
+def smooth_1D(signal, params):
+    smoothed_signal = gaussian_filter1d(signal,sigma=params['smoothing_sigma'])
+    return smoothed_signal
+
+def smooth_2D(signal, params):
+    smoothed_signal = gaussian_filter(signal,sigma=params['smoothing_sigma'])
+    return smoothed_signal
 
 def compute_velocity(interpolated_position, caTime, speed_threshold):
     velocity = np.zeros(interpolated_position.shape[0])

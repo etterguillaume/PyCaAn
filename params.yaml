@@ -33,13 +33,12 @@ spatialBinSize: 4 # cm
 directionBinSize: 9 # º
 velocityBinSize: 4 # cm.s-1
 
-max_distance_length: 100
-max_temporal_length: 10
+max_distance_length: 30
+max_temporal_length: 5
 max_velocity_length: 30
 
 # Tuning curve analysis
-#rate_map_smoothing_sigma: 2 # cm, sigma for gaussian smoothing, 0 for no smoothing
-rate_map_smoothing_size: 5 # cm, size for gaussian smoothing, 0 for no smoothing
+smoothing_sigma: 2 # sigma for gaussian smoothing
 
 # Chance analysis
 num_surrogates: 1000 # Number of circular permutations
