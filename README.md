@@ -1,7 +1,5 @@
 ## Readme
 
-
-
 # Data format
 
 # Configuration
