@@ -4,6 +4,7 @@ from sklearn.metrics import adjusted_mutual_info_score
 from sklearn.feature_selection import chi2
 
 def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size):
+    #TODO optimize using digitize
     X_bin_vector = np.arange(0,var_length+bin_size,bin_size)
     Y_bin_vector = np.arange(0,var_length+bin_size,bin_size)
     binaryData = binaryData[inclusion_ts]
@@ -39,6 +40,7 @@ def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
     return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
 
 def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size):
+    #TODO optimize using digitize
     X_bin_vector = np.arange(0,var_length+bin_size,bin_size)
     binaryData = binaryData[inclusion_ts]
     interpolated_var = interpolated_var[inclusion_ts]
