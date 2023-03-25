@@ -33,6 +33,14 @@ def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
                 if frames_in_bin is not None: # if bin has been explored
                     active_frames_in_bin[neuron,y,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
 
+        # TODO Shuffle here:
+        # isSig=True
+        # if params['num_surrogates']>0
+        # for i in params['num_surrogates']:
+        #   shuffle
+        # if more than params['pval_threshold']
+        # break
+        # isSig=False
         AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector)
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
     
@@ -71,6 +79,16 @@ def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
     
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
     return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
+
+def assess_covariate(var1, var2, inclusion_ts, var1_length, var1_bin_size, var2_length, var2_bin_size):
+    # Assess the amount of covariation between two variables (e.g. time and distance)
+
+
+    # Digitize var1, var2 using params (length, bin_size)
+    # Compute AMI, p_value between two variables
+    # Shuffle for significance?
+    
+    return info, p_value, isSig
 
 
 def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_length):
