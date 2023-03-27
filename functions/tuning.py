@@ -33,14 +33,6 @@ def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
                 if frames_in_bin is not None: # if bin has been explored
                     active_frames_in_bin[neuron,y,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
 
-        # TODO Shuffle here:
-        # isSig=True
-        # if params['num_surrogates']>0
-        # for i in params['num_surrogates']:
-        #   shuffle
-        # if more than params['pval_threshold']
-        # break
-        # isSig=False
         AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector)
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
     
@@ -82,14 +74,45 @@ def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
 
 def assess_covariate(var1, var2, inclusion_ts, var1_length, var1_bin_size, var2_length, var2_bin_size):
     # Assess the amount of covariation between two variables (e.g. time and distance)
-
-
-    # Digitize var1, var2 using params (length, bin_size)
-    # Compute AMI, p_value between two variables
-    # Shuffle for significance?
+    var1_bin_vector = np.arange(0,var1_length+var1_bin_size,var1_bin_size)
+    var2_bin_vector = np.arange(0,var2_length+var2_bin_size,var2_bin_size)
+    var1=var1[inclusion_ts]
+    var2=var2[inclusion_ts]
+    digitized_var1 = np.zeros(len(var1), dtype=int) # Vector that will specificy the bin# for each frame
+    digitized_var2 = np.zeros(len(var2), dtype=int) # Vector that will specificy the bin# for each frame
     
-    return info, p_value, isSig
+    # Digitize var1, var2 using params (length, bin_size)
+    ct=0
+    if len(var1.shape)==1: #1D variable #TODO fix 0D variables
+        for i in range(len(var1_bin_vector)-1):
+            frames_in_bin = (var1 >= var1_bin_vector[i]) & (var1 < var1_bin_vector[i+1])
+            digitized_var1[frames_in_bin] = ct
+            ct+=1
+    elif var1.shape[1]==2: #2D variable
+        for i in range(len(var1_bin_vector)-1):
+            for j in range(len(var1_bin_vector)-1):
+                frames_in_bin = (var1[:,0] >= var1_bin_vector[i]) & (var1[:,0] < var1_bin_vector[i+1]) & (var1[:,1] >= var1_bin_vector[j]) & (var1[:,1] < var1_bin_vector[j+1])
+                digitized_var1[frames_in_bin] = ct
+                ct+=1
 
+    ct=0
+    if len(var2.shape)==1: #1D variable
+        for i in range(len(var2_bin_vector)-1):
+            frames_in_bin = (var2 >= var2_bin_vector[i]) & (var2 < var2_bin_vector[i+1])
+            digitized_var2[frames_in_bin] = ct
+            ct+=1
+    elif var2.shape[1]==2: #2D variable
+        for i in range(len(var2_bin_vector)-1):
+            for j in range(len(var2_bin_vector)-1):
+                frames_in_bin = (var2[:,0] >= var2_bin_vector[i]) & (var2[:,0] < var2_bin_vector[i+1]) & (var2[:,1] >= var2_bin_vector[j]) & (var2[:,1] < var2_bin_vector[j+1])
+                digitized_var1[frames_in_bin] = ct
+                ct+=1
+
+    # Compute AMI, p_value between two variables
+    info = adjusted_mutual_info_score(digitized_var1,digitized_var2)
+    p_value = chi2(digitized_var1[:,None],digitized_var2[:,None])[1]
+    
+    return info, p_value
 
 def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_length):
     discrete_bin_vector = np.arange(var_length)
