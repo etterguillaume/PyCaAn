@@ -5,7 +5,7 @@ from tqdm import tqdm
 import numpy as np
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data, extract_tone, extract_seqLT_tone
-from functions.tuning import extract_1D_tuning, extract_2D_tuning, extract_discrete_tuning, assess_covariate
+from functions.tuning import extract_1D_tuning, extract_2D_tuning, extract_discrete_tuning
 from functions.metrics import extract_total_distance_travelled
 import h5py
 
@@ -63,46 +63,6 @@ for i, session in enumerate(tqdm(session_list)):
                 'duration': float(data['caTime'][-1]),
                 'speed_threshold': params['speed_threshold']
         }
-
-    if not os.path.exists(os.path.join(working_directory,'info.yaml')) or params['overwrite_mode']=='always':
-        with open(os.path.join(working_directory,'info.yaml'),"w") as file:
-            yaml.dump(info_dict,file)
-
-    # Pre-allocate data for covariates
-    info_matrix = np.zeros((4,4))
-    pvalue_matrix = np.zeros((4,4))
-    labels=['space','time','distance','speed']
-    info,pvalue = assess_covariate(data['elapsed_time'],
-                            data['distance_travelled'],
-                            data['running_ts'],
-                            params['max_temporal_length'],
-                            params['temporalBinSize'],
-                            params['max_distance_length'],
-                            params['distanceBinSize'])
-
-    info,pvalue = assess_covariate(data['position'][:,0],
-                                data['distance_travelled'],
-                                data['running_ts'],
-                                100,
-                                params['spatialBinSize'],
-                                params['max_distance_length'],
-                                params['distanceBinSize'])
-
-    info,pvalue = assess_covariate(data['position'][:,0],
-                                data['elapsed_time'],
-                                data['running_ts'],
-                                100,
-                                params['spatialBinSize'],
-                                params['max_temporal_length'],
-                                params['temporalBinSize'])
-
-    info,pvalue = assess_covariate(data['velocity'],
-                                data['elapsed_time'],
-                                data['running_ts'],
-                                params['max_velocity_length'],
-                                params['velocityBinSize'],
-                                params['max_temporal_length'],
-                                params['temporalBinSize'])
 
     # Extract tuning to time
     if not os.path.exists(os.path.join(working_directory,'temporal_tuning.h5')) or params['overwrite_mode']=='always':
@@ -187,11 +147,15 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('tuning_curves', data=tuning_curves)
 
     # Extract direction tuning
-    # if data['task']=='legoOF' or data['task']=='OF':
-    #     HD=[] # TODO extract head direction tuning?
     try:
         if not os.path.exists(os.path.join(working_directory,'direction_tuning.h5')) or params['overwrite_mode']=='always':
-            if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                                data['heading'],
+                                                                data['running_ts'],
+                                                                var_length=360,
+                                                                bin_size=params['directionBinSize'])
+            elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
                 AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                                 data['LT_direction'],
                                                                 data['running_ts'],
@@ -245,12 +209,3 @@ for i, session in enumerate(tqdm(session_list)):
                     f.create_dataset('tuning_curves', data=tuning_curves)
         except:
             print('Could not extract tuning to tone sequence')
-
-    with h5py.File(os.path.join(working_directory,'covariates.h5'),'w') as f:
-        f.create_dataset('AMI', data=info_matrix)
-        f.create_dataset('p_value', data=pvalue_matrix)
-        f.create_dataset('labels', data=labels)
-
-
-    
-# %%
