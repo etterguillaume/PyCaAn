@@ -52,6 +52,82 @@ if not os.path.exists(os.path.join(working_directory,'covariates.h5')) or params
     pvalue_matrix = np.zeros((5,5))
     labels=['space','time','distance','speed','heading']
 
+    position=data['position']
+    if data['task'] == 'OF':
+        mazeSize=45
+    elif data['task'] == 'legoOF':
+        mazeSize=50
+    elif data['task'] == 'plexiOF':
+        mazeSize=49
+
+    if data['task'] == 'LT':
+        mazeSize=100
+        position=data['position'][:,0]
+
+    elif data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+        mazeSize=134
+        position=data['position'][:,0]
+
+    # Location vs time
+    info_matrix[0,1], pvalue_matrix[0,1] = assess_covariate(
+            position,
+            data['elapsed_time'],
+            data['running_ts'],
+            mazeSize,
+            params['spatialBinSize'],
+            params['max_temporal_length'],
+            params['temporalBinSize']
+            )
+    info_matrix[1,0], pvalue_matrix[1,0] = info_matrix[0,1], pvalue_matrix[0,1]
+
+    # Location vs distance
+    info_matrix[0,2], pvalue_matrix[0,2] = assess_covariate(
+            position,
+            data['distance_travelled'],
+            data['running_ts'],
+            mazeSize,
+            params['spatialBinSize'],
+            params['max_distance_length'],
+            params['distanceBinSize']
+            )
+    info_matrix[2,0], pvalue_matrix[2,0] = info_matrix[0,2], pvalue_matrix[0,2]
+
+    # Location vs velocity
+    info_matrix[0,3], pvalue_matrix[0,3] = assess_covariate(
+            position,
+            data['velocity'],
+            data['running_ts'],
+            mazeSize,
+            params['spatialBinSize'],
+            params['max_velocity_length'],
+            params['velocityBinSize']
+            )
+    info_matrix[3,0], pvalue_matrix[3,0] = info_matrix[0,3], pvalue_matrix[0,3]
+
+    # Location vs velocity
+    if data['task']=='LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
+        info_matrix[0,4], pvalue_matrix[0,4] = assess_covariate(
+                position,
+                data['LT_direction'],
+                data['running_ts'],
+                mazeSize,
+                params['spatialBinSize'],
+                2,
+                1
+                )
+        info_matrix[4,0], pvalue_matrix[4,0] = info_matrix[0,4], pvalue_matrix[0,4]
+    elif data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF':
+        info_matrix[0,4], pvalue_matrix[0,4] = assess_covariate(
+                position,
+                data['heading'],
+                data['running_ts'],
+                mazeSize,
+                params['spatialBinSize'],
+                360,
+                params['directionBinSize']
+                )
+        info_matrix[4,0], pvalue_matrix[4,0] = info_matrix[0,4], pvalue_matrix[0,4]
+
     # Time vs distance
     info_matrix[1,2], pvalue_matrix[1,2] = assess_covariate(data['elapsed_time'],
                         data['distance_travelled'],
@@ -60,7 +136,7 @@ if not os.path.exists(os.path.join(working_directory,'covariates.h5')) or params
                         params['temporalBinSize'],
                         params['max_distance_length'],
                         params['distanceBinSize'])
-    info_matrix[1,2], pvalue_matrix[1,2] = info_matrix[2,1], pvalue_matrix[2,1]
+    info_matrix[2,1], pvalue_matrix[2,1] = info_matrix[1,2], pvalue_matrix[1,2]
 
     # Time vs speed
     info_matrix[1,3], pvalue_matrix[1,3] = assess_covariate(data['elapsed_time'],
@@ -70,26 +146,89 @@ if not os.path.exists(os.path.join(working_directory,'covariates.h5')) or params
                         params['temporalBinSize'],
                         params['max_velocity_length'],
                         params['velocityBinSize'])
-    info_matrix[1,3], pvalue_matrix[1,3] = info_matrix[3,1], pvalue_matrix[3,1]
+    info_matrix[3,1], pvalue_matrix[3,1] = info_matrix[1,3], pvalue_matrix[1,3]
+
+    # Time vs heading
+    if data['task']=='LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
+        info_matrix[1,4], pvalue_matrix[1,4] = assess_covariate(data['elapsed_time'],
+                            data['LT_direction'],
+                            data['running_ts'],
+                            params['max_temporal_length'],
+                            params['temporalBinSize'],
+                            2,
+                            1
+                            )
+        info_matrix[4,1], pvalue_matrix[4,1] = info_matrix[1,4], pvalue_matrix[1,4]
+    elif data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF':
+        info_matrix[1,4], pvalue_matrix[1,4] = assess_covariate(data['elapsed_time'],
+                            data['heading'],
+                            data['running_ts'],
+                            params['max_temporal_length'],
+                            params['temporalBinSize'],
+                            360,
+                            params['directionBinSize']
+                            )
+        info_matrix[4,1], pvalue_matrix[4,1] = info_matrix[1,4], pvalue_matrix[1,4]
 
     # Distance vs speed
-    info_matrix[2,3], pvalue_matrix[2,3] = assess_covariate(data['distance_travelled'],
+    info_matrix[2,3], pvalue_matrix[2,3] = assess_covariate(
+                        data['distance_travelled'],
                         data['velocity'],
                         data['running_ts'],
                         params['max_distance_length'],
-                        params['temporalBinSize'],
+                        params['distanceBinSize'],
                         params['max_velocity_length'],
-                        params['distanceBinSize'])
-    info_matrix[2,3], pvalue_matrix[2,3] = info_matrix[3,2], pvalue_matrix[3,2]
+                        params['velocityBinSize'])
+    info_matrix[3,2], pvalue_matrix[3,2] = info_matrix[2,3], pvalue_matrix[2,3]
 
-    if data['task'] == 'OF':
-        info_matrix[0,1], pvalue_matrix[0,1] = assess_covariate(data['elapsed_time'],
-                data['distance_travelled'],
-                data['running_ts'],
-                params['max_temporal_length'],
-                params['temporalBinSize'],
-                params['max_distance_length'],
-                params['distanceBinSize'])
+    # distance vs heading
+    if data['task']=='LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
+        info_matrix[2,4], pvalue_matrix[2,4] = assess_covariate(
+                            data['distance_travelled'],
+                            data['LT_direction'],
+                            data['running_ts'],
+                            params['max_distance_length'],
+                            params['distanceBinSize'],
+                            2,
+                            1
+                            )
+        info_matrix[4,2], pvalue_matrix[4,2] = info_matrix[2,4], pvalue_matrix[2,4]
+    elif data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF':
+        info_matrix[2,4], pvalue_matrix[2,4] = assess_covariate(
+                            data['distance_travelled'],
+                            data['heading'],
+                            data['running_ts'],
+                            params['max_distance_length'],
+                            params['distanceBinSize'],
+                            360,
+                            params['directionBinSize']
+                            )
+        info_matrix[4,2], pvalue_matrix[4,2] = info_matrix[2,4], pvalue_matrix[2,4]
+
+    # velocity vs heading
+    if data['task']=='LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
+        info_matrix[3,4], pvalue_matrix[3,4] = assess_covariate(
+                            data['velocity'],
+                            data['LT_direction'],
+                            data['running_ts'],
+                            params['max_velocity_length'],
+                            params['velocityBinSize'],
+                            2,
+                            1
+                            )
+        info_matrix[4,3], pvalue_matrix[4,3] = info_matrix[3,4], pvalue_matrix[3,4]
+    elif data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF':
+        info_matrix[3,4], pvalue_matrix[3,4] = assess_covariate(
+                            data['velocity'],
+                            data['heading'],
+                            data['running_ts'],
+                            params['max_velocity_length'],
+                            params['velocityBinSize'],
+                            360,
+                            params['directionBinSize']
+                            )
+        info_matrix[4,3], pvalue_matrix[4,3] = info_matrix[3,4], pvalue_matrix[3,4]
+
 
     with h5py.File(os.path.join(working_directory,'covariates.h5'),'w') as f:
         f.create_dataset('AMI', data=info_matrix)
