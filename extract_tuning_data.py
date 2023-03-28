@@ -19,15 +19,15 @@ with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as fil
 session_list = session_file['sessions']
 print(f'{len(session_list)} sessions to process')
 
+#%% If tuning_data folder does not exist, create it
+if not os.path.exists(params['path_to_results']):
+    os.mkdir(params['path_to_results'])
+if not os.path.exists(os.path.join(params['path_to_results'],'tuning_data')):
+    os.mkdir(os.path.join(params['path_to_results'],'tuning_data'))
+
 #%%
 for i, session in enumerate(tqdm(session_list)):
     data = load_data(session)
-
-    # If tuning_data folder does not exist, create it
-    if not os.path.exists(params['path_to_results']):
-       os.mkdir(params['path_to_results'])
-    if not os.path.exists(os.path.join(params['path_to_results'],'tuning_data')):
-       os.mkdir(os.path.join(params['path_to_results'],'tuning_data'))
 
     # Create folder with convention (e.g. CA1_M246_LT_2017073)
     working_directory=os.path.join( 
@@ -63,6 +63,9 @@ for i, session in enumerate(tqdm(session_list)):
                 'duration': float(data['caTime'][-1]),
                 'speed_threshold': params['speed_threshold']
         }
+    if not os.path.exists(os.path.join(working_directory,'info.yaml')) or params['overwrite_mode']=='always':
+        with open(os.path.join(working_directory,'info.yaml'),"w") as file:
+            yaml.dump(info_dict,file)
 
     # Extract tuning to time
     if not os.path.exists(os.path.join(working_directory,'temporal_tuning.h5')) or params['overwrite_mode']=='always':
