@@ -69,13 +69,12 @@ for i, session in enumerate(tqdm(session_list)):
 
     # Extract tuning to time
     if not os.path.exists(os.path.join(working_directory,'temporal_tuning.h5')) or params['overwrite_mode']=='always':
-        AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                            data['elapsed_time'],
-                                                            data['running_ts'],
-                                                            var_length=params['max_temporal_length'],
-                                                            bin_size=params['temporalBinSize'])
-
         with h5py.File(os.path.join(working_directory,'temporal_tuning.h5'),'w') as f:
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                    data['elapsed_time'],
+                                                    data['running_ts'],
+                                                    var_length=params['max_temporal_length'],
+                                                    bin_size=params['temporalBinSize'])
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
@@ -84,13 +83,12 @@ for i, session in enumerate(tqdm(session_list)):
 
     # Extract tuning to distance
     if not os.path.exists(os.path.join(working_directory,'distance_tuning.h5')) or params['overwrite_mode']=='always':
-        AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                            data['distance_travelled'],
-                                                            data['running_ts'],
-                                                            var_length=params['max_distance_length'],
-                                                            bin_size=params['spatialBinSize'])
-
         with h5py.File(os.path.join(working_directory,'distance_tuning.h5'),'w') as f:
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                    data['distance_travelled'],
+                                                    data['running_ts'],
+                                                    var_length=params['max_distance_length'],
+                                                    bin_size=params['spatialBinSize'])
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
@@ -99,13 +97,12 @@ for i, session in enumerate(tqdm(session_list)):
 
     # Extract tuning to velocity
     if not os.path.exists(os.path.join(working_directory,'velocity_tuning.h5')) or params['overwrite_mode']=='always':
-        AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                            data['velocity'],
-                                                            data['running_ts'],
-                                                            var_length=params['max_velocity_length'],
-                                                            bin_size=params['velocityBinSize'])
-
         with h5py.File(os.path.join(working_directory,'velocity_tuning.h5'),'w') as f:
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                    data['velocity'],
+                                                    data['running_ts'],
+                                                    var_length=params['max_velocity_length'],
+                                                    bin_size=params['velocityBinSize'])
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
@@ -114,35 +111,40 @@ for i, session in enumerate(tqdm(session_list)):
 
     # Extract spatial tuning
     if not os.path.exists(os.path.join(working_directory,'spatial_tuning.h5')) or params['overwrite_mode']=='always':
-        if data['task']=='OF':
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
-                                                            data['position'],
-                                                            data['running_ts'],
-                                                            var_length=45,
-                                                            bin_size=params['spatialBinSize'])
-            
-        elif data['task']=='legoOF':
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
-                                                            data['position'],
-                                                            data['running_ts'],
-                                                            var_length=50,
-                                                            bin_size=params['spatialBinSize'])
-
-        elif data['task']=='LT':
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                            data['position'][:,0],
-                                                            data['running_ts'],
-                                                            var_length=100,
-                                                            bin_size=params['spatialBinSize'])
-            
-        elif data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                            data['position'][:,0],
-                                                            data['running_ts'],
-                                                            var_length=134,
-                                                            bin_size=params['spatialBinSize'])
-            
         with h5py.File(os.path.join(working_directory,'spatial_tuning.h5'),'w') as f:
+            if data['task']=='OF':
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
+                                                                data['position'],
+                                                                data['running_ts'],
+                                                                var_length=45,
+                                                                bin_size=params['spatialBinSize'])
+                
+            elif data['task']=='legoOF':
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
+                                                                data['position'],
+                                                                data['running_ts'],
+                                                                var_length=50,
+                                                                bin_size=params['spatialBinSize'])
+            elif data['task']=='plexiOF':
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
+                                                                data['position'],
+                                                                data['running_ts'],
+                                                                var_length=49,
+                                                                bin_size=params['spatialBinSize'])
+
+            elif data['task']=='LT':
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                                data['position'][:,0],
+                                                                data['running_ts'],
+                                                                var_length=100,
+                                                                bin_size=params['spatialBinSize'])
+                
+            elif data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                                data['position'][:,0],
+                                                                data['running_ts'],
+                                                                var_length=134,
+                                                                bin_size=params['spatialBinSize'])
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
@@ -152,20 +154,19 @@ for i, session in enumerate(tqdm(session_list)):
     # Extract direction tuning
     try:
         if not os.path.exists(os.path.join(working_directory,'direction_tuning.h5')) or params['overwrite_mode']=='always':
-            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                                data['heading'],
-                                                                data['running_ts'],
-                                                                var_length=360,
-                                                                bin_size=params['directionBinSize'])
-            elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                                data['LT_direction'],
-                                                                data['running_ts'],
-                                                                var_length=2,
-                                                                bin_size=1)
-                
             with h5py.File(os.path.join(working_directory,'direction_tuning.h5'),'w') as f:
+                if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
+                    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                                    data['heading'],
+                                                                    data['running_ts'],
+                                                                    var_length=360,
+                                                                    bin_size=params['directionBinSize'])
+                elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+                    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                                    data['LT_direction'],
+                                                                    data['running_ts'],
+                                                                    var_length=2,
+                                                                    bin_size=1)
                 f.create_dataset('AMI', data=AMI)
                 f.create_dataset('p_value', data=p_value)
                 f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
@@ -174,18 +175,17 @@ for i, session in enumerate(tqdm(session_list)):
     except:
         print('Could not extract tuning to direction')
 
-
     # Extract tuning to tone
     if data['task'] == 'legoToneLT':
         try:
             if not os.path.exists(os.path.join(working_directory,'tone_tuning.h5')) or params['overwrite_mode']=='always':
-                data=extract_tone(data,params)
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_discrete_tuning(data['binaryData'],
-                                                                data['binaryTone'],
-                                                                data['running_ts'],
-                                                                var_length=1,
-                                                                )
                 with h5py.File(os.path.join(working_directory,'tone_tuning.h5'),'w') as f:
+                    data=extract_tone(data,params)
+                    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_discrete_tuning(data['binaryData'],
+                                                                    data['binaryTone'],
+                                                                    data['running_ts'],
+                                                                    var_length=1,
+                                                                    )                
                     f.create_dataset('AMI', data=AMI)
                     f.create_dataset('p_value', data=p_value)
                     f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
@@ -197,14 +197,13 @@ for i, session in enumerate(tqdm(session_list)):
     elif data['task'] == 'legoSeqLT':
         try:
             if not os.path.exists(os.path.join(working_directory,'seqTone_tuning.h5')) or params['overwrite_mode']=='always':
-                data = extract_seqLT_tone(data,params)
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_discrete_tuning(data['binaryData'],
-                                                                data['seqLT_state'],
-                                                                data['running_ts'],
-                                                                var_length=3,
-                                                                )
-                
                 with h5py.File(os.path.join(working_directory,'seqTone_tuning.h5'),'w') as f:
+                    data = extract_seqLT_tone(data,params)
+                    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_discrete_tuning(data['binaryData'],
+                                                                    data['seqLT_state'],
+                                                                    data['running_ts'],
+                                                                    var_length=3,
+                                                                    )
                     f.create_dataset('AMI', data=AMI)
                     f.create_dataset('p_value', data=p_value)
                     f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
