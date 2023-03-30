@@ -16,11 +16,24 @@ with open('params.yaml','r') as file:
 #%% Open-field
 #path='../..//datasets/calcium_imaging/CA1/M991/M991_legoSeqLT_20190313'
 #path = '../../datasets/calcium_imaging/CA1/M989/M989_legoSeqLT_20190313'
-path = '../../datasets/calcium_imaging/CA1/M989/M989_legoToneLT_scrambled_20190301'
+#path = '../../datasets/calcium_imaging/CA1/M989/M989_legoToneLT_scrambled_20190301'
+with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
+    session_file = yaml.full_load(file)
+session_list = session_file['sessions']
+path=session_list[148]
+
+
 data = load_data(path)
 
 #%% Pre-process data
 data=preprocess_data(data,params)
+
+#%%
+AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                    data['elapsed_time'],
+                                                    data['running_ts'],
+                                                    var_length=params['max_temporal_length'],
+                                                    bin_size=params['temporalBinSize'])
 
 #%%
 # data = extract_seqLT_tone(data,params)
