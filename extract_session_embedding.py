@@ -6,66 +6,205 @@ plt.style.use('plot_style.mplstyle')
 
 #%% Import dependencies
 import yaml
-import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from umap.parametric_umap import ParametricUMAP
+import tensorflow as tf
+from sklearn.linear_model import LinearRegression as lin_reg
+from sklearn.neighbors import KNeighborsRegressor as knn_reg
+from sklearn.neighbors import KNeighborsClassifier as knn_class
+from scipy.stats import pearsonr as corr
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data
-from functions.data_embedding import train_embedding_model
-from functions.decoding import train_linear_decoder
-from functions.datasets import generateDataset, split_to_loaders
-from scipy.stats import pearsonr as corr
-
-from functions.metrics import analyze_binary_reconstruction, analyze_decoding
-
-import numpy as np
-from functions.plotting import plot_losses, plot_embedding_results_raw, plot_embedding_results_binary
 
 #%% Load parameters
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 
-#%% TODO parameter override here
-
-#%% TODO create experimental folder, to save results, figs, params
-
 #%% Load session
-session_path = '../../datasets/calcium_imaging/M246/M246_LT_6'
+#session_path = '../../datasets/calcium_imaging/M246/M246_LT_6'
+session_path = '../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
+#session_path = '../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
 data = load_data(session_path)
 
 #%% Preprocessing 
 data = preprocess_data(data,params)
 
-#%%
-dataset = generateDataset(data, params)
-
 #%% Split dataset into
-train_loader, test_loader = split_to_loaders(dataset, params)
+np.random.seed(params['seed'])
+trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
+
+if params['train_set_selection']=='random':
+    trainingFrames[np.random.choice(np.arange(len(data['caTime'])), size=int(len(data['caTime'])*params['train_test_ratio']), replace=False)] = True
+elif params['train_set_selection']=='split':
+    trainingFrames[0:int(params['train_test_ratio']*len(data['caTime']))] = True 
+data['trainingFrames']=trainingFrames
 
 #%%
-embedding_model, train_loss, test_loss = train_embedding_model(params, train_loader, test_loader)
-plot_losses(train_loss, test_loss, title='Embedding model')
+data['trainingFrames']=data['running_ts']
 
-#%% Train decoder on embedding and location
-embedding_decoder, train_loss, test_loss = train_linear_decoder(params, embedding_model, train_loader, test_loader)
-plot_losses(train_loss, test_loss, title='Decoder')
+#%% Train embedding model
+embedding_model = ParametricUMAP(
+                       parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
+                       autoencoder_loss = False,
+                       parametric_reconstruction= True,
+                       n_components=params['embedding_dims'],
+                       n_neighbors=params['n_neighbors'],
+                       min_dist=params['min_dist'],
+                       metric='euclidean',
+                       random_state=42).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 
-# %% Compute
-train_accuracy, train_precision, train_recall, train_F1 = analyze_binary_reconstruction(params, embedding_model, train_loader)
-test_accuracy, test_precision, test_recall, test_F1 = analyze_binary_reconstruction(params, embedding_model, test_loader)
-print(f'Train F1: {np.mean(train_F1).round(4)}, Test F1: {np.mean(test_F1).round(4)}')
+#%%
+train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
+test_embedding = embedding_model.transform(data['neuralData'][~data['trainingFrames'],0:params['input_neurons']])
 
-# %% Compute decoding errors #TODO only when speed > threshold
-train_decoding_error, train_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, train_loader)
-test_decoding_error, test_decoder_stats = analyze_decoding(params, embedding_model, embedding_decoder, test_loader)
+#%% Plot embeddings
+plt.figure(figsize=(1.5,1.5))
+plt.scatter(train_embedding[:, 0], train_embedding[:, 1], s= 1, 
+c=data['position'][data['trainingFrames'],0], cmap='Spectral')
+plt.axis('equal')
+plt.xlabel('$D_{1}$')
+plt.ylabel('$D_{2}$')
+plt.colorbar(label='Relative position')
+plt.tight_layout()
+
+#%% Plot embeddings - elapsed time
+plt.figure(figsize=(1.5,1.5))
+plt.scatter(train_embedding[:, 0], train_embedding[:, 1], s= 1, 
+c=data['elapsed_time'][data['trainingFrames']], cmap='Spectral')
+plt.axis('equal')
+plt.xlabel('$D_{1}$')
+plt.ylabel('$D_{2}$')
+plt.colorbar(label='Elapsed time (s)')
+plt.tight_layout()
+
+#%% Plot embeddings - distance travelled
+plt.figure(figsize=(1.5,1.5))
+plt.scatter(train_embedding[:, 0], train_embedding[:, 1], s= 1, 
+c=data['distance_travelled'][data['trainingFrames']], cmap='Spectral')
+plt.axis('equal')
+plt.xlabel('$D_{1}$')
+plt.ylabel('$D_{2}$')
+plt.colorbar(label='Distance travelled (cm)')
+plt.tight_layout()
+
+#%% Plot embeddings - direction
+plt.figure(figsize=(1.5,1.5))
+plt.scatter(train_embedding[:, 0], train_embedding[:, 1], s= 1, 
+c=data['heading'][data['trainingFrames']], cmap='Spectral')
+plt.axis('equal')
+plt.xlabel('$D_{1}$')
+plt.ylabel('$D_{2}$')
+plt.colorbar(label='Heading')
+plt.tight_layout()
+
+#%% Reconstruct inputs for both train and test sets
+test_reconstruction = embedding_model.inverse_transform(test_embedding)
+test_stats = corr(data['neuralData'][~data['trainingFrames'],0:params['input_neurons']].flatten(),test_reconstruction.flatten())
+
+#%% Train decoder
+pos_decoder = LinearRegression().fit(train_embedding, data['normPosition'][data['trainingFrames'],:])
+train_pred_pos = pos_decoder.predict(train_embedding)
+test_pred_pos = pos_decoder.predict(test_embedding)
+#score=pos_decoder.score(test_embedding, data['position'][~data['trainingFrames'],:])
+vel_decoder = LinearRegression().fit(train_embedding, data['normVelocity'][data['trainingFrames']])
+train_pred_vel = vel_decoder.predict(train_embedding)
+test_pred_vel = vel_decoder.predict(test_embedding)
+
+#%% Decoding accuracy
+train_pred_pos_stats = corr(train_pred_pos.flatten(),data['normPosition'][data['trainingFrames'],:].flatten())
+test_pred_pos_stats = corr(test_pred_pos.flatten(),data['normPosition'][~data['trainingFrames'],:].flatten())
+train_pred_vel_stats = corr(train_pred_vel.flatten(),data['normVelocity'][data['trainingFrames']].flatten())
+test_pred_vel_stats = corr(test_pred_vel.flatten(),data['normVelocity'][~data['trainingFrames']].flatten())
 
 # %% Reconstruct original data
-original = torch.tensor(data['procData'][:,0:params['input_neurons']],dtype=torch.float)
-reconstruction, embedding = embedding_model(original)
-pred_position = embedding_decoder(embedding)
+full_embedding = embedding_model.transform(data['neuralData'][:,0:params['input_neurons']])
+full_reconstruction = embedding_model.inverse_transform(full_embedding)
+pred_position = pos_decoder.predict(full_embedding)
+pred_vel = vel_decoder.predict(full_embedding)
+
+#%% Plot summary
+# Plot embedding results
+plt.figure(figsize=(1,1))
+cells2plot = 10
+plt.subplot(121)
+for i in range(cells2plot):
+    plt.plot(data['caTime'],data['neuralData'][:,i]*params['plot_gain']+i,
+#            c=(0,0,0),
+            linewidth=.3)
+plt.xlim(50,60)
+plt.axis('off')
+
+plt.subplot(122)
+for i in range(cells2plot):
+    plt.plot(data['caTime'],full_reconstruction[:,i]*params['plot_gain']+i,
+#            c=(.8,0,0),
+            linewidth=.3)
+plt.xlim(50,60)
+plt.axis('off')
+
+# %%
+#plt.figure(figsize=(1.5,1))
+plt.scatter(full_embedding[:,0],full_embedding[:,1],c=data['position'][:,0], cmap='Spectral', s=1)
+plt.title('embedding')
+#plt.xlabel('$D_{1}$')
+#plt.ylabel('$D_{2}$')
+plt.axis('scaled')
+plt.axis('off')
+plt.colorbar(label='Location (cm)', fraction=0.025, pad=.001)
 
 #%%
-if params['data_type']=='raw':
-    reconstruction_R, p_value = corr(original.flatten(),reconstruction.detach().flatten())
-    plot_embedding_results_raw(params, original, reconstruction.detach(), embedding, reconstruction_R, test_decoder_stats[0], data['position'][:,0], pred_position[:,0].detach(), data['velocity'])
-elif params['data_type']=='binarized':
-    plot_embedding_results_binary(original, reconstruction, embedding, test_F1, test_decoder_stats[0], data['position'][:,0], pred_position[:,0].detach(), data['velocity'])
+plt.figure(figsize=(.75,.75))
+plt.title('reconstruction')
+plt.scatter(data['neuralData'][~data['trainingFrames'],0:params['input_neurons']].flatten(),test_reconstruction.flatten(), s=1)
+#plt.plot([0,100],[0,100],'r--')
+#plt.xlim([0,100])
+#plt.ylim([0,100])
+plt.title(f'$R^2=${test_stats[0].round(4)}')
+plt.xlabel('original')
+plt.ylabel('reconstructed')
+
+#%%
+plt.figure(figsize=(.75,.75))
+plt.title('location')
+plt.scatter(data['normPosition'].flatten(),pred_position.flatten(), s=1)
+#plt.plot([0,100],[0,100],'r--')
+#plt.xlim([0,100])
+#plt.ylim([0,100])
+plt.title(f'$R^2=${test_pred_pos_stats[0].round(4)}')
+plt.xlabel('actual')
+plt.ylabel('predicted')
+
+#%%
+plt.figure(figsize=(.75,.75))
+plt.title('velocity')
+plt.scatter(data['normVelocity'].flatten(),pred_vel.flatten(), s=1)
+#plt.plot([0,100],[0,100],'r--')
+#plt.xlim([0,100])
+#plt.ylim([0,100])
+plt.title(f'$R^2=${test_pred_vel_stats[0].round(4)}')
+plt.xlabel('actual')
+plt.ylabel('predicted')
+.
+#%%
+plt.figure(figsize=(3,1))
+plt.plot(data['caTime'],data['normPosition'][:,0], label='Actual')
+plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([])
+plt.plot(data['caTime'],pred_position[:,0], label='Decoded')
+#plt.xlim([50,60])
+#plt.ylim([0,100])
+plt.xlabel('Time (s)')
+plt.ylabel('Location\n(normalize)')
+plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
+
+#%%
+plt.figure(figsize=(3,1))
+plt.plot(data['caTime'],data['normVelocity'], label='Actual')
+plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([])
+plt.plot(data['caTime'],pred_vel, label='Decoded')
+#plt.xlim([50,60])
+#plt.ylim([0,100])
+plt.xlabel('Time (s)')
+plt.ylabel('Velocity\n(normalized)')
+plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 # %%
