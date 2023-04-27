@@ -111,7 +111,7 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('decoding_error', data=decoding_error)
-            f.create_dataset('decoding_error', data=shuffled_error)
+            f.create_dataset('shuffled_error', data=shuffled_error)
 
     # Decode distance travelled
     if not os.path.exists(os.path.join(working_directory,'distance_decoding.h5')) or params['overwrite_mode']=='always':
@@ -121,7 +121,7 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('decoding_error', data=decoding_error)
-            f.create_dataset('decoding_error', data=shuffled_error)
+            f.create_dataset('shuffled_error', data=shuffled_error)
     
     # Decode velocity
     if not os.path.exists(os.path.join(working_directory,'velocity_decoding.h5')) or params['overwrite_mode']=='always':
@@ -131,7 +131,7 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('decoding_error', data=decoding_error)
-            f.create_dataset('decoding_error', data=shuffled_error)
+            f.create_dataset('shuffled_error', data=shuffled_error)
 
     # Decode position
     if not os.path.exists(os.path.join(working_directory,'spatial_decoding.h5')) or params['overwrite_mode']=='always':
@@ -146,7 +146,7 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('decoding_error', data=decoding_error)
-            f.create_dataset('decoding_error', data=shuffled_error)
+            f.create_dataset('shuffled_error', data=shuffled_error)
 
     # Extract direction tuning
     try:
@@ -155,7 +155,7 @@ for i, session in enumerate(tqdm(session_list)):
                 if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
                     decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['heading'],data, params, train_embedding, test_embedding)
                     f.create_dataset('decoding_error', data=decoding_error)
-                    f.create_dataset('decoding_error', data=shuffled_error)
+                    f.create_dataset('shuffled_error', data=shuffled_error)
                 elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
                     decoding_score, z_score, p_value = decode_embedding(data['LT_direction'],data, params, train_embedding, test_embedding)
             
