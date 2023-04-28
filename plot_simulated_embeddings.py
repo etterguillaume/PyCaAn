@@ -9,6 +9,7 @@ from keras.layers.core import Lambda
 from umap.umap_ import UMAP
 from sklearn.linear_model import LinearRegression as lin_reg
 from sklearn.neighbors import KNeighborsRegressor as KNN_reg
+from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 plt.style.use('plot_style.mplstyle')
@@ -128,6 +129,7 @@ plt.axis('off')
 plt.colorbar(label='Artificial activity')
 plt.savefig(os.path.join(params['path_to_results'],'figures','ground_truth_manifold.pdf'))
 
+# %%
 plt.figure()
 plt.title(f'Embedding performance\nR$^2$: {embedding_perf.round(4)}')
 plt.scatter(test_embedding[:,0], test_embedding[:,1], edgecolors='none', s=.5, c=u_true[~train_idx], cmap='Spectral')
@@ -136,9 +138,10 @@ plt.axis('off')
 plt.colorbar(label='Artificial activity')
 plt.savefig(os.path.join(params['path_to_results'],'figures','estimated_manifold.pdf'))
 
+# %%
 plt.figure()
 plt.title(f'Reconstruction accuracy\nR$^2${reconstruction_perf.round(4)}')
-plt.scatter(mean_true[~train_idx].flatten(), test_reconstruction.flatten(), edgecolors='none', s=.5,)
+plt.scatter(mean_true[~train_idx].flatten()[::100], test_reconstruction.flatten()[::100], edgecolors='none', s=.5)
 plt.axis('equal')
 plt.xlabel('Original')
 plt.ylabel('Reconstruction')
@@ -150,7 +153,6 @@ prediction = decoder.predict(test_embedding)
 
 prediction_stats = decoder.score(test_embedding,u_true[~train_idx])
 # %%
-
 plt.figure()
 plt.plot(u_true[~train_idx],label='Actual')
 plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([]);plt.plot([]) # Skip cycler colors
@@ -163,10 +165,65 @@ plt.savefig(os.path.join(params['path_to_results'],'figures','simulated_decoded_
 
 #%%
 plt.title(f'Decoding accuracy\nR$^2${prediction_stats.round(4)}')
-plt.scatter(u_true[~train_idx].flatten(), prediction.flatten(), edgecolors='none', s=.5,)
+plt.scatter(u_true[~train_idx].flatten(), prediction.flatten(), edgecolors='none', s=.5)
 plt.plot([0,6],[0,6],'C6--')
 plt.axis('equal')
 plt.xlabel('Original')
 plt.ylabel('Reconstruction')
 plt.savefig(os.path.join(params['path_to_results'],'figures','simulated_decoding_performance.pdf'))
-# %%
+
+# %% Optimize parameters
+num_neurons_list=[8,16,32,64,128,256,512,1024]
+
+embedding_perf = np.zeros(len(num_neurons_list))*np.nan
+reconstruction_perf = np.zeros(len(num_neurons_list))*np.nan
+decoder_perf = np.zeros(len(num_neurons_list))*np.nan
+
+for i, num_neurons in enumerate(tqdm(num_neurons_list)):
+    z_true, u_true, mean_true, lam_true = simulate_cont_data(length, num_neurons)
+
+    embedding_model = UMAP(
+                       n_components=params['embedding_dims'],
+                       n_neighbors=params['n_neighbors'],
+                       min_dist=params['min_dist'],
+                       metric='euclidean',
+                       random_state=42).fit(mean_true[train_idx])
+
+    train_embedding = embedding_model.transform(mean_true[train_idx])
+    test_embedding = embedding_model.transform(mean_true[~train_idx])
+
+    embedding_decoder=lin_reg().fit(train_embedding, z_true[train_idx,0:2])
+    embedding_perf[i] = embedding_decoder.score(test_embedding,z_true[~train_idx,0:2])
+
+    train_reconstruction = embedding_model.inverse_transform(train_embedding)
+    test_reconstruction = embedding_model.inverse_transform(test_embedding)
+
+    reconstruction_decoder=lin_reg().fit(train_reconstruction, mean_true[train_idx])
+    reconstruction_perf[i] = reconstruction_decoder.score(test_reconstruction,mean_true[~train_idx])
+
+    decoder = KNN_reg(metric='euclidean').fit(train_embedding, u_true[train_idx])
+    prediction = decoder.predict(test_embedding)
+
+    decoder_perf[i] = decoder.score(test_embedding,u_true[~train_idx])
+
+#%% Plot results
+plt.figure()
+plt.plot(num_neurons_list,embedding_perf)
+plt.xlabel('Neurons')
+plt.ylabel('Embedding performance')
+plt.savefig(os.path.join(params['path_to_results'],'figures','optim_numNeurons_embedding_perf.pdf'))
+
+plt.figure()
+plt.plot(num_neurons_list,reconstruction_perf)
+plt.xlabel('Neurons')
+plt.ylabel('Reconstruction accuracy')
+plt.savefig(os.path.join(params['path_to_results'],'figures','optim_numNeurons_reconstruction_accuracy.pdf'))
+
+plt.figure()
+plt.plot(num_neurons_list,prediction_stats)
+plt.xlabel('Neurons')
+plt.ylabel('Decoding accuracy')
+plt.savefig(os.path.join(params['path_to_results'],'figures','optim_numNeurons_decoding_accuracy.pdf'))
+
+#%% Then select ideal number of neurons and optimize embedding dims
+num_dims_list = [1,2,3,4,5,6,7,8]
