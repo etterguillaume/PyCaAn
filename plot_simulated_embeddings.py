@@ -1,12 +1,12 @@
 #%%
 import numpy as np
+import os
 import yaml
 import tensorflow as tf
 from keras import layers
 from keras.models import Model
 from keras.layers.core import Lambda
-from umap.parametric_umap import ParametricUMAP
-from scipy.stats import pearsonr as corr
+from umap.umap_ import UMAP
 from sklearn.linear_model import LinearRegression as lin_reg
 from sklearn.neighbors import KNeighborsRegressor as KNN_reg
 
@@ -95,16 +95,8 @@ train_idx = np.arange(0,int(params['train_test_ratio']*length))
 n_dim = 128
 z_true, u_true, mean_true, lam_true = simulate_cont_data(length, n_dim)
 
-plt.figure()
-plt.scatter(z_true[:,0], z_true[:,1], edgecolors='none', s=.5, c=u_true, cmap='Spectral')
-plt.axis('equal')
-plt.colorbar(label='Artificial activity')
-
 #%%
-embedding_model = ParametricUMAP(
-                       parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
-                       autoencoder_loss = True,
-                       parametric_reconstruction = True,
+embedding_model = UMAP(
                        n_components=params['embedding_dims'],
                        n_neighbors=params['n_neighbors'],
                        min_dist=params['min_dist'],
@@ -112,41 +104,51 @@ embedding_model = ParametricUMAP(
                        random_state=42).fit(mean_true[train_idx])
 
 #%% Transform data
-embedding = embedding_model.transform(mean_true[~train_idx])
+train_embedding = embedding_model.transform(mean_true[train_idx])
+test_embedding = embedding_model.transform(mean_true[~train_idx])
+
+#%% Test embedding performance
+embedding_decoder=lin_reg().fit(train_embedding, z_true[train_idx,0:2])
+embedding_perf = embedding_decoder.score(test_embedding,z_true[~train_idx,0:2])
 
 #%% Reconstruct inputs
-reconstruction = embedding_model.inverse_transform(embedding)
+train_reconstruction = embedding_model.inverse_transform(train_embedding)
+test_reconstruction = embedding_model.inverse_transform(test_embedding)
 
 #%% Assess reconstruction performance
-embedding_decoder=lin_reg().fit(embedding, z_true[~train_idx,0:2])
-embedding_perf = embedding_decoder.score(embedding,z_true[~train_idx,0:2])
-reconstruction_decoder=lin_reg().fit(reconstruction, mean_true[~train_idx])
-reconstruction_perf = reconstruction_decoder.score(reconstruction,mean_true[~train_idx])
+reconstruction_decoder=lin_reg().fit(train_reconstruction, mean_true[train_idx])
+reconstruction_perf = reconstruction_decoder.score(test_reconstruction,mean_true[~train_idx])
 
 # %%
 plt.figure()
 plt.title('True latent')
 plt.scatter(z_true[~train_idx,0], z_true[~train_idx,1], edgecolors='none', s=.5, c=u_true[~train_idx], cmap='Spectral')
 plt.axis('equal')
+plt.axis('off')
+plt.colorbar(label='Artificial activity')
+plt.savefig(os.path.join(params['path_to_results'],'figures','ground_truth_manifold.pdf'))
 
 plt.figure()
 plt.title(f'Embedding performance\nR$^2$: {embedding_perf.round(4)}')
-plt.scatter(embedding[:,0], embedding[:,1], edgecolors='none', s=.5, c=u_true[~train_idx], cmap='Spectral')
+plt.scatter(test_embedding[:,0], test_embedding[:,1], edgecolors='none', s=.5, c=u_true[~train_idx], cmap='Spectral')
 plt.axis('equal')
+plt.axis('off')
 plt.colorbar(label='Artificial activity')
+plt.savefig(os.path.join(params['path_to_results'],'figures','estimated_manifold.pdf'))
 
 plt.figure()
 plt.title(f'Reconstruction accuracy\nR$^2${reconstruction_perf.round(4)}')
-plt.scatter(mean_true[~train_idx].flatten(), reconstruction.flatten(), edgecolors='none', s=.5,)
+plt.scatter(mean_true[~train_idx].flatten(), test_reconstruction.flatten(), edgecolors='none', s=.5,)
 plt.axis('equal')
 plt.xlabel('Original')
 plt.ylabel('Reconstruction')
+plt.savefig(os.path.join(params['path_to_results'],'figures','GT_vs_reconstruction_performance.pdf'))
 
 # %%
-decoder = KNN_reg(metric='euclidean').fit(embedding, u_true[~train_idx])
-prediction = decoder.predict(embedding)
+decoder = KNN_reg(metric='euclidean').fit(train_embedding, u_true[train_idx])
+prediction = decoder.predict(test_embedding)
 
-prediction_stats = decoder.score(embedding,u_true[~train_idx])
+prediction_stats = decoder.score(test_embedding,u_true[~train_idx])
 # %%
 
 plt.figure()
@@ -157,11 +159,14 @@ plt.xlim([0,50])
 plt.xlabel('Sample')
 plt.ylabel('Value')
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
+plt.savefig(os.path.join(params['path_to_results'],'figures','simulated_decoded_manifold.pdf'))
 
 #%%
-plt.title(f'Reconstruction accuracy\nR$^2${prediction_stats.round(4)}')
+plt.title(f'Decoding accuracy\nR$^2${prediction_stats.round(4)}')
 plt.scatter(u_true[~train_idx].flatten(), prediction.flatten(), edgecolors='none', s=.5,)
+plt.plot([0,6],[0,6],'C6--')
 plt.axis('equal')
 plt.xlabel('Original')
 plt.ylabel('Reconstruction')
+plt.savefig(os.path.join(params['path_to_results'],'figures','simulated_decoding_performance.pdf'))
 # %%
