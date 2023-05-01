@@ -220,7 +220,7 @@ plt.ylabel('Reconstruction accuracy')
 plt.savefig(os.path.join(params['path_to_results'],'figures','optim_numNeurons_reconstruction_accuracy.pdf'))
 
 plt.figure()
-plt.plot(num_neurons_list,prediction_stats)
+plt.plot(num_neurons_list,decoder_perf)
 plt.xlabel('Neurons')
 plt.ylabel('Decoding accuracy')
 plt.savefig(os.path.join(params['path_to_results'],'figures','optim_numNeurons_decoding_accuracy.pdf'))
