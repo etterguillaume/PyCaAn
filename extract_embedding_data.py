@@ -2,7 +2,9 @@
 import yaml
 import numpy as np
 import joblib
-from umap.umap_ import UMAP
+# from umap.umap_ import UMAP
+from umap.parametric_umap import ParametricUMAP
+import tensorflow as tf
 import os
 from tqdm import tqdm
 from sklearn.linear_model import LinearRegression as lin_reg
@@ -66,7 +68,11 @@ for i, session in enumerate(tqdm(session_list)):
 
 
             # Train embedding model
-            embedding_model = UMAP(
+            embedding_model = ParametricUMAP(
+                                verbose=False,
+                                parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
+                                autoencoder_loss = True,
+                                parametric_reconstruction = True,
                                 n_components=params['embedding_dims'],
                                 n_neighbors=params['n_neighbors'],
                                 min_dist=params['min_dist'],
@@ -92,15 +98,15 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('reconstruction_score', data=reconstruction_score)
         
         # Save model 
-        joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib instead
+        # joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib instead #TEMP
 
-    else: # Load existing model
-        loaded_embedding_model = joblib.load(params['path_to_results'] + 'test_umap_model.sav') #using joblib instead
-        model_file = h5py.File(os.path.join(working_directory,'model_params.h5'), 'r')
-        data['trainingFrames'] = model_file['trainingFrames']
-        data['testingFrames'] = model_file['testingFrames']
-        reconstruction_score = model_file['reconstruction_score']
-        model_file.close()
+    # else: # Load existing model
+    #     loaded_embedding_model = joblib.load(params['path_to_results'] + 'test_umap_model.sav') #using joblib instead
+    #     model_file = h5py.File(os.path.join(working_directory,'model_params.h5'), 'r')
+    #     data['trainingFrames'] = model_file['trainingFrames']
+    #     data['testingFrames'] = model_file['testingFrames']
+    #     reconstruction_score = model_file['reconstruction_score']
+    #     model_file.close()
 
     #%% Decode
     # Decode elapsed time

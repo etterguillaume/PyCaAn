@@ -6,7 +6,7 @@ import tensorflow as tf
 from keras import layers
 from keras.models import Model
 from keras.layers.core import Lambda
-from umap.umap_ import UMAP
+from umap.parametric_umap import ParametricUMAP
 from sklearn.linear_model import LinearRegression as lin_reg
 from sklearn.neighbors import KNeighborsRegressor as KNN_reg
 from tqdm import tqdm
@@ -97,7 +97,10 @@ n_dim = 128
 z_true, u_true, mean_true, lam_true = simulate_cont_data(length, n_dim)
 
 #%%
-embedding_model = UMAP(
+embedding_model = ParametricUMAP(
+                       parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
+                       autoencoder_loss = True,
+                       parametric_reconstruction = True,
                        n_components=params['embedding_dims'],
                        n_neighbors=params['n_neighbors'],
                        min_dist=params['min_dist'],
@@ -127,7 +130,7 @@ plt.scatter(z_true[~train_idx,0], z_true[~train_idx,1], edgecolors='none', s=.5,
 plt.axis('equal')
 plt.axis('off')
 plt.colorbar(label='Artificial activity')
-plt.savefig(os.path.join(params['path_to_results'],'figures','ground_truth_manifold.pdf'))
+plt.savefig(os.path.join(params['path_to_results'],'figures','pUMAP_ground_truth_manifold.pdf'))
 
 # %%
 plt.figure()
@@ -136,7 +139,7 @@ plt.scatter(test_embedding[:,0], test_embedding[:,1], edgecolors='none', s=.5, c
 plt.axis('equal')
 plt.axis('off')
 plt.colorbar(label='Artificial activity')
-plt.savefig(os.path.join(params['path_to_results'],'figures','estimated_manifold.pdf'))
+plt.savefig(os.path.join(params['path_to_results'],'figures','pUMAP_estimated_manifold.pdf'))
 
 # %%
 plt.figure()
@@ -145,7 +148,7 @@ plt.scatter(mean_true[~train_idx].flatten()[::100], test_reconstruction.flatten(
 plt.axis('equal')
 plt.xlabel('Original')
 plt.ylabel('Reconstruction')
-plt.savefig(os.path.join(params['path_to_results'],'figures','GT_vs_reconstruction_performance.pdf'))
+plt.savefig(os.path.join(params['path_to_results'],'figures','pUMAP_GT_vs_reconstruction_performance.pdf'))
 
 # %%
 decoder = KNN_reg(metric='euclidean').fit(train_embedding, u_true[train_idx])
@@ -161,7 +164,7 @@ plt.xlim([0,50])
 plt.xlabel('Sample')
 plt.ylabel('Value')
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
-plt.savefig(os.path.join(params['path_to_results'],'figures','simulated_decoded_manifold.pdf'))
+plt.savefig(os.path.join(params['path_to_results'],'figures','pUMAP_simulated_decoded_manifold.pdf'))
 
 #%%
 plt.title(f'Decoding accuracy\nR$^2${prediction_stats.round(4)}')
@@ -170,7 +173,7 @@ plt.plot([0,6],[0,6],'C6--')
 plt.axis('equal')
 plt.xlabel('Original')
 plt.ylabel('Reconstruction')
-plt.savefig(os.path.join(params['path_to_results'],'figures','simulated_decoding_performance.pdf'))
+plt.savefig(os.path.join(params['path_to_results'],'figures','pUMAP_simulated_decoding_performance.pdf'))
 
 # %% Optimize parameters
 num_neurons_list=[8,16,32,64,128,256,512,1024]

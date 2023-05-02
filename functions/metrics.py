@@ -36,11 +36,6 @@ def analyze_binary_reconstruction(params, model, data_loader):
 
     return accuracy, precision, recall, F1 
 
-def extract_decoding_error(actual,decoded):
-    decoding_error=[]
-    # Do something
-    return decoding_error
-
 def extract_binary_stats(binary_data):
     numFrames, numNeurons = binary_data.shape
     trans_probability = []
