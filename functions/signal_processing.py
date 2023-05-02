@@ -101,21 +101,36 @@ def compute_heading(interpolated_position):
 def compute_distance_time(interpolated_position, velocity, caTime, speed_threshold):
     elapsed_time = np.zeros(len(caTime))
     distance_travelled = np.zeros(len(caTime))
-    time_counter=0
-    distance_counter=0
+    time2stop = np.zeros(len(caTime))
+    distance2stop = np.zeros(len(caTime))
+    elapsed_time_counter=0
+    travelled_distance_counter=0
     for i in range(1,len(velocity)):
         if (velocity[i] > speed_threshold): # Start of locomotor trajectory
-            time_counter += caTime[i]-caTime[i-1]
-            distance_counter += sqrt((interpolated_position[i,0]-interpolated_position[i-1,0])**2 + (interpolated_position[i,1]-interpolated_position[i-1,1])**2) # Euclidean distance
+            elapsed_time_counter += caTime[i]-caTime[i-1]
+            travelled_distance_counter += sqrt((interpolated_position[i,0]-interpolated_position[i-1,0])**2 + (interpolated_position[i,1]-interpolated_position[i-1,1])**2) # Euclidean distance
 
         if (velocity[i] <= speed_threshold): # End of locomotor trajectory
-            time_counter = 0 # Reset counter
-            distance_counter = 0
+            elapsed_time_counter = 0 # Reset counter
+            travelled_distance_counter = 0
 
-        elapsed_time[i] = time_counter
-        distance_travelled[i] = distance_counter
-    
-    return elapsed_time, distance_travelled
+        elapsed_time[i] = elapsed_time_counter
+        distance_travelled[i] = travelled_distance_counter
+
+    # Time/distance to destination
+    for i in reversed(range(1,len(velocity))):
+        if (velocity[i] > speed_threshold): # Start of locomotor trajectory
+            elapsed_time_counter += caTime[i]-caTime[i-1]
+            travelled_distance_counter += sqrt((interpolated_position[i,0]-interpolated_position[i-1,0])**2 + (interpolated_position[i,1]-interpolated_position[i-1,1])**2) # Euclidean distance
+
+        if (velocity[i] <= speed_threshold): # End of locomotor trajectory
+            elapsed_time_counter = 0 # Reset counter
+            travelled_distance_counter = 0
+
+        time2stop[i] = elapsed_time_counter
+        distance2stop[i] = travelled_distance_counter
+
+    return elapsed_time, distance_travelled, time2stop, distance2stop
 
 def extract_tone(data, params):
     data['binaryTone'] = data['tone']
@@ -183,7 +198,7 @@ def preprocess_data(data, params):
     data = clean_timestamps(data) # only include unique timestamps
     data['position'] = interpolate_2D(data['position'], data['behavTime'], data['caTime'])
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
-    data['elapsed_time'], data['distance_travelled'] = compute_distance_time(data['position'], 
+    data['elapsed_time'], data['distance_travelled'], data['time2stop'], data['distance2stop'] = compute_distance_time(data['position'], 
                                                                              data['velocity'], 
                                                                              data['caTime'], 
                                                                              params['speed_threshold'])
