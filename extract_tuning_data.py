@@ -68,8 +68,8 @@ for i, session in enumerate(tqdm(session_list)):
             yaml.dump(info_dict,file)
 
     # Extract tuning to time
-    if not os.path.exists(os.path.join(working_directory,'temporal_tuning.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'temporal_tuning.h5'),'w') as f:
+    if not os.path.exists(os.path.join(working_directory,'retrospective_temporal_tuning.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'retrospective_temporal_tuning.h5'),'w') as f:
             AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                     data['elapsed_time'],
                                                     data['running_ts'],
@@ -81,9 +81,37 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
 
-    # Extract tuning to distance
-    if not os.path.exists(os.path.join(working_directory,'distance_tuning.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'distance_tuning.h5'),'w') as f:
+    # Extract tuning to prospective time
+    if not os.path.exists(os.path.join(working_directory,'prospective_temporal_tuning.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'prospective_temporal_tuning.h5'),'w') as f:
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                    data['time2stop'],
+                                                    data['running_ts'],
+                                                    var_length=params['max_temporal_length'],
+                                                    bin_size=params['temporalBinSize'])
+            f.create_dataset('AMI', data=AMI)
+            f.create_dataset('p_value', data=p_value)
+            f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+            f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+            f.create_dataset('tuning_curves', data=tuning_curves)
+
+    # Extract tuning to retrospective distance
+    if not os.path.exists(os.path.join(working_directory,'retrospective_distance_tuning.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'retrospective_distance_tuning.h5'),'w') as f:
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                                                    data['distance_travelled'],
+                                                    data['running_ts'],
+                                                    var_length=params['max_distance_length'],
+                                                    bin_size=params['spatialBinSize'])
+            f.create_dataset('AMI', data=AMI)
+            f.create_dataset('p_value', data=p_value)
+            f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+            f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+            f.create_dataset('tuning_curves', data=tuning_curves)
+
+    # Extract tuning to prospective distance
+    if not os.path.exists(os.path.join(working_directory,'prospective_distance_tuning.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'prospective_distance_tuning.h5'),'w') as f:
             AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                     data['distance_travelled'],
                                                     data['running_ts'],
