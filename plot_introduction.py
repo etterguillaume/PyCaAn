@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 # Custom functions
 from functions.dataloaders import load_data
-from functions.signal_processing import preprocess_data
+from functions.signal_processing import preprocess_data, smooth_1D, smooth_2D
 # Params
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
@@ -152,8 +152,24 @@ for session in tqdm(sessionList):
 df = pd.DataFrame(data_list)
 
 #%% Find indices of example cells
-# Example place cell
+# Example place cell in open field
+df_OF = df.query("region=='CA1' and task=='OF'")
+pc_row=df_OF['spatial_info'].argmax()
+session_info=df_OF.iloc[pc_row]
+session=session_info['region']+'_'+session_info['subject']+'_'+session_info['task']+'_'+str(session_info['day'])
+spatial_file = h5py.File(os.path.join(params['path_to_results'],'tuning_data',session,'spatial_tuning.h5'), 'r')
+spatial_file['tuning_curves']
 
+
+PF=spatial_file['tuning_curves'][23,:,:]
+peak_prob=np.nanmax(PF)
+PF[np.isnan(PF)]=0
+PF=smooth_2D(PF, params)
+plt.imshow(PF, interpolation='Bicubic')
+plt.title(peak_prob.round(2))
+plt.axis('off')
+
+plt.savefig(params['path_to_results']+"/figures/example_placecell.pdf")
 
 #%% Plot example cells
 
