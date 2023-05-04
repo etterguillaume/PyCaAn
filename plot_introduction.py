@@ -17,9 +17,6 @@ from functions.signal_processing import preprocess_data, smooth_1D, smooth_2D
 with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 
-# %% [markdown]
-# # Plot footprints and calcium traces with associated colors
-
 # %%
 # Pick example session/mouse
 session_path='../../datasets/calcium_imaging/CA1/M990/M990_legoOF_20190114'
@@ -113,6 +110,7 @@ for session in tqdm(sessionList):
             data_list.append( #This will create one list entry per cell
                 {
                     # Basic conditions
+                    'cell_ID':i,
                     'subject':session_info['subject'],
                     'region':session_info['region'],
                     'day':session_info['day'],
@@ -151,25 +149,116 @@ for session in tqdm(sessionList):
 
 df = pd.DataFrame(data_list)
 
-#%% Find indices of example cells
-# Example place cell in open field
+#%% Example place cell in open field
 df_OF = df.query("region=='CA1' and task=='OF'")
 pc_row=df_OF['spatial_info'].argmax()
 session_info=df_OF.iloc[pc_row]
+PC_cell_ID=session_info['cell_ID']
 session=session_info['region']+'_'+session_info['subject']+'_'+session_info['task']+'_'+str(session_info['day'])
 spatial_file = h5py.File(os.path.join(params['path_to_results'],'tuning_data',session,'spatial_tuning.h5'), 'r')
 spatial_file['tuning_curves']
 
 
-PF=spatial_file['tuning_curves'][23,:,:]
+PF=spatial_file['tuning_curves'][PC_cell_ID,:,:]
 peak_prob=np.nanmax(PF)
 PF[np.isnan(PF)]=0
 PF=smooth_2D(PF, params)
 plt.imshow(PF, interpolation='Bicubic')
 plt.title(peak_prob.round(2))
+#plt.colorbar()
 plt.axis('off')
 
 plt.savefig(params['path_to_results']+"/figures/example_placecell.pdf")
+spatial_file.close()
 
-#%% Plot example cells
+#%% Example time cell in open field
+#df_OF = df.query("region=='CA1' and task=='OF'")
+tc_row=df_OF['retrospective_temporal_info'].argmax()
+session_info=df_OF.iloc[tc_row]
+TC_cell_ID=session_info['cell_ID']
+session=session_info['region']+'_'+session_info['subject']+'_'+session_info['task']+'_'+str(session_info['day'])
+retrospective_temporal_file = h5py.File(os.path.join(params['path_to_results'],'tuning_data',session,'retrospective_temporal_tuning.h5'), 'r')
 
+TF=retrospective_temporal_file['tuning_curves'][TC_cell_ID,:]
+peak_prob=np.nanmax(TF)
+TF[np.isnan(TF)]=0
+TF=smooth_1D(TF, params)
+plt.figure(figsize=(1,.75))
+plt.plot(TF,linewidth=2,color='C1')
+plt.title(peak_prob.round(2))
+plt.xticks([0,len(TF)],[0,params['max_temporal_length']])
+plt.yticks([])
+plt.xlabel('Elapsed time (s)')
+
+plt.savefig(params['path_to_results']+"/figures/example_timecell.pdf")
+retrospective_temporal_file.close()
+
+#%% Example distance cell in open field
+#df_OF = df.query("region=='CA1' and task=='OF'")
+dc_row=df_OF['retrospective_distance_info'].argmax()
+session_info=df_OF.iloc[dc_row]
+DC_cell_ID=session_info['cell_ID']
+session=session_info['region']+'_'+session_info['subject']+'_'+session_info['task']+'_'+str(session_info['day'])
+retrospective_distance_file = h5py.File(os.path.join(params['path_to_results'],'tuning_data',session,'retrospective_distance_tuning.h5'), 'r')
+
+DF=retrospective_distance_file['tuning_curves'][DC_cell_ID,:]
+peak_prob=np.nanmax(DF)
+DF[np.isnan(DF)]=0
+DF=smooth_1D(DF, params)
+plt.figure(figsize=(1,.75))
+plt.plot(DF,linewidth=2,color='C5')
+plt.title(peak_prob.round(2))
+plt.xticks([0,len(DF)],[0,params['max_distance_length']])
+plt.yticks([])
+plt.xlabel('Distance travelled (cm)')
+
+plt.savefig(params['path_to_results']+"/figures/example_distancecell.pdf")
+retrospective_distance_file.close()
+
+#%% Example speed cell in open field
+#df_OF = df.query("region=='CA1' and task=='OF'")
+vc_row=df_OF['velocity_info'].argmax()
+session_info=df_OF.iloc[vc_row]
+VC_cell_ID=session_info['cell_ID']
+session=session_info['region']+'_'+session_info['subject']+'_'+session_info['task']+'_'+str(session_info['day'])
+velocity_file = h5py.File(os.path.join(params['path_to_results'],'tuning_data',session,'velocity_tuning.h5'), 'r')
+
+VF=velocity_file['tuning_curves'][VC_cell_ID,:]
+peak_prob=np.nanmax(VF)
+VF[np.isnan(VF)]=0
+VF=smooth_1D(VF, params)
+plt.figure(figsize=(1,.75))
+plt.plot(VF,linewidth=2,color='C6')
+plt.title(peak_prob.round(2))
+plt.xticks([0,len(VF)],[0,params['max_velocity_length']])
+plt.yticks([])
+plt.xlabel('Speed (cm.s$^{-1}$)')
+
+plt.savefig(params['path_to_results']+"/figures/example_speedcell.pdf")
+velocity_file.close()
+
+#%% Example heading cell in open field
+#df_OF = df.query("region=='CA1' and task=='OF'")
+hc_row=df_OF['heading_info'].argmax()
+session_info=df_OF.iloc[hc_row]
+HC_cell_ID=session_info['cell_ID']
+session=session_info['region']+'_'+session_info['subject']+'_'+session_info['task']+'_'+str(session_info['day'])
+direction_file = h5py.File(os.path.join(params['path_to_results'],'tuning_data',session,'direction_tuning.h5'), 'r')
+
+HF=direction_file['tuning_curves'][HC_cell_ID,:]
+peak_prob=np.nanmax(HF)
+HF[np.isnan(HF)]=0
+HF=smooth_1D(HF, params)
+plt.figure(figsize=(1,.75))
+plt.polar(np.radians(np.arange(0,360,params['directionBinSize'])),
+          HF,
+          linewidth=2,color='C3')
+plt.title(peak_prob.round(2))
+#plt.xticks([0,len(HF)],[0,np.pi])
+plt.yticks([])
+plt.xlabel('Heading (º)')
+
+plt.savefig(params['path_to_results']+"/figures/example_headingcell.pdf")
+direction_file.close()
+
+#%%
