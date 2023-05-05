@@ -2,6 +2,7 @@ numpy
 scipy
 scikit-learn
 h5py
+pytest
 pandas
 pyyaml
 pingouin

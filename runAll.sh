@@ -1,5 +1,5 @@
 ## Run tests
-python3 run_tests.py # First verify that everything works correctly
+pytest # First verify that everything works correctly
 
 ## Analyze dataset
 python3 curate_dataset.py # Prepare dataset

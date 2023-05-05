@@ -14,12 +14,12 @@ from tqdm import tqdm
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data, smooth_1D, smooth_2D
 # Params
-with open('params.yaml','r') as file:
+with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 # %%
 # Pick example session/mouse
-session_path='../../datasets/calcium_imaging/CA1/M990/M990_legoOF_20190114'
+session_path=params['path_to_dataset']+'/CA1/M990/M990_legoOF_20190114'
 data = load_data(session_path)
 data = preprocess_data(data, params)
 
