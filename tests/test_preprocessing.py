@@ -1,11 +1,7 @@
-#%%TEMP FOR DEBUG
-%load_ext autoreload
-%autoreload 2
-
 #%% Import dependencies
 import yaml
 import matplotlib.pyplot as plt
-plt.style.use('plot_style.mplstyle')
+plt.style.use('../plot_style.mplstyle')
 from functions.dataloaders import load_data
 from functions.signal_processing import compute_velocity, compute_distance_time, interpolate_2D, preprocess_data
 
