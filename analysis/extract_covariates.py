@@ -10,7 +10,7 @@ from functions.metrics import extract_total_distance_travelled
 import h5py
 
 #%% Load parameters
-with open('params.yaml','r') as file:
+with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Load folders to analyze from yaml file?
