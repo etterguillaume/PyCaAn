@@ -220,10 +220,6 @@ plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_binsVec_info1_samplingEqual.pdf'))
 
 
-
-
-
-
 #%% Behavioral variable with multiple bins
 ground_truth_info = 1
 sampling_vec = np.linspace(0.001,1,100)
@@ -242,16 +238,16 @@ for i in tqdm(range(len(bin_vec))):
                                        sampling=sampling_vec[j])
         
         MI_mx[j,i] = mutual_info_score(activity,variable)
-        AMI_mx[j,i] = adjusted_mutual_info_score(activity,variable)
+        AMI_mx[j,i] = adjusted_mutual_info_score(activity,variable, average_method='min')
         X2_mx[j,i] = chi2(activity[:,None],variable[:,None])[1]
 
-#%%
 plt.figure()
 plt.title(f'Ground truth info: {ground_truth_info}')
-plt.plot(MI_mx,cmap='magma', interpolation='bicubic',origin='lower', aspect='auto', vmin=0, vmax=1)
+plt.imshow(MI_mx,cmap='magma', interpolation='bicubic',origin='lower', aspect='auto', vmin=0, vmax=1)
 plt.colorbar(label='MI')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_binsVec_info1_samplingVec_MI.pdf'))
 
 plt.figure()
 plt.title(f'Ground truth info: {ground_truth_info}')
@@ -259,6 +255,7 @@ plt.imshow(AMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='a
 plt.colorbar(label='adjusted MI')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_binsVec_info1_samplingVec_AMI.pdf'))
 
 plt.figure()
 plt.title(f'Ground truth info: {ground_truth_info}')
@@ -266,56 +263,51 @@ plt.imshow(X2_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='au
 plt.colorbar(label='Chi2 p-value')
 plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_binsVec_info1_samplingVec_Chi2.pdf'))
 
 
-
-#%%
-activity_prob = .01
-info_vec = np.linspace(0.001,1,100)
+#%% Behavioral variable with multiple bins
+ground_truth_info = 0
 sampling_vec = np.linspace(0.001,1,100)
 recording_length=10000
-numBins = 10
+bin_vec = np.arange(2,100)
 
-MI_mx = np.zeros((len(sampling_vec),len(info_vec)))
-NMI_mx = np.zeros((len(sampling_vec),len(info_vec)))
-AMI_mx = np.zeros((len(sampling_vec),len(info_vec)))
-X2_mx = np.zeros((len(sampling_vec),len(info_vec)))
+MI_mx = np.zeros((len(sampling_vec),len(bin_vec)))
+AMI_mx = np.zeros((len(sampling_vec),len(bin_vec)))
+X2_mx = np.zeros((len(sampling_vec),len(bin_vec)))
 
-for i in tqdm(range(len(info_vec))):
+for i in tqdm(range(len(bin_vec))):
     for j in range(len(sampling_vec)):
-        activity = np.zeros(recording_length,dtype='bool')
-        variable = np.random.choice(np.arange(1,numBins),recording_length) # randomly sample bins
-        activity_idx = np.random.choice(np.arange(recording_length),int(recording_length*activity_prob),replace=False)
-        activity[activity_idx]=True # Set active frames
-
-        predict_behav_idx=np.random.choice(activity_idx,int(len(activity_idx)*sampling_vec[j]),replace=False)
-        predict_behav_idx=np.random.choice(predict_behav_idx,int(len(predict_behav_idx)*info_vec[i]),replace=False)
-        variable[predict_behav_idx] = 0 # bin zero predicts neural activity
+        activity, variable = simulate_activity(recording_length=recording_length,
+                                       num_bins=bin_vec[i],
+                                       ground_truth_info=ground_truth_info,
+                                       sampling=sampling_vec[j])
         
         MI_mx[j,i] = mutual_info_score(activity,variable)
-        AMI_mx[j,i] = adjusted_mutual_info_score(activity,variable)
+        AMI_mx[j,i] = adjusted_mutual_info_score(activity,variable, average_method='min')
         X2_mx[j,i] = chi2(activity[:,None],variable[:,None])[1]
 
-#%%
-
 plt.figure()
-plt.title('MI')
-plt.imshow(MI_mx,cmap='magma', norm=LogNorm(vmin=0.0001, vmax=.1), interpolation='bicubic',origin='lower', aspect='auto')
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(MI_mx,cmap='magma', interpolation='bicubic',origin='lower', aspect='auto', vmin=0, vmax=1)
 plt.colorbar(label='MI')
-plt.xlabel('true info.')
+plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
-
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_binsVec_info0_samplingVec_MI.pdf'))
 
 plt.figure()
-plt.title('AMI')
-plt.imshow(AMI_mx,cmap='magma', norm=LogNorm(vmin=0.0001, vmax=.1), interpolation='bicubic',origin='lower',aspect='auto')
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(AMI_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto', vmin=0, vmax=1)
 plt.colorbar(label='adjusted MI')
-plt.xlabel('true info.')
+plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_binsVec_info0_samplingVec_AMI.pdf'))
 
 plt.figure()
-plt.title('Chi2')
-plt.imshow(X2_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto')
+plt.title(f'Ground truth info: {ground_truth_info}')
+plt.imshow(X2_mx,cmap='magma', interpolation='bicubic',origin='lower',aspect='auto',vmin=0,vmax=.05)
 plt.colorbar(label='Chi2 p-value')
-plt.xlabel('true info.')
+plt.xlabel('num. bins')
 plt.ylabel('sampled portion')
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_binsVec_info0_samplingVec_Chi2.pdf'))
+# %%

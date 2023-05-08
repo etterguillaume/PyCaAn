@@ -1,5 +1,5 @@
 # General
-seed: 42
+seed: 42 # Default seed, for reproducibility
 
 # Paths
 path_to_dataset: ../../../datasets/calcium_imaging
