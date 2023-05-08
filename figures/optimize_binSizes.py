@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 plt.style.use('plot_style.mplstyle')
 
 #%% Load parameters
-with open('params.yaml','r') as file:
+with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 # Tested values (7 points)
@@ -24,7 +24,7 @@ heading_bins = [0.5625,1.125, 2.25, 4.5, 9, 18, 36]
 #TODO save plots
 
 #%%
-path = '../../datasets/calcium_imaging/CA1/M246/M246_legoOF_20180621'
+path = '../../../datasets/calcium_imaging/CA1/M246/M246_legoOF_20180621'
 
 #%%
 data = load_data(path)
@@ -35,7 +35,7 @@ numFrames, numNeurons = data['rawData'].shape
 temporal_AMI = np.zeros((len(time_bins),numNeurons))
 
 for bin_i in range(len(time_bins)): # hard-coded for 7 bins but oh well
-    AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_1D_tuning(data['binaryData'],
                                                             data['elapsed_time'],
                                                             data['running_ts'],
                                                             var_length=params['max_temporal_length'],
@@ -70,16 +70,16 @@ plt.xscale('log')
 plt.ylabel('AMI')
 plt.xlabel('Time bins (s)')
 
-plt.plot([.25,.25],[0,.002])
-plt.title('Ideal bin size = 0.25 s')
+plt.plot([.125,.125],[0,.08],color='C6')
+plt.title('Ideal bin size = 125 ms')
 plt.legend()
 plt.legend()
 
 #%% SPACE
 spatial_AMI = np.zeros((len(space_bins),numNeurons))
 
-for bin_i in tqdm(range(len(space_bins))): # hard-coded for 7 bins but oh well
-    AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
+for bin_i in tqdm(range(len(space_bins))):
+    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
                                                             data['position'],
                                                             data['running_ts'],
                                                             var_length=45,
@@ -115,7 +115,7 @@ plt.xscale('log')
 plt.xlabel('Space bins (cm)')
 plt.ylabel('AMI')
 
-plt.plot([4,4],[0,.005])
+plt.plot([4,4],[0,.25],color='C6')
 plt.title('Ideal bin size = 4cm')
 plt.legend()
 
@@ -123,7 +123,7 @@ plt.legend()
 distance_AMI = np.zeros((len(distance_bins),numNeurons))
 
 for bin_i in range(len(distance_bins)): # hard-coded for 7 bins but oh well
-    AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                             data['distance_travelled'],
                                                             data['running_ts'],
                                                             var_length=128,
@@ -158,15 +158,15 @@ plt.xlabel('Distance bins (cm)')
 plt.ylabel('AMI')
 
 plt.xscale('log')
-plt.plot([4,4],[0,.002])
-plt.title('Ideal bin size = 4 cm')
+plt.plot([2,2],[0,.1],color='C6')
+plt.title('Ideal bin size = 2 cm')
 plt.legend()
 
 #%% SPEED
 speed_AMI = np.zeros((len(speed_bins),numNeurons))
 
 for bin_i in range(len(speed_bins)): # hard-coded for 7 bins but oh well
-    AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                             data['velocity'],
                                                             data['running_ts'],
                                                             var_length=30,
@@ -199,14 +199,14 @@ plt.xticks(speed_bins)
 plt.xlabel('Speed bins (cm)')
 plt.ylabel('AMI')
 plt.xscale('log')
-plt.plot([4,4],[0,.002])
-plt.title('Ideal bin size = 4 cm.s$^{-1}$')
+plt.plot([1,1],[0,.04], color='C6')
+plt.title('Ideal bin size = 1 cm.s$^{-1}$')
 
 #%% HEADING
 heading_AMI = np.zeros((len(heading_bins),numNeurons))
 
 for bin_i in range(len(heading_bins)): # hard-coded for 7 bins but oh well
-    AMI, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
                                                             data['heading'],
                                                             data['running_ts'],
                                                             var_length=360,
@@ -238,6 +238,6 @@ plt.xticks(speed_bins)
 plt.xlabel('heading bins (º)')
 plt.ylabel('AMI')
 plt.xscale('log')
-plt.plot([9,9],[0,.0025])
-plt.title('Ideal bin size = 9º')
-plt.legend()
+plt.plot([4.5,4.5],[0,.1], color='C6')
+plt.title('Ideal bin size = 4.5º')
+# %%

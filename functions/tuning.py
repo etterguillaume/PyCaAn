@@ -33,7 +33,7 @@ def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
                 if frames_in_bin is not None: # if bin has been explored
                     active_frames_in_bin[neuron,y,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
 
-        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector)
+        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
     
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
@@ -66,7 +66,7 @@ def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
             if frames_in_bin is not None: # if bin has been explored
                 active_frames_in_bin[neuron,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
 
-        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector)
+        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
     
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
@@ -109,7 +109,7 @@ def assess_covariate(var1, var2, inclusion_ts, var1_length, var1_bin_size, var2_
                 ct+=1
 
     # Compute AMI, p_value between two variables
-    info = adjusted_mutual_info_score(digitized_var1,digitized_var2)
+    info = adjusted_mutual_info_score(digitized_var1,digitized_var2, average_method='min')
     p_value = chi2(digitized_var1[:,None],digitized_var2[:,None])[1]
     
     return info, p_value
@@ -140,7 +140,7 @@ def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_leng
             if frames_in_bin is not None: # if bin has been explored
                 active_frames_in_bin[neuron,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
 
-        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector)
+        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
     
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy

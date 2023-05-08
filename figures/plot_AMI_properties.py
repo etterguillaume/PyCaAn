@@ -8,11 +8,11 @@ plt.style.use('plot_style.mplstyle')
 
 from tqdm import tqdm
 from functions.simulate import simulate_activity
-from sklearn.metrics import mutual_info_score, adjusted_mutual_info_score
+from sklearn.metrics import mutual_info_score, adjusted_mutual_info_score, normalized_mutual_info_score
 from sklearn.feature_selection import chi2
 
 #%%
-with open('params.yaml','r') as file:
+with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Plot example activities
@@ -54,6 +54,33 @@ plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_20len
 #%% Effect of ground truth on metric
 ground_truth_vec = np.linspace(0.001,1,100)
 recording_length=10000
+num_bins = 25
+sampling_vec = 1/num_bins
+
+MI_vals = np.zeros(len(ground_truth_vec))
+AMI_vals = np.zeros(len(ground_truth_vec))
+X2_vals = np.zeros(len(ground_truth_vec))
+
+for i in tqdm(range(len(ground_truth_vec))):
+    activity, variable = simulate_activity(recording_length=recording_length,
+                                       num_bins=num_bins,
+                                       ground_truth_info=ground_truth_vec[i],
+                                       sampling=sampling_vec)
+    
+    MI_vals[i] = mutual_info_score(activity,variable)
+    AMI_vals[i] = adjusted_mutual_info_score(activity,variable, average_method='min')
+
+plt.figure(figsize=(1,.75))
+plt.plot(ground_truth_vec, MI_vals, label='MI', color='C0')
+plt.plot(ground_truth_vec, AMI_vals, label='AMI', color='C6')
+plt.xlabel('Ground truth info.')
+plt.ylabel('Info.')
+plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_25bins_infoVec_samplingEqual.pdf'))
+
+#%% Effect of ground truth on metric
+ground_truth_vec = np.linspace(0.001,1,100)
+recording_length=10000
 num_bins = 2
 sampling_vec = 1/num_bins
 
@@ -68,7 +95,7 @@ for i in tqdm(range(len(ground_truth_vec))):
                                        sampling=sampling_vec)
     
     MI_vals[i] = mutual_info_score(activity,variable)
-    AMI_vals[i] = adjusted_mutual_info_score(activity,variable)
+    AMI_vals[i] = adjusted_mutual_info_score(activity,variable, average_method='min')
 
 plt.figure(figsize=(1,.75))
 plt.plot(ground_truth_vec, MI_vals, label='MI', color='C0')
@@ -79,9 +106,9 @@ plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_2bins_infoVec_samplingEqual.pdf'))
 
 #%% Effect of sampling on on metric
-ground_truth_vec = .9
+ground_truth_vec = 1
 recording_length=10000
-num_bins = 2
+num_bins = 25
 sampling_vec = np.linspace(0.001,1/num_bins,100)
 
 MI_vals = np.zeros(len(sampling_vec))
@@ -95,7 +122,7 @@ for i in tqdm(range(len(sampling_vec))):
                                        sampling=sampling_vec[i])
     
     MI_vals[i] = mutual_info_score(activity,variable)
-    AMI_vals[i] = adjusted_mutual_info_score(activity,variable)
+    AMI_vals[i] = adjusted_mutual_info_score(activity,variable, average_method='min')
 
 plt.figure(figsize=(1,.75))
 plt.plot(sampling_vec, MI_vals, label='MI', color='C0')
@@ -104,12 +131,40 @@ plt.xlabel('Portion samples')
 plt.ylabel('Info.')
 plt.xticks([0,1/num_bins],['0','1/$n_{bins}$'])
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
-plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_2bins_info09_samplingVec.pdf'))
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_25bins_info1_samplingVec.pdf'))
+
+#%% Effect of sampling on on metric: when there is no information
+ground_truth_vec = 0
+recording_length=10000
+num_bins = 25
+sampling_vec = np.linspace(0.001,1/num_bins,100)
+
+MI_vals = np.zeros(len(sampling_vec))
+AMI_vals = np.zeros(len(sampling_vec))
+X2_vals = np.zeros(len(sampling_vec))
+
+for i in tqdm(range(len(sampling_vec))):
+    activity, variable = simulate_activity(recording_length=recording_length,
+                                       num_bins=num_bins,
+                                       ground_truth_info=ground_truth_vec,
+                                       sampling=sampling_vec[i])
+    
+    MI_vals[i] = mutual_info_score(activity,variable)
+    AMI_vals[i] = adjusted_mutual_info_score(activity,variable, average_method='min')
+
+plt.figure(figsize=(1,.75))
+plt.plot(sampling_vec, MI_vals, label='MI', color='C0')
+plt.plot(sampling_vec, AMI_vals, label='AMI', color='C6')
+plt.xlabel('Portion samples')
+plt.ylabel('Info.')
+plt.xticks([0,1/num_bins],['0','1/$n_{bins}$'])
+plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_25bins_info0_samplingVec.pdf'))
 
 #%% Effect of number of bins on on metric
 ground_truth_vec = 0
 recording_length=10000
-num_bins = np.arange(2,201)
+num_bins = np.arange(2,200)
 
 MI_vals = np.zeros(len(num_bins))
 AMI_vals = np.zeros(len(num_bins))
@@ -123,7 +178,7 @@ for i in tqdm(range(len(num_bins))):
                                        sampling=sampling)
     
     MI_vals[i] = mutual_info_score(activity,variable)
-    AMI_vals[i] = adjusted_mutual_info_score(activity,variable)
+    AMI_vals[i] = adjusted_mutual_info_score(activity,variable, average_method='min')
 
 plt.figure(figsize=(1,.75))
 plt.title('Ground truth information: 0\nRecording length: 10,000 samples')
@@ -134,10 +189,45 @@ plt.ylabel('Info.')
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_binsVec_info0_samplingEqual.pdf'))
 
+#%% Effect of number of bins on on metric with perfect information
+# This can be used to estimate maximum information per n_bins
+ground_truth_vec = 1
+recording_length=10000
+num_bins = np.arange(2,200)
+
+
+MI_vals = np.zeros(len(num_bins))
+AMI_vals = np.zeros(len(num_bins))
+X2_vals = np.zeros(len(num_bins))
+
+for i in tqdm(range(len(num_bins))):
+    sampling = 1/num_bins[i]
+    activity, variable = simulate_activity(recording_length=recording_length,
+                                       num_bins=num_bins[i],
+                                       ground_truth_info=ground_truth_vec,
+                                       sampling=sampling)
+    
+    MI_vals[i] = mutual_info_score(activity,variable)
+    AMI_vals[i] = adjusted_mutual_info_score(activity,variable, average_method='min')
+
+plt.figure(figsize=(1,.75))
+plt.title('Ground truth information: 0\nRecording length: 10,000 samples')
+plt.plot(num_bins, MI_vals, label='MI', color='C0')
+plt.plot(num_bins, AMI_vals, label='AMI', color='C6')
+plt.xlabel('Number of bins')
+plt.ylabel('Info.')
+plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
+plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_binsVec_info1_samplingEqual.pdf'))
+
+
+
+
+
+
 #%% Behavioral variable with multiple bins
 ground_truth_info = 1
 sampling_vec = np.linspace(0.001,1,100)
-recording_length=1000
+recording_length=10000
 bin_vec = np.arange(2,100)
 
 MI_mx = np.zeros((len(sampling_vec),len(bin_vec)))

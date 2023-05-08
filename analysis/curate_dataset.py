@@ -7,7 +7,7 @@ from functions.signal_processing import preprocess_data
 from functions.metrics import extract_total_distance_travelled
 
 #%% Load YAML file
-with open('params.yaml','r') as file:
+with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Establish list of regions
