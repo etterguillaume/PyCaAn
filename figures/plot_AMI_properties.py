@@ -3,12 +3,11 @@ import numpy as np
 import yaml
 import os
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
 plt.style.use('plot_style.mplstyle')
 
 from tqdm import tqdm
 from functions.simulate import simulate_activity
-from sklearn.metrics import mutual_info_score, adjusted_mutual_info_score, normalized_mutual_info_score
+from sklearn.metrics import mutual_info_score, adjusted_mutual_info_score
 from sklearn.feature_selection import chi2
 
 #%%
@@ -24,11 +23,11 @@ activity, variable = simulate_activity(recording_length=rec_length,
                                        ground_truth_info=1,
                                        sampling=1/num_bins)
 plt.subplot(211)
-plt.bar(np.arange(rec_length),variable,label='State', color='C6')
+plt.bar(np.arange(rec_length),variable,label='State', color='C5')
 plt.ylabel('State')
 
 plt.subplot(212)
-plt.bar(np.arange(rec_length),~activity,label='Activity', color='C0')
+plt.bar(np.arange(rec_length),~activity,label='Activity', color='C1')
 plt.ylabel('Activity')
 plt.tight_layout()
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_20length_2bins_info1_samplingEqual.pdf'))
@@ -42,12 +41,14 @@ activity, variable = simulate_activity(recording_length=rec_length,
                                        ground_truth_info=.1,
                                        sampling=1/num_bins)
 plt.subplot(211)
-plt.bar(np.arange(rec_length),variable,label='State', color='C6')
+plt.bar(np.arange(rec_length),variable,label='State', color='C5')
 plt.ylabel('State')
+#plt.xlabel('Sample')
 
 plt.subplot(212)
-plt.bar(np.arange(rec_length),~activity,label='Activity', color='C0')
+plt.bar(np.arange(rec_length),~activity,label='Activity', color='C1')
 plt.ylabel('Activity')
+#plt.xlabel('Sample')
 plt.tight_layout()
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_20length_2bins_info01_samplingEqual.pdf'))
 
@@ -59,7 +60,6 @@ sampling_vec = 1/num_bins
 
 MI_vals = np.zeros(len(ground_truth_vec))
 AMI_vals = np.zeros(len(ground_truth_vec))
-X2_vals = np.zeros(len(ground_truth_vec))
 
 for i in tqdm(range(len(ground_truth_vec))):
     activity, variable = simulate_activity(recording_length=recording_length,
@@ -75,6 +75,7 @@ plt.plot(ground_truth_vec, MI_vals, label='MI', color='C0')
 plt.plot(ground_truth_vec, AMI_vals, label='AMI', color='C6')
 plt.xlabel('Ground truth info.')
 plt.ylabel('Info.')
+plt.ylim([0,1.1])
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_25bins_infoVec_samplingEqual.pdf'))
 
@@ -86,7 +87,6 @@ sampling_vec = 1/num_bins
 
 MI_vals = np.zeros(len(ground_truth_vec))
 AMI_vals = np.zeros(len(ground_truth_vec))
-X2_vals = np.zeros(len(ground_truth_vec))
 
 for i in tqdm(range(len(ground_truth_vec))):
     activity, variable = simulate_activity(recording_length=recording_length,
@@ -102,6 +102,7 @@ plt.plot(ground_truth_vec, MI_vals, label='MI', color='C0')
 plt.plot(ground_truth_vec, AMI_vals, label='AMI', color='C6')
 plt.xlabel('Ground truth info.')
 plt.ylabel('Info.')
+plt.ylim([0,1.1])
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_2bins_infoVec_samplingEqual.pdf'))
 
@@ -129,6 +130,7 @@ plt.plot(sampling_vec, MI_vals, label='MI', color='C0')
 plt.plot(sampling_vec, AMI_vals, label='AMI', color='C6')
 plt.xlabel('Portion samples')
 plt.ylabel('Info.')
+plt.ylim([0,1.1])
 plt.xticks([0,1/num_bins],['0','1/$n_{bins}$'])
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_25bins_info1_samplingVec.pdf'))
@@ -186,6 +188,7 @@ plt.plot(num_bins, MI_vals, label='MI', color='C0')
 plt.plot(num_bins, AMI_vals, label='AMI', color='C6')
 plt.xlabel('Number of bins')
 plt.ylabel('Info.')
+#plt.ylim([0,1.1])
 plt.legend(bbox_to_anchor=(1.1, 1), loc='upper left', borderaxespad=0)
 plt.savefig(os.path.join(params['path_to_results'],'figures','sim_activity_length10000_binsVec_info0_samplingEqual.pdf'))
 
