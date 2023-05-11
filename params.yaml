@@ -29,7 +29,7 @@ input_neurons: 128 # Number of neurons to be used. Also minimum number required
 # Tuning curve computations
 temporalBinSize: .125 # s
 distanceBinSize: 2 # cm
-spatialBinSize: 4 # cm
+spatialBinSize: 2.5 # cm
 directionBinSize: 4.5 # º
 velocityBinSize: 1 # cm.s-1
 

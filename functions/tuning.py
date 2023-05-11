@@ -40,11 +40,11 @@ def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
     return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
 
 def extract_tuning(binaryData, var, inclusion_ts, bins):
-    # TODO assert that d_var == d_bins
+    bin_dims=tuple([len(b) for b in bins]) # TODO assert that d_var == d_bins
     binaryData = binaryData[inclusion_ts]
     var = var[inclusion_ts]
     numFrames, numNeurons = binaryData.shape
-    active_frames_in_bin = np.zeros((numNeurons,len(bins)-1,len(bins)-1), dtype=int)
+    active_frames_in_bin = np.zeros((np.hstack((numNeurons,np.asarray(bin_dims)-1))), dtype=int)
     AMI = np.zeros(numNeurons)
     p_value = np.zeros(numNeurons)
 
@@ -53,9 +53,15 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
                                       bins=bins)[0]
     
     # Digitize variable for info computations
-    bin_vector = np.digitize(var,np.asarray(bins))
-    bin_vector = np.ravel_multi_index(bin_vector) # Convert to 1D
-    #bin_vector = (bin_vector[:,1] * len(bins)) + bin_vector[:,0] #Convert to 1D indices #TODO assert orientation
+    digitized = np.zeros(var.shape,dtype=int)
+    for i in range(len(bins)):
+        digitized[:,i]=np.digitize(var[:, i], bins[i], right=False)
+    
+    bin_vector = np.zeros(len(digitized))
+    
+    for i in range(len(digitized)):
+        bin_vector[i] = np.ravel_multi_index(multi_index=digitized[i]-1,
+                                        dims=bin_dims) # Convert to 1D
 
     # Compute info and tuning curves for each neuron
     for neuron in range(numNeurons):
