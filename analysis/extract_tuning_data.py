@@ -133,7 +133,7 @@ for i, session in enumerate(tqdm(session_list)):
     # Extract tuning to velocity
     if not os.path.exists(os.path.join(working_directory,'velocity_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'velocity_tuning.h5'),'w') as f:
-            bin_vec=(np.arange(data['speed_threshold'],params['max_velocity_length']+params['velocityBinSize'],params['velocityBinSize']))
+            bin_vec=(np.arange(params['speed_threshold'],params['max_velocity_length']+params['velocityBinSize'],params['velocityBinSize']))
             AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                     data['velocity'],
                                                     data['running_ts'],

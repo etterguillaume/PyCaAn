@@ -40,7 +40,10 @@ def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
     return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
 
 def extract_tuning(binaryData, var, inclusion_ts, bins):
-    bin_dims=tuple([len(b) for b in bins]) # TODO assert that d_var == d_bins
+    if var.ndim>1:
+        bin_dims=tuple([len(b) for b in bins]) # TODO assert that d_var == d_bins
+    else:
+        bin_dims=len(bins)
     binaryData = binaryData[inclusion_ts]
     var = var[inclusion_ts]
     numFrames, numNeurons = binaryData.shape
@@ -49,23 +52,34 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
     p_value = np.zeros(numNeurons)
 
     # Compute occupancy
-    occupancy_frames = np.histogramdd(sample=var,
+    if var.ndim>1:
+        occupancy_frames = np.histogramdd(sample=var,
+                                      bins=bins)[0]
+    else:
+        occupancy_frames = np.histogram(a=var,
                                       bins=bins)[0]
     
     # Digitize variable for info computations
-    digitized = np.zeros(var.shape,dtype=int)
-    for i in range(len(bins)):
-        digitized[:,i]=np.digitize(var[:, i], bins[i], right=False)
+    if var.ndim>1:
+        digitized = np.zeros(var.shape,dtype=int)
+        for i in range(len(bins)):
+            digitized[:,i]=np.digitize(var[:, i], bins[i], right=False)
+        
+        bin_vector = np.zeros(len(digitized))    
+        for i in range(len(digitized)):
+            bin_vector[i] = np.ravel_multi_index(multi_index=digitized[i]-1,
+                                            dims=bin_dims) # Convert to 1D
     
-    bin_vector = np.zeros(len(digitized))
-    
-    for i in range(len(digitized)):
-        bin_vector[i] = np.ravel_multi_index(multi_index=digitized[i]-1,
-                                        dims=bin_dims) # Convert to 1D
-
+    else:
+        bin_vector=np.digitize(var, bins, right=False)
+        
     # Compute info and tuning curves for each neuron
     for neuron in range(numNeurons):
-        active_frames_in_bin[neuron,:,:] = np.histogramdd(sample=var[binaryData[:,neuron]],
+        if var.ndim>1:
+            active_frames_in_bin[neuron] = np.histogramdd(sample=var[binaryData[:,neuron]],
+                                                          bins=bins)[0]
+        else:
+            active_frames_in_bin[neuron] = np.histogram(a=var[binaryData[:,neuron]],
                                                           bins=bins)[0]
 
         AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
