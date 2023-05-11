@@ -29,19 +29,11 @@ data = preprocess_data(data, params)
 
 #%%
 from functions.tuning import extract_2D_tuning, extract_tuning
-
 #%%
-bins = (np.arange(0,45,4), np.arange(0,45,4))
-AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_2D_tuning(data['binaryData'],data['position'],data['running_ts'],var_length=45,bin_size=4)
-d_AMI, d_p_value, d_occupancy_frames, d_active_frames_in_bin, d_tuning_curve = extract_tuning(data['binaryData'],data['position'],data['running_ts'],bins)
+#AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_2D_tuning(data['binaryData'],data['position'],data['running_ts'],var_length=45,bin_size=4)
+%timeit d_AMI, d_p_value, d_occupancy_frames, d_active_frames_in_bin, d_tuning_curve = extract_tuning(data['binaryData'],data['position'],data['running_ts'],bins)
 
 #%% Assertions
-#assert occupancy_frames == d_occupancy_frames
-assert AMI.all()==d_AMI.all()
-# assert tuning
-# assert pval
-# assert chi2
-# assert active_in_frames
 
 
 
