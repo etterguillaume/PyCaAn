@@ -5,12 +5,12 @@ from tqdm import tqdm
 import numpy as np
 from functions.dataloaders import load_data
 from functions.signal_processing import preprocess_data, extract_tone, extract_seqLT_tone
-from functions.tuning import extract_1D_tuning, extract_2D_tuning, extract_discrete_tuning
+from functions.tuning import extract_tuning, extract_discrete_tuning
 from functions.metrics import extract_total_distance_travelled
 import h5py
 
 #%% Load parameters
-with open('../params.yaml','r') as file:
+with open('params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Load folders to analyze from yaml file?
@@ -70,131 +70,143 @@ for i, session in enumerate(tqdm(session_list)):
     # Extract tuning to time
     if not os.path.exists(os.path.join(working_directory,'retrospective_temporal_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'retrospective_temporal_tuning.h5'),'w') as f:
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+            bin_vec = (np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize']))
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(
+                                                    data['binaryData'],
                                                     data['elapsed_time'],
                                                     data['running_ts'],
-                                                    var_length=params['max_temporal_length'],
-                                                    bin_size=params['temporalBinSize'])
+                                                    bins=bin_vec)
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
+            f.create_dataset('bins', data=bin_vec)
 
     # Extract tuning to prospective time
     if not os.path.exists(os.path.join(working_directory,'prospective_temporal_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'prospective_temporal_tuning.h5'),'w') as f:
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+            bin_vec = (np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize']))
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(
+                                                    data['binaryData'],
                                                     data['time2stop'],
                                                     data['running_ts'],
-                                                    var_length=params['max_temporal_length'],
-                                                    bin_size=params['temporalBinSize'])
+                                                    bins=bin_vec)
+
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
+            f.create_dataset('bins', data=bin_vec)
 
     # Extract tuning to retrospective distance
     if not os.path.exists(os.path.join(working_directory,'retrospective_distance_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'retrospective_distance_tuning.h5'),'w') as f:
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+            bin_vec = (np.arange(0,params['max_distance_length']+params['spatialBinSize'],params['spatialBinSize']))
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                     data['distance_travelled'],
                                                     data['running_ts'],
-                                                    var_length=params['max_distance_length'],
-                                                    bin_size=params['spatialBinSize'])
+                                                    bins=bin_vec)
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
+            f.create_dataset('bins', data=bin_vec)
 
     # Extract tuning to prospective distance
     if not os.path.exists(os.path.join(working_directory,'prospective_distance_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'prospective_distance_tuning.h5'),'w') as f:
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+            bin_vec = (np.arange(0,params['max_distance_length']+params['spatialBinSize'],params['spatialBinSize']))
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                     data['distance_travelled'],
                                                     data['running_ts'],
-                                                    var_length=params['max_distance_length'],
-                                                    bin_size=params['spatialBinSize'])
+                                                    bins=bin_vec)
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
+            f.create_dataset('bins', data=bin_vec)
 
     # Extract tuning to velocity
     if not os.path.exists(os.path.join(working_directory,'velocity_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'velocity_tuning.h5'),'w') as f:
-            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+            bin_vec=(np.arange(data['speed_threshold'],params['max_velocity_length']+params['velocityBinSize'],params['velocityBinSize']))
+            AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                     data['velocity'],
                                                     data['running_ts'],
-                                                    var_length=params['max_velocity_length'],
-                                                    bin_size=params['velocityBinSize'])
+                                                    bins=bin_vec)
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
+            f.create_dataset('bins', data=bin_vec)
 
     # Extract spatial tuning
     if not os.path.exists(os.path.join(working_directory,'spatial_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'spatial_tuning.h5'),'w') as f:
             if data['task']=='OF':
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
+                bin_vec=(np.arange(0,45+params['spatialBinSize'],params['spatialBinSize']),
+                         np.arange(0,45+params['spatialBinSize'],params['spatialBinSize']))
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                                 data['position'],
                                                                 data['running_ts'],
-                                                                var_length=45,
-                                                                bin_size=params['spatialBinSize'])
+                                                                bins=bin_vec)
                 
             elif data['task']=='legoOF':
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
+                bin_vec=(np.arange(0,50+params['spatialBinSize'],params['spatialBinSize']),
+                         np.arange(0,50+params['spatialBinSize'],params['spatialBinSize']))
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                                 data['position'],
                                                                 data['running_ts'],
-                                                                var_length=50,
-                                                                bin_size=params['spatialBinSize'])
+                                                                bins=bin_vec)
             elif data['task']=='plexiOF':
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_2D_tuning(data['binaryData'],
+                bin_vec=(np.arange(0,49+params['spatialBinSize'],params['spatialBinSize']),
+                         np.arange(0,49+params['spatialBinSize'],params['spatialBinSize']))
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                                 data['position'],
                                                                 data['running_ts'],
-                                                                var_length=49,
-                                                                bin_size=params['spatialBinSize'])
+                                                                bins=bin_vec)
 
             elif data['task']=='LT':
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                bin_vec=(np.arange(0,100+params['spatialBinSize'],params['spatialBinSize']))
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                                 data['position'][:,0],
                                                                 data['running_ts'],
-                                                                var_length=100,
-                                                                bin_size=params['spatialBinSize'])
+                                                                bins=bin_vec)
                 
             elif data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
-                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                bin_vec=(np.arange(0,135+params['spatialBinSize'],params['spatialBinSize']))
+                AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                                 data['position'][:,0],
                                                                 data['running_ts'],
-                                                                var_length=134,
-                                                                bin_size=params['spatialBinSize'])
+                                                                bins=bin_vec)
             f.create_dataset('AMI', data=AMI)
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
+            f.create_dataset('bins', data=bin_vec)
 
     # Extract direction tuning
     try:
         if not os.path.exists(os.path.join(working_directory,'direction_tuning.h5')) or params['overwrite_mode']=='always':
             with h5py.File(os.path.join(working_directory,'direction_tuning.h5'),'w') as f:
                 if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
-                    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                    bin_vec=(np.arange(0,360+params['directionBinSize'],params['directionBinSize']))
+                    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_tuning(data['binaryData'],
                                                                     data['heading'],
                                                                     data['running_ts'],
-                                                                    var_length=360,
-                                                                    bin_size=params['directionBinSize'])
+                                                                    bins=bin_vec)
+                    f.create_dataset('bins', data=bin_vec)
                 elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-                    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
+                    AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_discrete_tuning(data['binaryData'],
                                                                     data['LT_direction'],
                                                                     data['running_ts'],
-                                                                    var_length=2,
-                                                                    bin_size=1)
+                                                                    var_length=1)
                 f.create_dataset('AMI', data=AMI)
                 f.create_dataset('p_value', data=p_value)
                 f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
