@@ -50,6 +50,7 @@ def interpolate_2D(signal, behav_time, ca_time):
     interp_func_y = interp1d(behav_time, signal[:,1], fill_value="extrapolate")
     interpolated_signal[:,0] = interp_func_x(ca_time)   # use interpolation function returned by `interp1d`
     interpolated_signal[:,1] = interp_func_y(ca_time)   # use interpolation function returned by `interp1d`
+    interpolated_signal[interpolated_signal<0]=0 # Remove negative values
     
     return interpolated_signal
 

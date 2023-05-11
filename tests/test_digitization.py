@@ -9,29 +9,29 @@ from functions.signal_processing import preprocess_data
 from functions.tuning import assess_covariate
 import yaml
 import numpy as np
-from numpy import digitize
 import matplotlib.pyplot as plt
 #%%
 with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
-#%% Load folders to analyze from yaml file?
-with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
-    session_file = yaml.full_load(file)
-session_list = session_file['sessions']
-path = session_list[232]
+# #%% Load folders to analyze from yaml file?
+# with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
+#     session_file = yaml.full_load(file)
+# session_list = session_file['sessions']
+# path = session_list[232]
 #%%
-path = '../../../datasets/calcium_imaging/CA1/M988/M988_legoOF_scrambled_20190116'
+path = '../../../datasets/calcium_imaging/CA1/M1087/M1087_legoOF_20191119'
 
 #%%
 data = load_data(path)
 data = preprocess_data(data, params)
 
 #%%
-from functions.tuning import extract_2D_tuning, extract_tuning
+from functions.tuning import extract_tuning
 #%%
-#AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_2D_tuning(data['binaryData'],data['position'],data['running_ts'],var_length=45,bin_size=4)
-%timeit d_AMI, d_p_value, d_occupancy_frames, d_active_frames_in_bin, d_tuning_curve = extract_tuning(data['binaryData'],data['position'],data['running_ts'],bins)
+bin_vec=(np.arange(0,50+params['spatialBinSize'],params['spatialBinSize']),
+        np.arange(0,50+params['spatialBinSize'],params['spatialBinSize']))
+AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_tuning(data['binaryData'],data['position'],data['running_ts'],bins=bin_vec)
 
 #%% Assertions
 
