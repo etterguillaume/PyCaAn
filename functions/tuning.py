@@ -39,23 +39,51 @@ def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bi
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
     return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
 
-def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size):
-    X_bin_vector = np.arange(bin_size,var_length,bin_size)
+def extract_tuning(binaryData, var, inclusion_ts, bins):
+    # TODO assert that d_var == d_bins
     binaryData = binaryData[inclusion_ts]
-    interpolated_var = interpolated_var[inclusion_ts]
+    var = var[inclusion_ts]
     numFrames, numNeurons = binaryData.shape
-    active_frames_in_bin = np.zeros((numNeurons,len(X_bin_vector)-1), dtype=int)
-    #occupancy_frames = np.zeros(len(X_bin_vector)-1, dtype=int)
+    active_frames_in_bin = np.zeros((numNeurons,len(bins)-1,len(bins)-1), dtype=int)
     AMI = np.zeros(numNeurons)
     p_value = np.zeros(numNeurons)
 
-    bin_vector = np.digitize(interpolated_var,X_bin_vector)
-    occupancy_frames = np.bincount(bin_vector, minlength=len(X_bin_vector)-1)
+    # Compute occupancy
+    occupancy_frames = np.histogramdd(sample=var,
+                                      bins=bins)[0]
+    
+    # Digitize variable for info computations
+    bin_vector = np.digitize(var,np.asarray(bins))
+    bin_vector = np.ravel_multi_index(bin_vector) # Convert to 1D
+    #bin_vector = (bin_vector[:,1] * len(bins)) + bin_vector[:,0] #Convert to 1D indices #TODO assert orientation
+
+    # Compute info and tuning curves for each neuron
+    for neuron in range(numNeurons):
+        active_frames_in_bin[neuron,:,:] = np.histogramdd(sample=var[binaryData[:,neuron]],
+                                                          bins=bins)[0]
+
+        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
+        p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
+    
+    tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
+    return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
+
+def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size):
+    bins = np.arange(bin_size,var_length,bin_size)
+    binaryData = binaryData[inclusion_ts]
+    interpolated_var = interpolated_var[inclusion_ts]
+    numFrames, numNeurons = binaryData.shape
+    active_frames_in_bin = np.zeros((numNeurons,len(bins)-1), dtype=int)
+    AMI = np.zeros(numNeurons)
+    p_value = np.zeros(numNeurons)
+
+    bin_vector = np.digitize(interpolated_var,bins)
+    occupancy_frames = np.bincount(bin_vector, minlength=len(bins)-1)
 
     # Bin activity
     for neuron in range(numNeurons):
-        for x in range(len(X_bin_vector)):
-            active_frames_in_bin[neuron,x] = np.sum(binaryData[bin_vector==x,neuron]) # Total number of frames of activity in that bin
+        for i in range(len(bins)):
+            active_frames_in_bin[neuron,i] = np.sum(binaryData[bin_vector==i,neuron]) # Total number of frames of activity in that bin
 
         AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]

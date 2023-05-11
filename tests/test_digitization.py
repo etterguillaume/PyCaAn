@@ -21,48 +21,29 @@ with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as fil
 session_list = session_file['sessions']
 path = session_list[232]
 #%%
-path = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
+path = '../../../datasets/calcium_imaging/CA1/M988/M988_legoOF_scrambled_20190116'
 
 #%%
 data = load_data(path)
 data = preprocess_data(data, params)
 
 #%%
-binaryData=data['binaryData']
-inclusion_ts=data['running_ts']
-interpolated_var=data['position']
-
-var_length=50
-bin_size=4
-
-X_bin_vector = np.arange(0,var_length+bin_size,bin_size)
-# Y_bin_vector = np.arange(0,var_length+bin_size,bin_size)
-binaryData = binaryData[inclusion_ts]
-interpolated_var = interpolated_var[inclusion_ts]
-numFrames, numNeurons = binaryData.shape
-# occupancy_frames = np.zeros((len(Y_bin_vector)-1,len(X_bin_vector)-1), dtype=int)
-occupancy_frames = np.zeros(len(X_bin_vector)-1, dtype=int)
-
-# Compute occupancy
-bin_vector = np.zeros(numFrames, dtype=int) # Vector that will specificy the bin# for each frame
-ct=0
-
-for x in range(len(X_bin_vector)-1):
-    frames_in_bin = (interpolated_var[:,0] >= X_bin_vector[x]) & (interpolated_var[:,0] < X_bin_vector[x+1])
-    occupancy_frames[x] = np.sum(frames_in_bin) # How many frames for that bin
-    bin_vector[frames_in_bin] = ct
-    ct+=1
-
-#%% Digitize
-alt_X_bin_vector = np.arange(bin_size,var_length,bin_size)
-digitized_vector = digitize(interpolated_var[:,0], bins=alt_X_bin_vector)
-
-#%% Assert digitization
-assert digitized_vector.all()==bin_vector.all()
+from functions.tuning import extract_2D_tuning, extract_tuning
 
 #%%
-new_occupancy_frames = np.bincount(digitized_vector, minlength=len(X_bin_vector)-1)
+bins = (np.arange(0,45,4), np.arange(0,45,4))
+AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve = extract_2D_tuning(data['binaryData'],data['position'],data['running_ts'],var_length=45,bin_size=4)
+d_AMI, d_p_value, d_occupancy_frames, d_active_frames_in_bin, d_tuning_curve = extract_tuning(data['binaryData'],data['position'],data['running_ts'],bins)
 
-#%% Assert bincount
-assert new_occupancy_frames.all()==occupancy_frames.all()
+#%% Assertions
+#assert occupancy_frames == d_occupancy_frames
+assert AMI.all()==d_AMI.all()
+# assert tuning
+# assert pval
+# assert chi2
+# assert active_in_frames
 
+
+
+
+# %%
