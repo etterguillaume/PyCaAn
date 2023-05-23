@@ -3,7 +3,7 @@ np.seterr(divide='ignore', invalid='ignore') # Ignore zero divide warnings
 from sklearn.metrics import adjusted_mutual_info_score
 from sklearn.feature_selection import chi2
 
-def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size):
+def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size): # TODO legacy, to be removed
     #TODO optimize using digitize
     X_bin_vector = np.arange(0,var_length+bin_size,bin_size)
     Y_bin_vector = np.arange(0,var_length+bin_size,bin_size)
@@ -88,7 +88,7 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
     return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
 
-def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size):
+def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size): #TODO LEGACY, to be removed
     bins = np.arange(bin_size,var_length,bin_size)
     binaryData = binaryData[inclusion_ts]
     interpolated_var = interpolated_var[inclusion_ts]
@@ -188,41 +188,26 @@ def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_leng
 def extract_internal_info(data, params, inclusion_ts):
     retrospectivetime_bin_vector = np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize'])
     prospectivetime_bin_vector = np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize'])
-    retrospectivedistance_bin_vector = np.arange(0,params['max_distance_length']+params['distanceBinSize'],params['distanceBinSize'])
-    prospectivedistance_bin_vector = np.arange(0,params['max_distance_length']+params['distanceBinSize'],params['distanceBinSize'])
-    speed_bin_vector = np.arange(0,params['max_velocity_length']+params['speedBinSize'],params['speedBinSize'])
+    retrospectivedistance_bin_vector = np.arange(0,params['max_distance_length']+params['spatialBinSize'],params['spatialBinSize'])
+    prospectivedistance_bin_vector = np.arange(0,params['max_distance_length']+params['spatialBinSize'],params['spatialBinSize'])
+    speed_bin_vector = np.arange(0,params['max_velocity_length']+params['velocityBinSize'],params['velocityBinSize'])
 
-    binaryData = data['binaryData'][inclusion_ts]
-    interpolated_var = interpolated_var[inclusion_ts]
-    numFrames, numNeurons = binaryData.shape
-    active_frames_in_bin = np.zeros((numNeurons,len(X_bin_vector)-1), dtype=int)
-    occupancy_frames = np.zeros(len(X_bin_vector)-1, dtype=int)
-    AMI = np.zeros(numNeurons)
-    p_value = np.zeros(numNeurons)
+    binaryData = data['binaryData']
 
-    # Compute occupancy
-    bin_vector = np.zeros(numFrames, dtype=int) # Vector that will specificy the bin# for each frame
-    ct=0
-    for x in range(len(X_bin_vector)-1):
-        frames_in_bin = (interpolated_var >= X_bin_vector[x]) & (interpolated_var < X_bin_vector[x+1])
-        occupancy_frames[x] = np.sum(frames_in_bin) # How many frames for that bin
-        bin_vector[frames_in_bin] = ct
-        ct+=1
+    var = np.vstack((data['elapsed_time'],
+           data['time2stop'],
+           data['distance_travelled'],
+           data['distance2stop'],
+           data['velocity'])).T
 
-    # Bin activity
-    for neuron in range(numNeurons):
-        for x in range(len(X_bin_vector)-1):
-            frames_in_bin = (interpolated_var >= X_bin_vector[x]) & (interpolated_var < X_bin_vector[x+1])
-            if frames_in_bin is not None: # if bin has been explored
-                active_frames_in_bin[neuron,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
-
-        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
-        p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
-    
-    tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
+    internal_info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve= extract_tuning(binaryData, var, inclusion_ts,
+                   bins=(retrospectivetime_bin_vector,
+                         prospectivetime_bin_vector,
+                         retrospectivedistance_bin_vector,
+                         prospectivedistance_bin_vector,
+                         speed_bin_vector))
 
     return internal_info, p_value
-
 
 def extract_RWI(external_info, internal_info):
     # Internal info = place field info
