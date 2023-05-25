@@ -46,6 +46,9 @@ num_surrogates: 1000 # Number of circular permutations
 max_centroid_dist: 5 # maximum distance between cell centroids in µm
 min_spatial_corr: .65 # minimum spatial footprint correlation
 
+# Sequences
+sequence_length: 2 # in seconds
+
 # Embeddings
 embedding_dims: 2
 train_set_selection: random # 'random', random frames. 'split', split recording using train_test_ratio

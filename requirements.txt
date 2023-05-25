@@ -11,6 +11,7 @@ jupyterlab
 matplotlib
 tqdm
 opencv-python
+seqnmf
 
 umap-learn==0.5
 tensorflow-macos
