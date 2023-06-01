@@ -1,9 +1,9 @@
 #%% Import dependencies
 import yaml
 import numpy as np
-import joblib
+#import joblib
 # from umap.umap_ import UMAP
-from umap.parametric_umap import ParametricUMAP
+from umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
 import tensorflow as tf
 import os
 from tqdm import tqdm
@@ -64,9 +64,6 @@ for i, session in enumerate(tqdm(session_list)):
             data['trainingFrames'][~data['running_ts']] = False
             data['testingFrames'][~data['running_ts']] = False
 
-            # TODO rationale for selecting neurons here
-
-
             # Train embedding model
             embedding_model = ParametricUMAP(
                                 verbose=False,
@@ -80,7 +77,6 @@ for i, session in enumerate(tqdm(session_list)):
                                 random_state=42
                                 ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 
-            #
             #train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
             train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
             test_embedding = embedding_model.transform(data['neuralData'][data['testingFrames'],0:params['input_neurons']])
@@ -98,20 +94,25 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('reconstruction_score', data=reconstruction_score)
         
         # Save model 
-        # joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib instead #TEMP
+        # joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib if non-parametric
+        try:
+            embedding_model.save(os.path.join(working_directory, 'model.h5'))
+        except:
+            print('Could not save parametric model')
 
-    # else: # Load existing model
-    #     loaded_embedding_model = joblib.load(params['path_to_results'] + 'test_umap_model.sav') #using joblib instead
-    #     model_file = h5py.File(os.path.join(working_directory,'model_params.h5'), 'r')
-    #     data['trainingFrames'] = model_file['trainingFrames']
-    #     data['testingFrames'] = model_file['testingFrames']
-    #     reconstruction_score = model_file['reconstruction_score']
-    #     model_file.close()
+    else: # Load existing model
+    #     loaded_embedding_model = joblib.load(params['path_to_results'] + 'test_umap_model.sav') # ùsing joblib if non-parametric
+        embedding_model = load_ParametricUMAP(working_directory, 'model.h5')
+        model_file = h5py.File(os.path.join(working_directory,'model_params.h5'), 'r')
+        data['trainingFrames'] = model_file['trainingFrames']
+        data['testingFrames'] = model_file['testingFrames']
+        reconstruction_score = model_file['reconstruction_score']
+        model_file.close()
 
     #%% Decode
     # Decode elapsed time
-    if not os.path.exists(os.path.join(working_directory,'temporal_decoding.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'temporal_decoding.h5'),'w') as f:
+    if not os.path.exists(os.path.join(working_directory,'retrospective_temporal_decoding.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'retrospective_decoding.h5'),'w') as f:
             decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['elapsed_time'],data, params, train_embedding, test_embedding)
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
@@ -119,10 +120,28 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('decoding_error', data=decoding_error)
             f.create_dataset('shuffled_error', data=shuffled_error)
 
+    if not os.path.exists(os.path.join(working_directory,'prospective_temporal_decoding.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'prospective_temporal_decoding.h5'),'w') as f:
+            decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['time2stop'],data, params, train_embedding, test_embedding)
+            f.create_dataset('decoding_score', data=decoding_score)
+            f.create_dataset('z_score', data=z_score)
+            f.create_dataset('p_value', data=p_value)
+            f.create_dataset('decoding_error', data=decoding_error)
+            f.create_dataset('shuffled_error', data=shuffled_error)
+
     # Decode distance travelled
-    if not os.path.exists(os.path.join(working_directory,'distance_decoding.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'distance_decoding.h5'),'w') as f:
-            decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['elapsed_time'],data, params, train_embedding, test_embedding)
+    if not os.path.exists(os.path.join(working_directory,'retrospective_distance_decoding.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'retrospective_distance_decoding.h5'),'w') as f:
+            decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['distance_travelled'],data, params, train_embedding, test_embedding)
+            f.create_dataset('decoding_score', data=decoding_score)
+            f.create_dataset('z_score', data=z_score)
+            f.create_dataset('p_value', data=p_value)
+            f.create_dataset('decoding_error', data=decoding_error)
+            f.create_dataset('shuffled_error', data=shuffled_error)
+
+    if not os.path.exists(os.path.join(working_directory,'prospective_distance_decoding.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'prospective_distance_decoding.h5'),'w') as f:
+            decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['distance2stop'],data, params, train_embedding, test_embedding)
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
@@ -132,7 +151,7 @@ for i, session in enumerate(tqdm(session_list)):
     # Decode velocity
     if not os.path.exists(os.path.join(working_directory,'velocity_decoding.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'velocity_decoding.h5'),'w') as f:
-            decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['elapsed_time'],data, params, train_embedding, test_embedding)
+            decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['velocity'],data, params, train_embedding, test_embedding)
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
