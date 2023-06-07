@@ -246,10 +246,9 @@ if __name__ == '__main__':
     args = get_arguments()
     config = vars(args)
 
-    with open('../../params.yaml','r') as file:
+    with open('params.yaml','r') as file:
         params = yaml.full_load(file)
-    
-    params['path_to_results'] = '../../' + params['path_to_results'] # Upate relative paths for standalone use
+
     data = load_data(args.session_path)
     data = preprocess_data(data, params)
     extract_tuning_session(data, params)

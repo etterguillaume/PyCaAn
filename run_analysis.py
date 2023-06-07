@@ -8,7 +8,7 @@ from PyCaAn.functions.signal_processing import preprocess_data
 from PyCaAn.analysis.extract_tuning_data import extract_tuning_session
 from PyCaAn.analysis.extract_embedding_data import extract_embedding_session
 
-def get_arguments():
+def get_arguments(): #TODO add params override here
     parser = ArgumentParser()
     parser.add_argument('--extract_tuning', action='store_true', default=False)
     parser.add_argument('--extract_embedding', action='store_true', default=False)
