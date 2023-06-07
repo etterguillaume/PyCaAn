@@ -6,5 +6,5 @@
 #SBATCH --time=0-36:00           # time (DD-HH:MM)
 
 #pytest # First verify that everything works correctly
-python3 curate_dataset.py # Prepare dataset
+python3 run_dataset_curation.py # Prepare dataset
 python3 run_analysis.py --extract_tuning --extract_embedding
