@@ -14,5 +14,7 @@ opencv-python
 seqnmf
 
 umap-learn==0.5
-tensorflow-macos
+tensorflow; sys_platform == 'linux'
+tensorflow; sys_platform == 'windows'
+tensorflow-macos; sys_platform == 'darwin'
 tensorflow-probability
