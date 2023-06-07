@@ -1,33 +1,25 @@
 #%% Imports
 import yaml
 import os
-from tqdm import tqdm
 import numpy as np
+from argparse import ArgumentParser
 from PyCaAn.functions.dataloaders import load_data
 from PyCaAn.functions.signal_processing import preprocess_data, extract_tone, extract_seqLT_tone
 from PyCaAn.functions.tuning import extract_tuning, extract_discrete_tuning
 from PyCaAn.functions.metrics import extract_total_distance_travelled
 import h5py
 
-#%% Load parameters
-with open('params.yaml','r') as file:
-    params = yaml.full_load(file)
+def get_arguments():
+    parser = ArgumentParser()
+    parser.add_argument('--session_path', type=str, default='')
+    args = parser.parse_args()
+    return args
 
-#%% Load folders to analyze from yaml file?
-with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
-    session_file = yaml.full_load(file)
-session_list = session_file['sessions']
-print(f'{len(session_list)} sessions to process')
-
-#%% If tuning_data folder does not exist, create it
-if not os.path.exists(params['path_to_results']):
-    os.mkdir(params['path_to_results'])
-if not os.path.exists(os.path.join(params['path_to_results'],'tuning_data')):
-    os.mkdir(os.path.join(params['path_to_results'],'tuning_data'))
-
-#%%
-for i, session in enumerate(tqdm(session_list)):
-    data = load_data(session)
+def extract_tuning_session(data, params):
+    if not os.path.exists(params['path_to_results']):
+        os.mkdir(params['path_to_results'])
+    if not os.path.exists(os.path.join(params['path_to_results'],'tuning_data')):
+        os.mkdir(os.path.join(params['path_to_results'],'tuning_data'))
 
     # Create folder with convention (e.g. CA1_M246_LT_2017073)
     working_directory=os.path.join( 
@@ -37,9 +29,6 @@ for i, session in enumerate(tqdm(session_list)):
         )
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
-
-    # Pre-process data
-    data=preprocess_data(data,params)
 
     # Save basic info
     numFrames, numNeurons = data['rawData'].shape
@@ -251,3 +240,16 @@ for i, session in enumerate(tqdm(session_list)):
                     f.create_dataset('tuning_curves', data=tuning_curves)
         except:
             print('Could not extract tuning to tone sequence')
+
+# If used as standalone script
+if __name__ == '__main__': 
+    args = get_arguments()
+    config = vars(args)
+
+    with open('../../params.yaml','r') as file:
+        params = yaml.full_load(file)
+    
+    params['path_to_results'] = '../../' + params['path_to_results'] # Upate relative paths for standalone use
+    data = load_data(args.session_path)
+    data = preprocess_data(data, params)
+    extract_tuning_session(data, params)
