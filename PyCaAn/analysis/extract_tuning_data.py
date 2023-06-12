@@ -3,10 +3,10 @@ import yaml
 import os
 import numpy as np
 from argparse import ArgumentParser
-from PyCaAn.functions.dataloaders import load_data
-from PyCaAn.functions.signal_processing import preprocess_data, extract_tone, extract_seqLT_tone
-from PyCaAn.functions.tuning import extract_tuning, extract_discrete_tuning
-from PyCaAn.functions.metrics import extract_total_distance_travelled
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import preprocess_data, extract_tone, extract_seqLT_tone
+from pycaan.functions.tuning import extract_tuning, extract_discrete_tuning
+from pycaan.functions.metrics import extract_total_distance_travelled
 import h5py
 
 def get_arguments():

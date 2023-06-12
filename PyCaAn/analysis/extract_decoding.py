@@ -3,10 +3,10 @@ import yaml
 import numpy as np
 import os
 from tqdm import tqdm
-from PyCaAn.functions.decoding import decode_neural_data
-from PyCaAn.functions.dataloaders import load_data
-from PyCaAn.functions.signal_processing import preprocess_data
-from PyCaAn.functions.signal_processing import extract_tone, extract_seqLT_tone
+from pycaan.functions.decoding import decode_neural_data
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import preprocess_data
+from pycaan.functions.signal_processing import extract_tone, extract_seqLT_tone
 import h5py
 
 #%% Load parameters

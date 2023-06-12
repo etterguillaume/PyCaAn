@@ -3,10 +3,10 @@ import yaml
 import os
 from tqdm import tqdm
 import numpy as np
-from PyCaAn.functions.dataloaders import load_data
-from PyCaAn.functions.signal_processing import preprocess_data
-from PyCaAn.functions.tuning import assess_covariate
-from PyCaAn.functions.metrics import extract_total_distance_travelled
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import preprocess_data
+from pycaan.functions.tuning import assess_covariate
+from pycaan.functions.metrics import extract_total_distance_travelled
 import h5py
 
 #%% Load parameters
