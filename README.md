@@ -1,12 +1,16 @@
-## PyCaAn
-Python Calcium imaging Analysis.
-This repository contains tools to analyze large datasets of calcium imaging data.
+<p align="center">
+  <img width="60%" src="docs/logo.png">
+</p>
+
+PyCaAn stands for  **Python Calcium imaging Analysis** (pronounced 'puh-can')
+This repository contains tools to analyze large datasets of calcium imaging data, plot, and extract statistics.
 
 Features:
 - Tuning curves
 - Unbiased information theoretic metrics
 - Low-dimensional embeddings (manifolds)
 - Data simulator
+- Dataframe support for quick plotting/stats
 - and more!
 
 # Installation and usage

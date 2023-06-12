@@ -1,8 +1,8 @@
 from distutils.core import setup
 
-setup(name='Spatiotemporal_ensemble_dynamics',
+setup(name='PyCaAn',
       version='.01',
-      description='Analysis code',
+      description='Python Calcium imaging Analysis',
       author='Guillaume Etter',
       author_email='etterguillaume@gmail.com',
       #url='',

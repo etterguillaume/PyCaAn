@@ -3,10 +3,10 @@ import numpy as np
 import os
 from argparse import ArgumentParser
 from tqdm import tqdm
-from PyCaAn.functions.dataloaders import load_data
-from PyCaAn.functions.signal_processing import preprocess_data
-from PyCaAn.analysis.extract_tuning_data import extract_tuning_session
-from PyCaAn.analysis.extract_embedding_data import extract_embedding_session
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import preprocess_data
+from pycaan.analysis.extract_tuning_data import extract_tuning_session
+from pycaan.analysis.extract_embedding_data import extract_embedding_session
 
 def get_arguments(): #TODO add params override here
     parser = ArgumentParser()
