@@ -76,3 +76,37 @@ def decode_embedding(var2predict,data, params, train_embedding, test_embedding):
     decoding_pvalue = np.sum(shuffled_score>decoding_score)/params['num_surrogates']
     shuffled_error = np.nanmean(shuffled_error)
     return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
+
+def RWI_decoding(data, params, embedding):
+    np.random.seed(params['seed'])
+
+    prediction_stats = np.zeros(len(params['num_k']))*np.nan
+    
+    # Build a new variable containing all internally generated signals
+    internal_var = np.vstack((data['elapsed_time'],
+           data['time2stop'],
+           data['distance_travelled'],
+           data['distance2stop'],
+           data['velocity'])).T
+    
+    # Find optimal k
+    for i, num_k  in enumerate(params['num_k']):
+        external_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(embedding[data['trainingFrames']], data['position'][data['trainingFrames']])
+        internal_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(embedding[data['trainingFrames']], internal_var[data['trainingFrames']])
+        prediction_stats[i] = external_decoder.score(embedding['testingFrames'],data['position'][data['testingFrames']]) + internal_decoder.score(embedding['testingFrames'],internal_var[data['testingFrames']])
+
+    optimal_k = np.argmax(prediction_stats)
+    decoding_score = prediction_stats[optimal_k]
+
+    external_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(embedding[data['trainingFrames']], data['position'][data['trainingFrames']])
+    internal_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(embedding[data['trainingFrames']], internal_var[data['trainingFrames']])
+    external_prediction = external_decoder.predict(embedding) # predict location
+    internal_prediction = internal_decoder.predict(embedding) # predict internal signals (time, distance, speed)
+
+    
+
+
+
+    RWI = (external_info-internal_info)/(external_info+internal_info)
+
+    return RWI, decoding_score
