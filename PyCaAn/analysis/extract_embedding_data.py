@@ -33,8 +33,8 @@ def extract_embedding_session(data, params):
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
 
-    if not os.path.exists(os.path.join(working_directory,'model_params.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'model_params.h5'),'w') as f:
+    if not os.path.exists(os.path.join(working_directory,'embedding.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'embedding.h5'),'w') as f:
 
             # Split dataset
             trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
@@ -67,6 +67,7 @@ def extract_embedding_session(data, params):
             #train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
             train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
             test_embedding = embedding_model.transform(data['neuralData'][data['testingFrames'],0:params['input_neurons']])
+            embedding = embedding_model.transform(data['neuralData'][:,0:params['input_neurons']])
 
             # Reconstruct inputs for both train and test sets
             reconstruction = embedding_model.inverse_transform(test_embedding)
@@ -79,22 +80,25 @@ def extract_embedding_session(data, params):
             f.create_dataset('trainingFrames', data=data['trainingFrames'])
             f.create_dataset('testingFrames', data=data['testingFrames'])
             f.create_dataset('reconstruction_score', data=reconstruction_score)
-        
+            f.create_dataset('embedding', data=embedding)
+            # Save embedding
+
+        #TODO save/load transform (so far only saving embedding)
         # Save model 
         # joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib if non-parametric
-        try:
-            embedding_model.save(os.path.join(working_directory, 'model.h5'))
-        except:
-            print('Could not save parametric model')
-
-    else: # Load existing model
-    #     loaded_embedding_model = joblib.load(params['path_to_results'] + 'test_umap_model.sav') # ùsing joblib if non-parametric
-        embedding_model = load_ParametricUMAP(working_directory, 'model.h5')
-        model_file = h5py.File(os.path.join(working_directory,'model_params.h5'), 'r')
-        data['trainingFrames'] = model_file['trainingFrames']
-        data['testingFrames'] = model_file['testingFrames']
-        reconstruction_score = model_file['reconstruction_score']
-        model_file.close()
+        #(try:
+        #    embedding_model.save(os.path.join(working_directory, 'model.h5'))
+        #except:
+        #    print('Could not save parametric model')
+            
+    # else: # Load existing model
+    # #     loaded_embedding_model = joblib.load(params['path_to_results'] + 'test_umap_model.sav') # ùsing joblib if non-parametric
+    #     embedding_model = load_ParametricUMAP(working_directory, 'model.h5')
+    #     model_file = h5py.File(os.path.join(working_directory,'model_params.h5'), 'r')
+    #     data['trainingFrames'] = model_file['trainingFrames']
+    #     data['testingFrames'] = model_file['testingFrames']
+    #     reconstruction_score = model_file['reconstruction_score']
+    #     model_file.close()
 
     #%% Decode
     # Decode elapsed time
@@ -148,10 +152,10 @@ def extract_embedding_session(data, params):
     # Decode position
     if not os.path.exists(os.path.join(working_directory,'spatial_decoding.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'spatial_decoding.h5'),'w') as f:
-            if data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF':
+            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
                 decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['position'],data, params, train_embedding, test_embedding)
 
-            elif data['task']=='LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
+            elif data['task'] == 'LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
                 decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['position'][:,0],data, params, train_embedding, test_embedding)
 
             f.create_dataset('decoding_score', data=decoding_score)
@@ -161,22 +165,18 @@ def extract_embedding_session(data, params):
             f.create_dataset('shuffled_error', data=shuffled_error)
 
     # Extract direction tuning
-    try:
-        if not os.path.exists(os.path.join(working_directory,'direction_decoding.h5')) or params['overwrite_mode']=='always':
-            with h5py.File(os.path.join(working_directory,'direction_decoding.h5'),'w') as f:
-                if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
-                    decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['heading'],data, params, train_embedding, test_embedding)
-                    f.create_dataset('decoding_error', data=decoding_error)
-                    f.create_dataset('shuffled_error', data=shuffled_error)
-                elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-                    decoding_score, z_score, p_value = decode_embedding(data['LT_direction'],data, params, train_embedding, test_embedding)
-            
-                f.create_dataset('decoding_score', data=decoding_score)
-                f.create_dataset('z_score', data=z_score)
-                f.create_dataset('p_value', data=p_value)
-
-    except:
-        print('Could not decode direction')
+    if not os.path.exists(os.path.join(working_directory,'direction_decoding.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'direction_decoding.h5'),'w') as f:
+            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
+                decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['heading'],data, params, train_embedding, test_embedding)
+                f.create_dataset('decoding_error', data=decoding_error)
+                f.create_dataset('shuffled_error', data=shuffled_error)
+            elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+                decoding_score, z_score, p_value, _, _ = decode_embedding(data['LT_direction'], data, params, train_embedding, test_embedding)
+        
+            f.create_dataset('decoding_score', data=decoding_score)
+            f.create_dataset('z_score', data=z_score)
+            f.create_dataset('p_value', data=p_value)
 
     # Decode tone
     if data['task'] == 'legoToneLT':
@@ -184,7 +184,7 @@ def extract_embedding_session(data, params):
             if not os.path.exists(os.path.join(working_directory,'tone_decoding.h5')) or params['overwrite_mode']=='always':
                 with h5py.File(os.path.join(working_directory,'tone_decoding.h5'),'w') as f:
                     data=extract_tone(data,params)
-                    decoding_score, z_score, p_value = decode_embedding(data['binaryTone'],data, params, train_embedding, test_embedding)
+                    decoding_score, z_score, p_value, _, _ = decode_embedding(data['binaryTone'],data, params, train_embedding, test_embedding)
             
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
@@ -197,7 +197,7 @@ def extract_embedding_session(data, params):
             if not os.path.exists(os.path.join(working_directory,'seqTone_decoding.h5')) or params['overwrite_mode']=='always':
                 with h5py.File(os.path.join(working_directory,'seqTone_decoding.h5'),'w') as f:
                     data = extract_seqLT_tone(data,params)
-                    decoding_score, z_score, p_value = decode_embedding(data['seqLT_state'],data, params, train_embedding, test_embedding)
+                    decoding_score, z_score, p_value, _, _ = decode_embedding(data['seqLT_state'],data, params, train_embedding, test_embedding)
             
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
