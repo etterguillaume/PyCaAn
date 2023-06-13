@@ -6,16 +6,16 @@
 import yaml
 import numpy as np
 import joblib
-# from umap.umap_ import UMAP
+from umap.umap_ import UMAP
 from umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
 import tensorflow as tf
 import os
 from tqdm import tqdm
 from sklearn.linear_model import LinearRegression as lin_reg
-from functions.dataloaders import load_data
-from functions.signal_processing import preprocess_data
-from functions.decoding import decode_embedding
-from functions.signal_processing import extract_tone, extract_seqLT_tone
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import preprocess_data
+from pycaan.functions.decoding import decode_embedding
+from pycaan.functions.signal_processing import extract_tone, extract_seqLT_tone
 import h5py
 #%%
 with open('../params.yaml','r') as file:
@@ -48,11 +48,11 @@ data['testingFrames'][~data['running_ts']] = False
 #tf.keras.backend.clear_session()
 
 # Train embedding model
-embedding_model = ParametricUMAP(
-                    verbose=False,
-                    parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
-                    autoencoder_loss = True,
-                    parametric_reconstruction = True,
+embedding_model = UMAP(
+                  #  verbose=False,
+                   # parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
+                   # autoencoder_loss = True,
+                   # parametric_reconstruction = True,
                     n_components=params['embedding_dims'],
                     n_neighbors=params['n_neighbors'],
                     min_dist=params['min_dist'],
@@ -64,6 +64,7 @@ embedding_model = ParametricUMAP(
 #train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 test_embedding = embedding_model.transform(data['neuralData'][data['testingFrames'],0:params['input_neurons']])
+total_embedding = embedding_model.transform(data['neuralData'][:,0:params['input_neurons']])
 
 # Reconstruct inputs for both train and test sets
 reconstruction = embedding_model.inverse_transform(test_embedding)
@@ -73,7 +74,9 @@ reconstruction_decoder = lin_reg().fit(reconstruction, data['rawData'][data['tes
 reconstruction_score = reconstruction_decoder.score(reconstruction, data['rawData'][data['testingFrames']])
 # %%
 embedding_model.save('model.h5')
+#joblib.dump(embedding_model, 'model.pkl')
 
 # %%
 embedding_model2 = load_ParametricUMAP(os.path.join('model.h5'))
+#embedding_model2 = joblib.load("model.pkl")
 # %%
