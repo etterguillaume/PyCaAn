@@ -2,6 +2,7 @@ import numpy as np
 np.seterr(divide='ignore', invalid='ignore') # Ignore zero divide warnings
 from sklearn.metrics import adjusted_mutual_info_score
 from sklearn.feature_selection import chi2
+from scipy.stats import pearsonr as corr
 
 def extract_2D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size): # TODO legacy, to be removed
     #TODO optimize using digitize
@@ -150,8 +151,9 @@ def assess_covariate(var1, var2, inclusion_ts, var1_length, var1_bin_size, var2_
     # Compute AMI, p_value between two variables
     info = adjusted_mutual_info_score(digitized_var1,digitized_var2, average_method='min')
     p_value = chi2(digitized_var1[:,None],digitized_var2[:,None])[1]
+    correlation_results = corr(digitized_var1,digitized_var2)
     
-    return info, p_value
+    return info, p_value, correlation_results[0]
 
 def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_length):
     discrete_bin_vector = np.arange(var_length)
