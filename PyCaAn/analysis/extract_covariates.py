@@ -71,7 +71,7 @@ for i, session in enumerate(tqdm(session_list)):
         # Pre-allocate data for covariates
         info_matrix = np.ones((5,5))
         pvalue_matrix = np.zeros((5,5))
-        correlation_matrix = np.zeros((5,5))
+        correlation_matrix = np.ones((5,5))
         labels=['space','time','distance','speed','heading']
 
         position=data['position']
