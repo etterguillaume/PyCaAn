@@ -3,6 +3,7 @@ from sklearn.neighbors import KNeighborsRegressor as knn_reg
 from sklearn.neighbors import KNeighborsClassifier as knn_class
 from sklearn.linear_model import BayesianRidge
 from sklearn.metrics import median_absolute_error as MAE
+from scipy.spatial import distance
 #from sklearn.metrics import f1_score
 from tqdm import tqdm
 
@@ -77,7 +78,7 @@ def decode_embedding(var2predict,data, params, train_embedding, test_embedding):
     shuffled_error = np.nanmean(shuffled_error)
     return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
 
-def RWI_decoding(data, params, embedding):
+def decode_RWI(data, params, embedding):
     np.random.seed(params['seed'])
 
     prediction_stats = np.zeros(len(params['num_k']))*np.nan
@@ -91,22 +92,21 @@ def RWI_decoding(data, params, embedding):
     
     # Find optimal k
     for i, num_k  in enumerate(params['num_k']):
-        external_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(embedding[data['trainingFrames']], data['position'][data['trainingFrames']])
-        internal_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(embedding[data['trainingFrames']], internal_var[data['trainingFrames']])
+        external_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['position'][data['trainingFrames']], embedding[data['trainingFrames']])
+        internal_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(internal_var[data['trainingFrames']], embedding[data['trainingFrames']])
         prediction_stats[i] = external_decoder.score(embedding['testingFrames'],data['position'][data['testingFrames']]) + internal_decoder.score(embedding['testingFrames'],internal_var[data['testingFrames']])
 
     optimal_k = np.argmax(prediction_stats)
-    decoding_score = prediction_stats[optimal_k]
+    #decoding_score = prediction_stats[optimal_k]
 
-    external_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(embedding[data['trainingFrames']], data['position'][data['trainingFrames']])
-    internal_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(embedding[data['trainingFrames']], internal_var[data['trainingFrames']])
-    external_prediction = external_decoder.predict(embedding) # predict location
-    internal_prediction = internal_decoder.predict(embedding) # predict internal signals (time, distance, speed)
+    external_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(data['position'][data['trainingFrames']], embedding[data['trainingFrames']])
+    internal_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(internal_var[data['trainingFrames']], embedding[data['trainingFrames']])
+    external_prediction = external_decoder.predict(data['position']) # predict location
+    internal_prediction = internal_decoder.predict(internal_var) # predict internal signals (time, distance, speed)
 
-    
+    external_error = distance.euclidean(embedding[data['testingFrames']], external_prediction[data['testingFrames']])
+    internal_error = distance.euclidean(embedding[data['testingFrames']], internal_prediction[data['testingFrames']])
 
+    RWI = internal_error-external_error
 
-
-    RWI = (external_info-internal_info)/(external_info+internal_info)
-
-    return RWI, decoding_score
+    return RWI, external_prediction, internal_prediction

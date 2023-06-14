@@ -6,7 +6,7 @@ import tensorflow as tf
 import os
 from argparse import ArgumentParser
 from sklearn.linear_model import LinearRegression as lin_reg
-from pycaan.functions.decoding import decode_embedding
+from pycaan.functions.decoding import decode_embedding, decode_RWI
 from pycaan.functions.signal_processing import extract_tone, extract_seqLT_tone
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
@@ -99,6 +99,17 @@ def extract_embedding_session(data, params):
     #     data['testingFrames'] = model_file['testingFrames']
     #     reconstruction_score = model_file['reconstruction_score']
     #     model_file.close()
+
+    #%% Extract RWI
+    if not os.path.exists(os.path.join(working_directory,'RWI.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'RWI.h5'),'w') as f:
+            decode_RWI(data, params, embedding)
+            # decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['elapsed_time'],data, params, train_embedding, test_embedding)
+            # f.create_dataset('decoding_score', data=decoding_score)
+            # f.create_dataset('z_score', data=z_score)
+            # f.create_dataset('p_value', data=p_value)
+            # f.create_dataset('decoding_error', data=decoding_error)
+            # f.create_dataset('shuffled_error', data=shuffled_error)
 
     #%% Decode
     # Decode elapsed time
