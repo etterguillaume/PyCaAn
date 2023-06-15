@@ -61,7 +61,7 @@ def extract_embedding_session(data, params):
                                 n_neighbors=params['n_neighbors'],
                                 min_dist=params['min_dist'],
                                 metric='euclidean',
-                                random_state=42
+                                random_state=params['seed']
                                 ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 
             #train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
