@@ -103,14 +103,13 @@ def extract_embedding_session(data, params):
     #%% Extract RWI
     if not os.path.exists(os.path.join(working_directory,'RWI.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'RWI.h5'),'w') as f:
-            decode_RWI(data, params, embedding)
-            # decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['elapsed_time'],data, params, train_embedding, test_embedding)
-            # f.create_dataset('decoding_score', data=decoding_score)
-            # f.create_dataset('z_score', data=z_score)
-            # f.create_dataset('p_value', data=p_value)
-            # f.create_dataset('decoding_error', data=decoding_error)
-            # f.create_dataset('shuffled_error', data=shuffled_error)
-
+            RWI, external_prediction, internal_prediction = decode_RWI(data, params, embedding)
+            f.create_dataset('RWI', data=RWI)
+            f.create_dataset('external_prediction', data=external_prediction)
+            f.create_dataset('internal_prediction', data=internal_prediction)
+            f.create_dataset('trainingFrames', data=data['trainingFrames'])
+            f.create_dataset('testingFrames', data=data['testingFrames'])
+            
     #%% Decode
     # Decode elapsed time
     if not os.path.exists(os.path.join(working_directory,'retrospective_temporal_decoding.h5')) or params['overwrite_mode']=='always':
@@ -176,18 +175,21 @@ def extract_embedding_session(data, params):
             f.create_dataset('shuffled_error', data=shuffled_error)
 
     # Extract direction tuning
-    if not os.path.exists(os.path.join(working_directory,'direction_decoding.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'direction_decoding.h5'),'w') as f:
-            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
-                decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['heading'],data, params, train_embedding, test_embedding)
-                f.create_dataset('decoding_error', data=decoding_error)
-                f.create_dataset('shuffled_error', data=shuffled_error)
-            elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-                decoding_score, z_score, p_value, _, _ = decode_embedding(data['LT_direction'], data, params, train_embedding, test_embedding)
-        
-            f.create_dataset('decoding_score', data=decoding_score)
-            f.create_dataset('z_score', data=z_score)
-            f.create_dataset('p_value', data=p_value)
+    try:
+        if not os.path.exists(os.path.join(working_directory,'direction_decoding.h5')) or params['overwrite_mode']=='always':
+            with h5py.File(os.path.join(working_directory,'direction_decoding.h5'),'w') as f:
+                if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
+                    decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['heading'],data, params, train_embedding, test_embedding)
+                    f.create_dataset('decoding_error', data=decoding_error)
+                    f.create_dataset('shuffled_error', data=shuffled_error)
+                elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+                    decoding_score, z_score, p_value, _, _ = decode_embedding(data['LT_direction'], data, params, train_embedding, test_embedding)
+            
+                f.create_dataset('decoding_score', data=decoding_score)
+                f.create_dataset('z_score', data=z_score)
+                f.create_dataset('p_value', data=p_value)
+    except:
+        print('Could not decode heading')
 
     # Decode tone
     if data['task'] == 'legoToneLT':

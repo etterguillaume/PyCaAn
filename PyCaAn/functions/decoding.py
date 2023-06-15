@@ -3,7 +3,7 @@ from sklearn.neighbors import KNeighborsRegressor as knn_reg
 from sklearn.neighbors import KNeighborsClassifier as knn_class
 from sklearn.linear_model import BayesianRidge
 from sklearn.metrics import median_absolute_error as MAE
-from scipy.spatial import distance
+from math import dist
 #from sklearn.metrics import f1_score
 from tqdm import tqdm
 
@@ -94,7 +94,7 @@ def decode_RWI(data, params, embedding):
     for i, num_k  in enumerate(params['num_k']):
         external_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['position'][data['trainingFrames']], embedding[data['trainingFrames']])
         internal_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(internal_var[data['trainingFrames']], embedding[data['trainingFrames']])
-        prediction_stats[i] = external_decoder.score(embedding['testingFrames'],data['position'][data['testingFrames']]) + internal_decoder.score(embedding['testingFrames'],internal_var[data['testingFrames']])
+        prediction_stats[i] = external_decoder.score(data['position'][data['testingFrames']], embedding[data['testingFrames']]) + internal_decoder.score(internal_var[data['testingFrames']], embedding[data['testingFrames']])
 
     optimal_k = np.argmax(prediction_stats)
     #decoding_score = prediction_stats[optimal_k]
@@ -103,9 +103,12 @@ def decode_RWI(data, params, embedding):
     internal_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(internal_var[data['trainingFrames']], embedding[data['trainingFrames']])
     external_prediction = external_decoder.predict(data['position']) # predict location
     internal_prediction = internal_decoder.predict(internal_var) # predict internal signals (time, distance, speed)
-
-    external_error = distance.euclidean(embedding[data['testingFrames']], external_prediction[data['testingFrames']])
-    internal_error = distance.euclidean(embedding[data['testingFrames']], internal_prediction[data['testingFrames']])
+    
+    external_error = np.zeros(len(embedding))
+    internal_error = np.zeros(len(embedding))
+    for i in range(len(embedding)):
+        external_error[i] = dist(embedding[i], external_prediction[i])
+        internal_error[i] = dist(embedding[i], internal_prediction[i])
 
     RWI = internal_error-external_error
 

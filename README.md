@@ -38,7 +38,7 @@ binarized_traces, neural_data = binarize_ca_traces(ca_traces, z_threshold, sampl
 First define your paths (input dataset, output result folders) and other parameters in params.yaml,
 you can analyze a single session from the terminal using:
 `
-% python3 pycaan/analysis.py --../../example_dataset/example_region/example_subject/example_mouse
+% python3 pycaan//analysis/extract_tuning_data.py --session_path ../../example_dataset/example_region/example_subject/example_mouse
 `
 
 you can also perform a specific type of analysis on selected sessions (batch process) after running run_dataset_curation.py:
