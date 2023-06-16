@@ -68,6 +68,7 @@ plot_gain: 3
 portion_to_plot: 0.2 # Only plot the first portion of the recording
 
 # Hyperparameter search (hs)
+hs_seeds: [1,2,3,4,5]
 hs_min_dist: [.1,.2,.4,.8,1]
 hs_n_neighbors: [2,4,8,16,32,64,128]
 hs_embedding_dims: [2,3,4,5,8]
