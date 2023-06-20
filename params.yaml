@@ -14,7 +14,7 @@ z_threshold: 2 # Used to detect periods of putative activity
 remove_inactivity: False # If true and data is binarized, will remove epochs where no cell was active
 
 # Locomotor info
-speed_threshold: 5 # cm.s-1
+speed_threshold: 2 # cm.s-1
 remove_immobility: False
 
 # seqLT params
