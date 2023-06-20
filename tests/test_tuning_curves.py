@@ -4,23 +4,26 @@
 
 #%% Imports
 import yaml
-from functions.dataloaders import load_data
-from functions.signal_processing import preprocess_data, extract_seqLT_tone, extract_tone
-from functions.tuning import extract_2D_tuning, extract_1D_tuning, extract_discrete_tuning
+import os
+import numpy as np
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import preprocess_data, extract_seqLT_tone, extract_tone
+from pycaan.functions.tuning import extract_discrete_tuning, extract_tuning
 import matplotlib.pyplot as plt
 
 #%% Load YAML file
-with open('params.yaml','r') as file:
+with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Open-field
 #path='../..//datasets/calcium_imaging/CA1/M991/M991_legoSeqLT_20190313'
+path = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
 #path = '../../datasets/calcium_imaging/CA1/M989/M989_legoSeqLT_20190313'
 #path = '../../datasets/calcium_imaging/CA1/M989/M989_legoToneLT_scrambled_20190301'
-with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
-    session_file = yaml.full_load(file)
-session_list = session_file['sessions']
-path=session_list[148]
+#with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
+#    session_file = yaml.full_load(file)
+#session_list = session_file['sessions']
+#path=session_list[148]
 
 
 data = load_data(path)
@@ -29,11 +32,18 @@ data = load_data(path)
 data=preprocess_data(data,params)
 
 #%%
-AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curves = extract_1D_tuning(data['binaryData'],
-                                                    data['elapsed_time'],
-                                                    data['running_ts'],
-                                                    var_length=params['max_temporal_length'],
-                                                    bin_size=params['temporalBinSize'])
+bin_vec = (np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize']))
+info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve, marginal_likelihood, peak_loc, peak_val = extract_tuning(
+                                        data['binaryData'],
+                                        data['elapsed_time'],
+                                        data['running_ts'],
+                                        bins=bin_vec)
+
+#%%
+
+
+
+
 
 #%%
 # data = extract_seqLT_tone(data,params)

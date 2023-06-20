@@ -49,8 +49,15 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
     var = var[inclusion_ts]
     numFrames, numNeurons = binaryData.shape
     active_frames_in_bin = np.zeros((np.hstack((numNeurons,np.asarray(bin_dims)-1))), dtype=int)
-    AMI = np.zeros(numNeurons)
+    info = np.zeros(numNeurons)
     p_value = np.zeros(numNeurons)
+    marginal_likelihood = np.zeros(numNeurons)
+    peak_val = np.zeros(numNeurons)
+
+    if var.ndim>1:
+        peak_loc = np.zeros((np.hstack((numNeurons,np.asarray(bin_dims)-1))), dtype=int)
+    else:
+        peak_loc = np.zeros(numNeurons, dtype=int)
 
     # Compute occupancy
     if var.ndim>1:
@@ -76,6 +83,7 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
         
     # Compute info and tuning curves for each neuron
     for neuron in range(numNeurons):
+        marginal_likelihood[neuron] = np.sum(binaryData[:,neuron])/numFrames
         if var.ndim>1:
             active_frames_in_bin[neuron] = np.histogramdd(sample=var[binaryData[:,neuron]],
                                                           bins=bins)[0]
@@ -83,11 +91,17 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
             active_frames_in_bin[neuron] = np.histogram(a=var[binaryData[:,neuron]],
                                                           bins=bins)[0]
 
-        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
+        info[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
-    
+        if var.ndim>1:
+            peak_loc[neuron] = np.unravel_index(np.argmax(active_frames_in_bin[neuron], axis=None),active_frames_in_bin.shape[1:-1])
+        else:
+            peak_loc[neuron] = np.argmax(active_frames_in_bin[neuron])
+            peak_val[neuron] = active_frames_in_bin[neuron,peak_loc[neuron]]/occupancy_frames[peak_loc[neuron]]
+
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
-    return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
+
+    return info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve, marginal_likelihood, peak_loc, peak_val
 
 def extract_1D_tuning(binaryData, interpolated_var, inclusion_ts, var_length, bin_size): #TODO LEGACY, to be removed
     bins = np.arange(bin_size,var_length,bin_size)
@@ -162,7 +176,7 @@ def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_leng
     numFrames, numNeurons = binaryData.shape
     active_frames_in_bin = np.zeros((numNeurons,len(discrete_bin_vector)), dtype=int)
     occupancy_frames = np.zeros(len(discrete_bin_vector), dtype=int)
-    AMI = np.zeros(numNeurons)
+    info = np.zeros(numNeurons)
     p_value = np.zeros(numNeurons)
 
     # Compute occupancy
@@ -181,11 +195,11 @@ def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_leng
             if frames_in_bin is not None: # if bin has been explored
                 active_frames_in_bin[neuron,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
 
-        AMI[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
+        info[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
     
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
-    return AMI, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
+    return info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve
 
 def extract_internal_info(data, params, inclusion_ts):
     retrospectivetime_bin_vector = np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize'])

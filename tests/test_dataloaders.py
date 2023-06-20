@@ -3,8 +3,8 @@
 %autoreload 2
 
 #%%
-from functions.dataloaders import load_data
-from functions.signal_processing import extract_tone, preprocess_data, clean_timestamps
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import extract_tone, preprocess_data, clean_timestamps
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
