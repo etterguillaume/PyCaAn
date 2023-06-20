@@ -15,20 +15,9 @@ import matplotlib.pyplot as plt
 with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
-#%% Open-field
-#path='../..//datasets/calcium_imaging/CA1/M991/M991_legoSeqLT_20190313'
+#%% Linear track
 path = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
-#path = '../../datasets/calcium_imaging/CA1/M989/M989_legoSeqLT_20190313'
-#path = '../../datasets/calcium_imaging/CA1/M989/M989_legoToneLT_scrambled_20190301'
-#with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
-#    session_file = yaml.full_load(file)
-#session_list = session_file['sessions']
-#path=session_list[148]
-
-
 data = load_data(path)
-
-#%% Pre-process data
 data=preprocess_data(data,params)
 
 #%%
@@ -39,8 +28,24 @@ info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve, marginal_li
                                         data['running_ts'],
                                         bins=bin_vec)
 
-#%%
+#%% Interesting plot...
+plt.hexbin(marginal_likelihood,peak_val, gridsize=15, C=info, cmap='Spectral_r'); plt.colorbar()
 
+#%% Open-field
+path = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
+data = load_data(path)
+data=preprocess_data(data,params)
+
+#%%
+bin_vec=(np.arange(0,45+params['spatialBinSize'],params['spatialBinSize']),
+                         np.arange(0,45+params['spatialBinSize'],params['spatialBinSize']))
+info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+                                                data['position'],
+                                                data['running_ts'],
+                                                bins=bin_vec)
+
+#%%
+plt.hexbin(marginal_likelihood,peak_val, gridsize=30, C=info, cmap='Spectral_r'); plt.colorbar()
 
 
 

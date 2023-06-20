@@ -53,11 +53,7 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
     p_value = np.zeros(numNeurons)
     marginal_likelihood = np.zeros(numNeurons)
     peak_val = np.zeros(numNeurons)
-
-    if var.ndim>1:
-        peak_loc = np.zeros((np.hstack((numNeurons,np.asarray(bin_dims)-1))), dtype=int)
-    else:
-        peak_loc = np.zeros(numNeurons, dtype=int)
+    peak_loc = np.zeros((numNeurons, var.ndim), dtype=int)
 
     # Compute occupancy
     if var.ndim>1:
@@ -93,11 +89,8 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
 
         info[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
         p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
-        if var.ndim>1:
-            peak_loc[neuron] = np.unravel_index(np.argmax(active_frames_in_bin[neuron], axis=None),active_frames_in_bin.shape[1:-1])
-        else:
-            peak_loc[neuron] = np.argmax(active_frames_in_bin[neuron])
-            peak_val[neuron] = active_frames_in_bin[neuron,peak_loc[neuron]]/occupancy_frames[peak_loc[neuron]]
+        peak_loc[neuron] = np.unravel_index(np.argmax(active_frames_in_bin[neuron], axis=None), active_frames_in_bin.shape[1::])
+        peak_val[neuron] = active_frames_in_bin[(neuron,) + tuple(peak_loc[neuron])]/occupancy_frames[tuple(peak_loc[neuron])]
 
     tuning_curve = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
 
