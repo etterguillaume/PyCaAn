@@ -31,6 +31,18 @@ info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve, marginal_li
 #%% Interesting plot...
 plt.hexbin(marginal_likelihood,peak_val, gridsize=15, C=info, cmap='Spectral_r'); plt.colorbar()
 
+#%% LT direction test
+info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_discrete_tuning(
+    data['binaryData'],
+    data['LT_direction'],
+    data['running_ts'],
+    var_length=2
+    )
+
+#%% Interesting plot...
+plt.hexbin(marginal_likelihood,peak_val, gridsize=15, C=info, cmap='Spectral_r'); plt.colorbar()
+
+
 #%% Open-field
 path = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
 data = load_data(path)
@@ -46,9 +58,6 @@ info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve, marginal_li
 
 #%%
 plt.hexbin(marginal_likelihood,peak_val, gridsize=30, C=info, cmap='Spectral_r'); plt.colorbar()
-
-
-
 
 #%%
 # data = extract_seqLT_tone(data,params)

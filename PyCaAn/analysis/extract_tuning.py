@@ -213,7 +213,7 @@ def extract_tuning_session(data, params):
                     info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
                                                                     data['LT_direction'],
                                                                     data['running_ts'],
-                                                                    var_length=1)
+                                                                    var_length=2)
                 f.create_dataset('info', data=info)
                 f.create_dataset('p_value', data=p_value)
                 f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
@@ -235,7 +235,7 @@ def extract_tuning_session(data, params):
                     info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
                                                                     data['binaryTone'],
                                                                     data['running_ts'],
-                                                                    var_length=1,
+                                                                    var_length=2,
                                                                     )                
                     f.create_dataset('info', data=info)
                     f.create_dataset('p_value', data=p_value)
@@ -257,7 +257,7 @@ def extract_tuning_session(data, params):
                     info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
                                                                     data['seqLT_state'],
                                                                     data['running_ts'],
-                                                                    var_length=3,
+                                                                    var_length=4,
                                                                     )
                     f.create_dataset('info', data=info)
                     f.create_dataset('p_value', data=p_value)

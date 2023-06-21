@@ -60,10 +60,10 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
 
     return info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val
 
-def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_length):
+def extract_discrete_tuning(binaryData, var, inclusion_ts, var_length):
     discrete_bin_vector = np.arange(var_length)
     binaryData = binaryData[inclusion_ts]
-    interpolated_var = interpolated_var[inclusion_ts]
+    var = var[inclusion_ts]
     numFrames, numNeurons = binaryData.shape
     active_frames_in_bin = np.zeros((numNeurons,len(discrete_bin_vector)), dtype=int)
     occupancy_frames = np.zeros(len(discrete_bin_vector), dtype=int)
@@ -74,25 +74,20 @@ def extract_discrete_tuning(binaryData, interpolated_var, inclusion_ts, var_leng
     peak_loc = np.zeros(numNeurons, dtype=int)
 
     # Compute occupancy
-    bin_vector = np.zeros(numFrames, dtype=int) # Vector that will specificy the bin# for each frame
-    ct=0
-    for x in discrete_bin_vector:
-        frames_in_bin = np.where(interpolated_var==x)[0]
-        occupancy_frames[x] = np.sum(frames_in_bin) # How many frames for that bin
-        bin_vector[frames_in_bin] = ct
-        ct+=1
+    occupancy_frames = np.bincount(var, minlength=var_length)
 
     # Bin activity
     for neuron in range(numNeurons):
+        marginal_likelihood[neuron] = np.sum(binaryData[:,neuron])/numFrames
         for x in discrete_bin_vector:
-            frames_in_bin = np.where(interpolated_var==x)[0]
+            frames_in_bin = np.where(var==x)[0]
             if frames_in_bin is not None: # if bin has been explored
                 active_frames_in_bin[neuron,x] = np.sum(binaryData[frames_in_bin,neuron]) # Total number of frames of activity in that bin
 
-        info[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],bin_vector, average_method='min')
-        p_value[neuron] = chi2(binaryData[:,neuron][:,None],bin_vector[:,None])[1]
-        peak_loc[neuron] = np.unravel_index(np.argmax(active_frames_in_bin[neuron], axis=None), active_frames_in_bin.shape[1::])
-        peak_val[neuron] = active_frames_in_bin[(neuron,) + tuple(peak_loc[neuron])]/occupancy_frames[tuple(peak_loc[neuron])]
+        info[neuron] = adjusted_mutual_info_score(binaryData[:,neuron],var, average_method='min')
+        p_value[neuron] = chi2(binaryData[:,neuron][:,None],var[:,None])[1]
+        peak_loc[neuron] = np.argmax(active_frames_in_bin[neuron])
+        peak_val[neuron] = active_frames_in_bin[neuron, peak_loc[neuron]]/occupancy_frames[peak_loc[neuron]]
     
     tuning_curves = active_frames_in_bin/occupancy_frames # Likelihood = number of active frames in bin/occupancy
     return info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val

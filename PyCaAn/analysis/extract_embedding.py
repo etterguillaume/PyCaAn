@@ -2,8 +2,11 @@
 import yaml
 import numpy as np
 from umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
+from umap.umap_ import UMAP
 import tensorflow as tf
+import joblib
 import os
+import sys
 from argparse import ArgumentParser
 from sklearn.linear_model import LinearRegression as lin_reg
 from pycaan.functions.decoding import decode_embedding, decode_RWI
@@ -11,6 +14,15 @@ from pycaan.functions.signal_processing import extract_tone, extract_seqLT_tone
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
 import h5py
+
+class hide_output_prints:
+    def __enter__(self):
+        self._original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        sys.stdout.close()
+        sys.stdout = self._original_stdout
 
 def get_arguments():
     parser = ArgumentParser()
@@ -52,11 +64,21 @@ def extract_embedding_session(data, params):
             data['testingFrames'][~data['running_ts']] = False
 
             # Train embedding model
-            embedding_model = ParametricUMAP(
+            if params['parametric_embedding']:
+                with hide_output_prints():
+                    embedding_model = ParametricUMAP(
                                 verbose=False,
                                 parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
                                 autoencoder_loss = True,
                                 parametric_reconstruction = True,
+                                n_components=params['embedding_dims'],
+                                n_neighbors=params['n_neighbors'],
+                                min_dist=params['min_dist'],
+                                metric='euclidean',
+                                random_state=params['seed']
+                                ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
+            else:
+                embedding_model = UMAP(
                                 n_components=params['embedding_dims'],
                                 n_neighbors=params['n_neighbors'],
                                 min_dist=params['min_dist'],
@@ -76,29 +98,17 @@ def extract_embedding_session(data, params):
             reconstruction_decoder = lin_reg().fit(reconstruction, data['rawData'][data['testingFrames']])
             reconstruction_score = reconstruction_decoder.score(reconstruction, data['rawData'][data['testingFrames']])
 
-            # Save model data
+            # Save embedding data
             f.create_dataset('trainingFrames', data=data['trainingFrames'])
             f.create_dataset('testingFrames', data=data['testingFrames'])
             f.create_dataset('reconstruction_score', data=reconstruction_score)
             f.create_dataset('embedding', data=embedding)
-            # Save embedding
 
-        #TODO save/load transform (so far only saving embedding)
         # Save model 
-        # joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib if non-parametric
-        #(try:
-        #    embedding_model.save(os.path.join(working_directory, 'model.h5'))
-        #except:
-        #    print('Could not save parametric model')
+        joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib if non-parametric
             
     # else: # Load existing model
     # #     loaded_embedding_model = joblib.load(params['path_to_results'] + 'test_umap_model.sav') # ùsing joblib if non-parametric
-    #     embedding_model = load_ParametricUMAP(working_directory, 'model.h5')
-    #     model_file = h5py.File(os.path.join(working_directory,'model_params.h5'), 'r')
-    #     data['trainingFrames'] = model_file['trainingFrames']
-    #     data['testingFrames'] = model_file['testingFrames']
-    #     reconstruction_score = model_file['reconstruction_score']
-    #     model_file.close()
 
     #%% Extract RWI
     if not os.path.exists(os.path.join(working_directory,'RWI.h5')) or params['overwrite_mode']=='always':
