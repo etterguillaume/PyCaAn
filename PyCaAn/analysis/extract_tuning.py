@@ -98,7 +98,7 @@ def extract_tuning_session(data, params):
     # Extract tuning to retrospective distance
     if not os.path.exists(os.path.join(working_directory,'retrospective_distance_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'retrospective_distance_tuning.h5'),'w') as f:
-            bin_vec = (np.arange(0,params['max_distance_length']+params['spatialBinSize'],params['spatialBinSize']))
+            bin_vec = (np.arange(0,params['max_distance_length']+params['distanceBinSize'],params['distanceBinSize']))
             info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                     data['distance_travelled'],
                                                     data['running_ts'],
@@ -116,7 +116,7 @@ def extract_tuning_session(data, params):
     # Extract tuning to prospective distance
     if not os.path.exists(os.path.join(working_directory,'prospective_distance_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'prospective_distance_tuning.h5'),'w') as f:
-            bin_vec = (np.arange(0,params['max_distance_length']+params['spatialBinSize'],params['spatialBinSize']))
+            bin_vec = (np.arange(0,params['max_distance_length']+params['distanceBinSize'],params['distanceBinSize']))
             info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                     data['distance_travelled'],
                                                     data['running_ts'],
