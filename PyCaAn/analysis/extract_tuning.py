@@ -34,6 +34,7 @@ def extract_tuning_session(data, params):
     numFrames, numNeurons = data['rawData'].shape
     total_distance_travelled = extract_total_distance_travelled(data['position'])
     info_dict = {
+                'path': data['path'],
                 'day': data['day'],
                 'task': data['task'],
                 'subject': data['subject'],
