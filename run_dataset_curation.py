@@ -44,11 +44,12 @@ for region in regionList:
                 except:
                     error_list.append(session_path)
                     print(f'Could not open {session_path}')
-                else: #TODO add other conditions, like num cells, neurons, overwrite, etc
-                    path_list.append(session_path)
+                else:
                     numFrames, numNeurons = data['rawData'].shape
                     distance_travelled=extract_total_distance_travelled(data['position'])
-                    if not numNeurons>=params['input_neurons'] and distance_travelled>=params['distance_travelled_threshold']:
+                    if numNeurons>=params['input_neurons'] and distance_travelled>=params['distance_travelled_threshold']:
+                        path_list.append(session_path)
+                    else:
                         excluded_list.append(session_path)
 
 #%% Save list of sessions and stats in yaml files
