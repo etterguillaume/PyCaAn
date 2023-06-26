@@ -29,7 +29,7 @@ def decode_neural_data(var2predict, neural_data, params, trainingFrames, testing
     shuffled_error = np.nanmean(shuffled_error)
     return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
 
-def decode_embedding(var2predict,data, params, train_embedding, test_embedding):
+def decode_embedding(var2predict, data, params, train_embedding, test_embedding):
     np.random.seed(params['seed'])
     prediction_stats = np.zeros(len(params['num_k']))*np.nan
     error_stats = np.zeros(len(params['num_k']))*np.nan
