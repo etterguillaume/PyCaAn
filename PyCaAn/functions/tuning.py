@@ -135,7 +135,7 @@ def assess_covariate(var1, var2, inclusion_ts, var1_length, var1_bin_size, var2_
     
     return info, p_value, correlation_results[0]
 
-def extract_internal_info(data, params, inclusion_ts):
+def extract_internal_info(data, params, inclusion_ts): #TODO alpha, very memory intensive currently
     retrospectivetime_bin_vector = np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize'])
     prospectivetime_bin_vector = np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize'])
     retrospectivedistance_bin_vector = np.arange(0,params['max_distance_length']+params['spatialBinSize'],params['spatialBinSize'])
@@ -164,4 +164,3 @@ def extract_RWI(external_info, internal_info):
     RWI = (external_info-internal_info)/(external_info+internal_info)
 
     return RWI
-# Representational weight index (RWI)

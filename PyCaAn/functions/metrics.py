@@ -51,3 +51,9 @@ def extract_total_distance_travelled(interpolated_position):
     for i in range(1,len(interpolated_position)):
         total_distance_travelled += sqrt((interpolated_position[i,0]-interpolated_position[i-1,0])**2 + (interpolated_position[i,1]-interpolated_position[i-1,1])**2) # Euclidean distance
     return total_distance_travelled
+
+def extract_marginal_likelihood(binaryData):
+    numFrames, numNeurons = binaryData.shape
+    marginal_likelihood = np.sum(binaryData, axis=0)/numFrames
+
+    return marginal_likelihood

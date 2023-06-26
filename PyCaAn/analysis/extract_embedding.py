@@ -13,6 +13,7 @@ from pycaan.functions.decoding import decode_embedding, decode_RWI
 from pycaan.functions.signal_processing import extract_tone, extract_seqLT_tone
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
+from pycaan.functions.metrics import extract_total_distance_travelled
 import h5py
 
 class hide_output_prints:
@@ -44,6 +45,33 @@ def extract_embedding_session(data, params):
         )
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
+
+    # Save basic info
+    numFrames, numNeurons = data['rawData'].shape
+    total_distance_travelled = extract_total_distance_travelled(data['position'])
+    info_dict = {
+                'path': data['path'],
+                'day': data['day'],
+                'task': data['task'],
+                'subject': data['subject'],
+                'region': data['region'],
+                'sex': data['sex'],
+                'age': data['age'],
+                'condition': data['day'],
+                'darkness': data['darkness'],
+                'optoStim': data['optoStim'],
+                'rewards': data['rewards'],
+                'darkness': data['darkness'],
+                'condition': data['condition'],
+                'numNeurons': numNeurons,
+                'numFrames': numFrames,
+                'total_distance_travelled': float(total_distance_travelled),
+                'duration': float(data['caTime'][-1]),
+                'speed_threshold': params['speed_threshold']
+        }
+    if not os.path.exists(os.path.join(working_directory,'info.yaml')) or params['overwrite_mode']=='always':
+        with open(os.path.join(working_directory,'info.yaml'),"w") as file:
+            yaml.dump(info_dict,file)
 
     if not os.path.exists(os.path.join(working_directory,'embedding.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'embedding.h5'),'w') as f:
@@ -123,7 +151,7 @@ def extract_embedding_session(data, params):
         #%% Decode
         # Decode elapsed time
         if not os.path.exists(os.path.join(working_directory,'retrospective_temporal_decoding.h5')) or params['overwrite_mode']=='always':
-            with h5py.File(os.path.join(working_directory,'retrospective_decoding.h5'),'w') as f:
+            with h5py.File(os.path.join(working_directory,'retrospective_temporal_decoding.h5'),'w') as f:
                 decoding_score, z_score, p_value, decoding_error, shuffled_error = decode_embedding(data['elapsed_time'],data, params, train_embedding, test_embedding)
                 f.create_dataset('decoding_score', data=decoding_score)
                 f.create_dataset('z_score', data=z_score)
