@@ -1,21 +1,30 @@
 #%% Import dependencies
 import yaml
 import matplotlib.pyplot as plt
-plt.style.use('../plot_style.mplstyle')
-from functions.dataloaders import load_data
-from functions.signal_processing import compute_velocity, compute_distance_time, interpolate_2D, preprocess_data
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import compute_distance_from_center, compute_velocity, compute_distance_time, interpolate_2D, preprocess_data
 
 #%% Load parameters
-with open('params.yaml','r') as file:
+with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Load session
-session_path = '../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
-#session_path = '../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
+#session_path = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
+session_path = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
 data = load_data(session_path)
 
 #%%
 data = preprocess_data(data, params)
+
+#%%
+dist_from_center = compute_distance_from_center(data['position'],45)
+
+#%%
+plt.scatter(data['position'][:,0],
+data['position'][:,1],
+c=dist_from_center
+)
+
 #%%
 plt.plot(data['distance_travelled'])
 plt.plot(data['distance2stop'])

@@ -6,6 +6,7 @@ from numpy import std
 from numpy import sqrt
 from scipy.stats import zscore
 from scipy.ndimage import gaussian_filter1d, gaussian_filter
+from math import dist
 
 def normalize(data): # Normalize between 0-1
     return (data - np.min(data)) / (np.max(data) - np.min(data))
@@ -98,6 +99,16 @@ def compute_heading(interpolated_position):
     heading=np.append(heading,np.nan)
 
     return heading
+
+def compute_distance_from_center(position, maze_width):
+    assert position.ndim==2, "'position' should be 2-dimensional"
+
+    dist_from_center = np.zeros(position.shape[0])
+    center_coordinates = [maze_width/2, maze_width/2]
+    for i in range(len(position)):
+        dist_from_center[i] = dist(center_coordinates, position[i])
+
+    return dist_from_center
 
 def compute_distance_time(interpolated_position, velocity, caTime, speed_threshold):
     elapsed_time = np.zeros(len(caTime))
