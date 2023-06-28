@@ -29,6 +29,28 @@ def decode_neural_data(var2predict, neural_data, params, trainingFrames, testing
     shuffled_error = np.nanmean(shuffled_error)
     return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
 
+def bayesian_decode(var2predict, neural_data, params, trainingFrames, testingFrames): #TODO
+    np.random.seed(params['seed'])
+    decoder = BayesianRidge().fit(neural_data[trainingFrames], var2predict[trainingFrames])
+    prediction = decoder.predict(neural_data[testingFrames])
+    decoding_score = decoder.score(neural_data[testingFrames], var2predict[testingFrames])
+    decoding_error = MAE(var2predict[testingFrames],prediction)
+
+    shuffled_score = np.zeros(params['num_surrogates'])
+    shuffled_error = np.zeros(params['num_surrogates'])
+    for shuffle_i in tqdm(range(params['num_surrogates'])):
+        idx = np.random.randint(len(neural_data))
+        shuffled_var = np.concatenate((var2predict[idx:], var2predict[:idx]))
+        decoder = knn_reg().fit(neural_data[trainingFrames], shuffled_var[trainingFrames])
+        prediction = decoder.predict(neural_data[testingFrames])
+        shuffled_score[shuffle_i] = decoder.score(neural_data[testingFrames],shuffled_var[testingFrames])
+        shuffled_error[shuffle_i] = MAE(var2predict[testingFrames],prediction)
+
+    decoding_zscore = (decoding_score-np.mean(shuffled_score))/np.std(shuffled_score)
+    decoding_pvalue = np.sum(shuffled_score>decoding_score)/params['num_surrogates']
+    shuffled_error = np.nanmean(shuffled_error)
+    return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
+
 def decode_embedding(var2predict, data, params, train_embedding, test_embedding):
     np.random.seed(params['seed'])
     prediction_stats = np.zeros(len(params['num_k']))*np.nan
