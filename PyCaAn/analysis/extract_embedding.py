@@ -104,8 +104,11 @@ def extract_embedding_session(data, params):
             f.create_dataset('test_embedding', data=test_embedding)
             f.create_dataset('embedding', data=embedding)
 
-        # Save model 
-        joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib if non-parametric
+        # Save model
+        if params['parametric_embedding']:
+            print('Saving of parametric models not fully supported at this time')
+        else:
+            joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib if non-parametric
             
     # else: # Load existing model
     # #     loaded_embedding_model = joblib.load(params['path_to_results'] + 'test_umap_model.sav') # ùsing joblib if non-parametric
