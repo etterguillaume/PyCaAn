@@ -36,11 +36,11 @@ def decode_embedding(var2predict, data, params, train_embedding, test_embedding)
     for i, num_k  in enumerate(params['num_k']):
         if var2predict.dtype=='float': # Use kNN regressor
             decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(train_embedding, var2predict[data['trainingFrames']])
-            prediction = decoder.predict(test_embedding)
+            test_prediction = decoder.predict(test_embedding)
             error_stats[i] = MAE(var2predict[data['testingFrames']],prediction)
         else: # Use kNN classifier
             decoder = knn_class(metric='euclidean', n_neighbors=num_k).fit(train_embedding, var2predict[data['trainingFrames']])
-            #prediction = decoder.predict(test_embedding)
+            test_prediction = decoder.predict(test_embedding)
             #error_stats[i] = np.nan # could use f1 score? But then opposite of error
 
         prediction_stats[i] = decoder.score(test_embedding,var2predict[data['testingFrames']])
@@ -76,7 +76,7 @@ def decode_embedding(var2predict, data, params, train_embedding, test_embedding)
     decoding_zscore = (decoding_score-np.mean(shuffled_score))/np.std(shuffled_score)
     decoding_pvalue = np.sum(shuffled_score>decoding_score)/params['num_surrogates']
     shuffled_error = np.nanmean(shuffled_error)
-    return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
+    return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error, test_prediction
 
 def decode_RWI(data, params, embedding):
     np.random.seed(params['seed'])

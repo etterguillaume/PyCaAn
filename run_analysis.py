@@ -5,15 +5,18 @@ from argparse import ArgumentParser
 from tqdm import tqdm
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
+
+from pycaan.analysis.extract_basic_info import extract_basic_info_session
 from pycaan.analysis.extract_tuning import extract_tuning_session
 from pycaan.analysis.extract_embedding import extract_embedding_session
-from pycaan.analysis.extract_basic_info import extract_basic_info_session
+from pycaan.analysis.decode_embedding import decode_embedding_session
 
 def get_arguments(): #TODO add params override here
     parser = ArgumentParser()
     parser.add_argument('--extract_basic_info', action='store_true', default=False)
     parser.add_argument('--extract_tuning', action='store_true', default=False)
     parser.add_argument('--extract_embedding', action='store_true', default=False)
+    parser.add_argument('--decode_embedding', action='store_true', default=False)
     args = parser.parse_args()
     return args
 
@@ -40,4 +43,6 @@ if __name__ == '__main__':
             extract_tuning_session(data, params)
         if args.extract_embedding:
             extract_embedding_session(data, params)
+        if args.decode_embedding:
+            decode_embedding_session(data, params)
 
