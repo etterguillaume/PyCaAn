@@ -48,13 +48,16 @@ def extract_basic_info_session(data, params):
                 'condition': data['condition'],
                 'numNeurons': numNeurons,
                 'numFrames': numFrames,
-                'total_distance_travelled': float(total_distance_travelled),
-                'marginal_likelihood': marginal_likelihood,
                 'duration': float(data['caTime'][-1]),
         }
     if not os.path.exists(os.path.join(working_directory,'info.yaml')) or params['overwrite_mode']=='always':
         with open(os.path.join(working_directory,'info.yaml'),"w") as file:
             yaml.dump(info_dict,file)
+
+    if not os.path.exists(os.path.join(working_directory,'data_stats.h5')) or params['overwrite_mode']=='always':
+        with open(os.path.join(working_directory,'data_stats.h5'),"w") as f:
+            f.create_dataset('marginal_likelihood', data=marginal_likelihood)
+            f.create_dataset('total_distance_travelled', data=float(total_distance_travelled))
 
     # Track current results
     if not os.path.exists(os.path.join(working_directory,'params.yaml')) or params['overwrite_mode']=='always':
