@@ -24,6 +24,7 @@ tone_threshold: .2
 distance_travelled_threshold: 1000 # cm
 occupancy_frame_threshold: 10 # min number of frames per location
 portion_surface_covered_threshold: .8 # 0-1, default=1 (all bins explored)
+
 input_neurons: 128 # Number of neurons to be used. Also minimum number required
 
 # Tuning curve computations
@@ -54,7 +55,7 @@ sequence_length: 2 # in seconds
 parametric_embedding: True
 embedding_dims: 4
 train_set_selection: random # 'random', random frames. 'split', split recording using train_test_ratio
-train_test_ratio: .8 # portion of recording used to train embedding model
+train_test_ratio: .8 # portion of recording used to train embedding model and decoders
 
 # UMAP-specific settings
 min_dist: .8 # high values encourage smooth latents, low values encourage clustering
