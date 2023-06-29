@@ -14,6 +14,12 @@ import os
 with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
+#%%
+CA3_data = load_data('../' + params['path_to_dataset']+'/CA3/M80/M80_OF_20210528')
+#%%
+CA3_data = preprocess_data(CA3_data, params)
+#%%
+
 #%% Load folders to analyze from yaml file?
 with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
     session_file = yaml.full_load(file)
