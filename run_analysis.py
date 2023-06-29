@@ -30,7 +30,10 @@ if __name__ == '__main__':
     with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
         session_file = yaml.full_load(file)
     session_list = session_file['sessions']
-    print(f'{len(session_list)} sessions to process')
+    with open(os.path.join(params['path_to_results'],'excludedList.yaml'),'r') as file:
+        excluded_file = yaml.full_load(file)
+    excluded_list = excluded_file['sessions']
+    print(f'{len(session_list)} sessions to process, {len(excluded_list)} to exclude')
 
     for i, session in enumerate(tqdm(session_list)):
         # Load data and preprocess
@@ -41,8 +44,8 @@ if __name__ == '__main__':
             extract_basic_info_session(data, params)
         if args.extract_tuning:
             extract_tuning_session(data, params)
-        if args.extract_embedding:
+        if args.extract_embedding and session not in excluded_list: # Exclude sessions with not enough data
             extract_embedding_session(data, params)
-        if args.decode_embedding:
+        if args.decode_embedding and session not in excluded_list: # Exclude sessions with not enough data
             decode_embedding_session(data, params)
 

@@ -2,6 +2,7 @@
 import yaml
 import os
 from tqdm import tqdm
+import numpy as np
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
 from pycaan.functions.metrics import extract_total_distance_travelled
@@ -45,11 +46,10 @@ for region in regionList:
                     error_list.append(session_path)
                     print(f'Could not open {session_path}')
                 else:
+                    path_list.append(session_path)
                     numFrames, numNeurons = data['rawData'].shape
                     distance_travelled=extract_total_distance_travelled(data['position'])
-                    if numNeurons>=params['input_neurons'] and distance_travelled>=params['distance_travelled_threshold']:
-                        path_list.append(session_path)
-                    else:
+                    if numNeurons<params['input_neurons'] and distance_travelled<params['distance_travelled_threshold']:
                         excluded_list.append(session_path)
 
 #%% Save list of sessions and stats in yaml files
