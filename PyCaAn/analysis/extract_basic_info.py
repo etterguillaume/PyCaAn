@@ -1,6 +1,7 @@
 #%% Import dependencies
 import yaml
 import os
+import h5py
 from argparse import ArgumentParser
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
@@ -55,7 +56,7 @@ def extract_basic_info_session(data, params):
             yaml.dump(info_dict,file)
 
     if not os.path.exists(os.path.join(working_directory,'data_stats.h5')) or params['overwrite_mode']=='always':
-        with open(os.path.join(working_directory,'data_stats.h5'),"w") as f:
+        with h5py.File(os.path.join(working_directory,'data_stats.h5'),"w") as f:
             f.create_dataset('marginal_likelihood', data=marginal_likelihood)
             f.create_dataset('total_distance_travelled', data=float(total_distance_travelled))
 
