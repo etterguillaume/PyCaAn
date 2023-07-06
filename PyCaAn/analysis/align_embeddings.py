@@ -7,7 +7,7 @@ from tqdm import tqdm
 import itertools
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
-from utils.utils import extract_hyperalignment_score
+from pycaan.functions.embedding import extract_hyperalignment_score
 import pandas as pd
 
 #%% Params
