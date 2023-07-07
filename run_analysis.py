@@ -10,22 +10,24 @@ from pycaan.analysis.extract_basic_info import extract_basic_info_session
 from pycaan.analysis.extract_tuning import extract_tuning_session
 from pycaan.analysis.extract_embedding import extract_embedding_session
 from pycaan.analysis.decode_embedding import decode_embedding_session
+from pycaan.analysis.align_embeddings import align_embeddings
 
-def get_arguments(): #TODO add params override here
+def get_arguments():
     parser = ArgumentParser()
     parser.add_argument('--extract_basic_info', action='store_true', default=False)
     parser.add_argument('--extract_tuning', action='store_true', default=False)
     parser.add_argument('--extract_embedding', action='store_true', default=False)
     parser.add_argument('--decode_embedding', action='store_true', default=False)
+    parser.add_argument('--align_embeddings', action='store_true', default=False)
     args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
-    args = get_arguments()
-    config = vars(args)
-
     with open('params.yaml','r') as file:
         params = yaml.full_load(file)
+    
+    args = get_arguments() #TODO add params override here
+    config = vars(args)
 
     with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
         session_file = yaml.full_load(file)
@@ -48,4 +50,6 @@ if __name__ == '__main__':
             extract_embedding_session(data, params)
         if args.decode_embedding and session not in excluded_list: # Exclude sessions with not enough data
             decode_embedding_session(data, params)
+    if args.align_embeddings:
+        align_embeddings(params)
 
