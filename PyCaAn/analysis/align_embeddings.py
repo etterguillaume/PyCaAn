@@ -34,7 +34,7 @@ def align_embeddings(params):
 
             if session_A_info['task']==session_B_info['task']: # Only compare manifolds on similar tasks
                 task=session_A_info['task']
-                if task=='legoLT' or task=='legoToneLT' or task=='legoSeqLT':
+                if task=='LT' or task=='legoLT' or task=='legoToneLT' or task=='legoSeqLT':
                     if session_A_info['path']==session_B_info['path']:
                         sameSession=True
                     else:
