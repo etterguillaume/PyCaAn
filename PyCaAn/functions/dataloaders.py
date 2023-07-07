@@ -92,10 +92,21 @@ def load_data(path):
                         { # Note that older files do not have background/tones
                         'position':f['behav']['ledPosition'][0][0], # Use LED to match older recordings
                         'headDirection':f['behav']['headDirection'][0][0][0],
-                        'behavTime':f['behav']['time'][0][0][0]/1000,
                         'mazeWidth_cm':f['behav']['width'][0][0],
                         'mazeWidth_px':f['behav']['width'][0][0]/f['behav']['cmPerPixels'][0][0]
                         }
                         )
+            if len(f['behav']['time'][0][0][0])>1:
+                data.update(
+                        {
+                            'behavTime':f['behav']['time'][0][0][0]/1000
+                         }
+                         )
+            else:
+                data.update(
+                        {
+                            'behavTime':f['behav']['time'][0][0].T[0]/1000
+                        }
+                )
 
     return data
