@@ -27,6 +27,7 @@ session_list = session_file['sessions']
 path = session_list[0]
 #%%
 path = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
+
 #path = '../../datasets/calcium_imaging/LS/M732/M732_LT_2018050701'
 #path = '../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
 #path='/Users/guillaumeetter/Documents/datasets/calcium_imaging/CA1/M991/M991_legoSeqLT_20190313'

@@ -51,7 +51,7 @@ def load_data(path):
         f = sio.loadmat(path + '/ms.mat')
         data.update(
                     {
-                    'corrProj':f['ms']['CorrProj'][0][0],
+                    'corrProj':f['ms']['CorrProj'][0][0], #TODO check variable depth
                     'pnrProj': f['ms']['PeakToNoiseProj'][0][0],
                     #'meanProj': f['ms']['meanFrame'][0][0],
                     #'experiment':f['ms']['Experiment'][0][0],
@@ -92,7 +92,7 @@ def load_data(path):
                         { # Note that older files do not have background/tones
                         'position':f['behav']['ledPosition'][0][0], # Use LED to match older recordings
                         'headDirection':f['behav']['headDirection'][0][0][0],
-                        'behavTime':f['behav']['time'][0][0][0]/1000,
+                        'behavTime':f['behav']['time'][0][0].T[0]/1000,
                         'mazeWidth_cm':f['behav']['width'][0][0],
                         'mazeWidth_px':f['behav']['width'][0][0]/f['behav']['cmPerPixels'][0][0]
                         }
