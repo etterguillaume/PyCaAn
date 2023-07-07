@@ -22,6 +22,8 @@ def align_embeddings(params):
     #%% Initialize matrices
     data_list = []
 
+    #TODO prepare list of session pairs in advance, given constraints (e.g. task type)
+
     #%% Extract data
     for session_A, session_B in tqdm(list(itertools.product(sessionList,sessionList)), total=len(sessionList)**2):
         try:
