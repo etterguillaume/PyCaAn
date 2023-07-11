@@ -92,7 +92,7 @@ def extract_tuning_session(data, params):
         with h5py.File(os.path.join(working_directory,'prospective_distance_tuning.h5'),'w') as f:
             bin_vec = (np.arange(0,params['max_distance_length']+params['distanceBinSize'],params['distanceBinSize']))
             info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
-                                                    data['distance_travelled'],
+                                                    data['distance2stop'],
                                                     data['running_ts'],
                                                     bins=bin_vec)
             f.create_dataset('info', data=info)
