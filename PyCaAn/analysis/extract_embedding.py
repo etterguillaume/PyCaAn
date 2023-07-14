@@ -93,7 +93,7 @@ def extract_embedding_session(data, params):
             reconstruction = embedding_model.inverse_transform(test_embedding)
 
             # Assess reconstruction error
-            reconstruction_decoder = lin_reg().fit(reconstruction, data['rawData'][data['trainingFrames']])
+            reconstruction_decoder = lin_reg().fit(reconstruction, data['rawData'][data['testingFrames']])
             reconstruction_score = reconstruction_decoder.score(reconstruction, data['rawData'][data['testingFrames']])
 
             # Save embedding data
