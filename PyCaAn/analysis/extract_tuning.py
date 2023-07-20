@@ -34,7 +34,7 @@ def extract_tuning_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'retrospective_temporal_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'retrospective_temporal_tuning.h5'),'w') as f:
             bin_vec = (np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize']))
-            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(
+            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(
                                                     data['binaryData'],
                                                     data['elapsed_time'],
                                                     data['running_ts'],
@@ -44,7 +44,6 @@ def extract_tuning_session(data, params):
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
-            f.create_dataset('marginal_likelihood', data=marginal_likelihood)
             f.create_dataset('peak_loc', data=peak_loc)
             f.create_dataset('peak_val', data=peak_val)
             f.create_dataset('bins', data=bin_vec)
@@ -53,7 +52,7 @@ def extract_tuning_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'prospective_temporal_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'prospective_temporal_tuning.h5'),'w') as f:
             bin_vec = (np.arange(0,params['max_temporal_length']+params['temporalBinSize'],params['temporalBinSize']))
-            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(
+            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(
                                                     data['binaryData'],
                                                     data['time2stop'],
                                                     data['running_ts'],
@@ -64,7 +63,6 @@ def extract_tuning_session(data, params):
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
-            f.create_dataset('marginal_likelihood', data=marginal_likelihood)
             f.create_dataset('peak_loc', data=peak_loc)
             f.create_dataset('peak_val', data=peak_val)
             f.create_dataset('bins', data=bin_vec)
@@ -73,7 +71,7 @@ def extract_tuning_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'retrospective_distance_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'retrospective_distance_tuning.h5'),'w') as f:
             bin_vec = (np.arange(0,params['max_distance_length']+params['distanceBinSize'],params['distanceBinSize']))
-            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                     data['distance_travelled'],
                                                     data['running_ts'],
                                                     bins=bin_vec)
@@ -81,7 +79,6 @@ def extract_tuning_session(data, params):
             f.create_dataset('p_value', data=p_value)
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
-            f.create_dataset('tuning_curves', data=tuning_curves)
             f.create_dataset('marginal_likelihood', data=marginal_likelihood)
             f.create_dataset('peak_loc', data=peak_loc)
             f.create_dataset('peak_val', data=peak_val)
@@ -91,7 +88,7 @@ def extract_tuning_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'prospective_distance_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'prospective_distance_tuning.h5'),'w') as f:
             bin_vec = (np.arange(0,params['max_distance_length']+params['distanceBinSize'],params['distanceBinSize']))
-            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                     data['distance2stop'],
                                                     data['running_ts'],
                                                     bins=bin_vec)
@@ -100,7 +97,6 @@ def extract_tuning_session(data, params):
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
-            f.create_dataset('marginal_likelihood', data=marginal_likelihood)
             f.create_dataset('peak_loc', data=peak_loc)
             f.create_dataset('peak_val', data=peak_val)
             f.create_dataset('bins', data=bin_vec)
@@ -109,7 +105,7 @@ def extract_tuning_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'velocity_tuning.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'velocity_tuning.h5'),'w') as f:
             bin_vec=(np.arange(params['speed_threshold'],params['max_velocity_length']+params['velocityBinSize'],params['velocityBinSize']))
-            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                     data['velocity'],
                                                     data['running_ts'],
                                                     bins=bin_vec)
@@ -118,7 +114,6 @@ def extract_tuning_session(data, params):
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
-            f.create_dataset('marginal_likelihood', data=marginal_likelihood)
             f.create_dataset('peak_loc', data=peak_loc)
             f.create_dataset('peak_val', data=peak_val)
             f.create_dataset('bins', data=bin_vec)
@@ -129,7 +124,7 @@ def extract_tuning_session(data, params):
             if data['task']=='OF':
                 bin_vec=(np.arange(0,45+params['spatialBinSize'],params['spatialBinSize']),
                          np.arange(0,45+params['spatialBinSize'],params['spatialBinSize']))
-                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                                 data['position'],
                                                                 data['running_ts'],
                                                                 bins=bin_vec)
@@ -137,28 +132,28 @@ def extract_tuning_session(data, params):
             elif data['task']=='legoOF':
                 bin_vec=(np.arange(0,50+params['spatialBinSize'],params['spatialBinSize']),
                          np.arange(0,50+params['spatialBinSize'],params['spatialBinSize']))
-                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                                 data['position'],
                                                                 data['running_ts'],
                                                                 bins=bin_vec)
             elif data['task']=='plexiOF':
                 bin_vec=(np.arange(0,49+params['spatialBinSize'],params['spatialBinSize']),
                          np.arange(0,49+params['spatialBinSize'],params['spatialBinSize']))
-                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                                 data['position'],
                                                                 data['running_ts'],
                                                                 bins=bin_vec)
 
             elif data['task']=='LT':
                 bin_vec=(np.arange(0,100+params['spatialBinSize'],params['spatialBinSize']))
-                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                                 data['position'][:,0],
                                                                 data['running_ts'],
                                                                 bins=bin_vec)
                 
             elif data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
                 bin_vec=(np.arange(0,135+params['spatialBinSize'],params['spatialBinSize']))
-                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                                 data['position'][:,0],
                                                                 data['running_ts'],
                                                                 bins=bin_vec)
@@ -167,7 +162,6 @@ def extract_tuning_session(data, params):
             f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
             f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
             f.create_dataset('tuning_curves', data=tuning_curves)
-            f.create_dataset('marginal_likelihood', data=marginal_likelihood)
             f.create_dataset('peak_loc', data=peak_loc)
             f.create_dataset('peak_val', data=peak_val)
             f.create_dataset('bins', data=bin_vec)
@@ -178,13 +172,13 @@ def extract_tuning_session(data, params):
             with h5py.File(os.path.join(working_directory,'direction_tuning.h5'),'w') as f:
                 if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
                     bin_vec=(np.arange(0,360+params['directionBinSize'],params['directionBinSize']))
-                    info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_tuning(data['binaryData'],
+                    info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                                     data['heading'],
                                                                     data['running_ts'],
                                                                     bins=bin_vec)
                     f.create_dataset('bins', data=bin_vec)
                 elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-                    info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
+                    info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
                                                                     data['LT_direction'],
                                                                     data['running_ts'],
                                                                     var_length=2)
@@ -193,7 +187,6 @@ def extract_tuning_session(data, params):
                 f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
                 f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
                 f.create_dataset('tuning_curves', data=tuning_curves)
-                f.create_dataset('marginal_likelihood', data=marginal_likelihood)
                 f.create_dataset('peak_loc', data=peak_loc)
                 f.create_dataset('peak_val', data=peak_val)
 
@@ -206,7 +199,7 @@ def extract_tuning_session(data, params):
             if not os.path.exists(os.path.join(working_directory,'tone_tuning.h5')) or params['overwrite_mode']=='always':
                 with h5py.File(os.path.join(working_directory,'tone_tuning.h5'),'w') as f:
                     data=extract_tone(data,params)
-                    info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
+                    info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
                                                                     data['binaryTone'],
                                                                     data['running_ts'],
                                                                     var_length=2,
@@ -216,7 +209,6 @@ def extract_tuning_session(data, params):
                     f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
                     f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
                     f.create_dataset('tuning_curves', data=tuning_curves)
-                    f.create_dataset('marginal_likelihood', data=marginal_likelihood)
                     f.create_dataset('peak_loc', data=peak_loc)
                     f.create_dataset('peak_val', data=peak_val)
                     f.create_dataset('bins', data=bin_vec)
@@ -228,7 +220,7 @@ def extract_tuning_session(data, params):
             if not os.path.exists(os.path.join(working_directory,'seqTone_tuning.h5')) or params['overwrite_mode']=='always':
                 with h5py.File(os.path.join(working_directory,'seqTone_tuning.h5'),'w') as f:
                     data = extract_seqLT_tone(data,params)
-                    info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, marginal_likelihood, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
+                    info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
                                                                     data['seqLT_state'],
                                                                     data['running_ts'],
                                                                     var_length=4,
@@ -238,7 +230,6 @@ def extract_tuning_session(data, params):
                     f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
                     f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
                     f.create_dataset('tuning_curves', data=tuning_curves)
-                    f.create_dataset('marginal_likelihood', data=marginal_likelihood)
                     f.create_dataset('peak_loc', data=peak_loc)
                     f.create_dataset('peak_val', data=peak_val)
                     f.create_dataset('bins', data=bin_vec)

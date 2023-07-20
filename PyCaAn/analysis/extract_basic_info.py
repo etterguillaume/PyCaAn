@@ -5,7 +5,7 @@ import h5py
 from argparse import ArgumentParser
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
-from pycaan.functions.metrics import extract_total_distance_travelled, extract_marginal_likelihood
+from pycaan.functions.metrics import extract_total_distance_travelled, extract_firing_properties
 
 def get_arguments():
     parser = ArgumentParser()
@@ -31,7 +31,7 @@ def extract_basic_info_session(data, params):
     # Save basic info
     numFrames, numNeurons = data['rawData'].shape
     total_distance_travelled = extract_total_distance_travelled(data['position'])
-    marginal_likelihood = extract_marginal_likelihood(data['binaryData'])
+    marginal_likelihood, prob_off_to_on, prob_on_to_off = extract_firing_properties(data['binaryData'])
 
     info_dict = {
                 'path': data['path'],
@@ -58,6 +58,8 @@ def extract_basic_info_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'data_stats.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'data_stats.h5'),"w") as f:
             f.create_dataset('marginal_likelihood', data=marginal_likelihood)
+            f.create_dataset('prob_off_to_on', data=prob_off_to_on)
+            f.create_dataset('prob_on_to_off', data=prob_on_to_off)
             f.create_dataset('total_distance_travelled', data=float(total_distance_travelled))
 
     # Track current results

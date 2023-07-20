@@ -52,8 +52,15 @@ def extract_total_distance_travelled(interpolated_position):
         total_distance_travelled += sqrt((interpolated_position[i,0]-interpolated_position[i-1,0])**2 + (interpolated_position[i,1]-interpolated_position[i-1,1])**2) # Euclidean distance
     return total_distance_travelled
 
-def extract_marginal_likelihood(binaryData):
+def extract_firing_properties(binaryData):
     numFrames, numNeurons = binaryData.shape
-    marginal_likelihood = np.sum(binaryData, axis=0)/numFrames
+    marginal_likelihood = np.zeros(numNeurons)
+    prob_off_to_on = np.zeros(numNeurons)
+    prob_on_to_off = np.zeros(numNeurons)
 
-    return marginal_likelihood
+    for neuron in range(numNeurons):
+        marginal_likelihood[neuron] = np.sum(binaryData[:,neuron])/numFrames
+        prob_off_to_on = sum(np.diff(binaryData[:,neuron])>0)/(numFrames-1)
+        prob_on_to_off= sum(np.diff(binaryData[:,neuron])<0)/(numFrames-1)
+
+    return marginal_likelihood, prob_off_to_on, prob_on_to_off
