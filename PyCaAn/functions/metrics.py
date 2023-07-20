@@ -55,12 +55,10 @@ def extract_total_distance_travelled(interpolated_position):
 def extract_firing_properties(binaryData):
     numFrames, numNeurons = binaryData.shape
     marginal_likelihood = np.zeros(numNeurons)
-    prob_off_to_on = np.zeros(numNeurons)
-    prob_on_to_off = np.zeros(numNeurons)
+    trans_prob = np.zeros(numNeurons)
 
     for neuron in range(numNeurons):
         marginal_likelihood[neuron] = np.sum(binaryData[:,neuron])/numFrames
-        prob_off_to_on = sum(np.diff(binaryData[:,neuron])>0)/(numFrames-1)
-        prob_on_to_off= sum(np.diff(binaryData[:,neuron])<0)/(numFrames-1)
+        trans_prob[neuron] = sum(np.diff(binaryData[:,neuron].astype('int'))>0)/(numFrames-1)
 
-    return marginal_likelihood, prob_off_to_on, prob_on_to_off
+    return marginal_likelihood, trans_prob

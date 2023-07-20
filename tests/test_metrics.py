@@ -3,22 +3,32 @@
 import numpy as np
 from copy import deepcopy
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
-plt.style.use('plot_style.mplstyle')
-
+from pycaan.functions.dataloaders import load_data
+from pycaan.functions.signal_processing import extract_tone, preprocess_data, clean_timestamps
+import yaml
+import os
+from pycaan.functions.metrics import extract_firing_properties
 from tqdm import tqdm
 
+#%%
+with open('../params.yaml','r') as file:
+    params = yaml.full_load(file)
 
-#%% Generate data
-numNeurons = 100
-recordingLength = 2000
-threshold = .95
-isNoiseAdditive = False
+#%%
+CA3_data = load_data('../' + params['path_to_dataset']+'/CA3/M80/M80_OF_20210528')
+#%%
+CA3_data = preprocess_data(CA3_data, params)
 
-original = torch.rand((recordingLength,numNeurons))
-original[original<=threshold] = 0
-original[original>threshold] = 1
-reconstruction = deepcopy(original)
+#%%
+marginal_likelihood, prob_off_to_on, prob_on_to_off = extract_firing_properties(CA3_data['binaryData'])
+
+#%%
+numFrames, numNeurons=CA3_data['binaryData'].shape
+#%%
+sum(np.diff(CA3_data['binaryData'][:,2].astype('int'))>0)/(numFrames-1)
+
+
+
 
 #%% Parameterize noise injection
 for neuron in range(numNeurons):
