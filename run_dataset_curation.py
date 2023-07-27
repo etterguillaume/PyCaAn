@@ -49,7 +49,7 @@ for region in regionList:
                     path_list.append(session_path)
                     numFrames, numNeurons = data['rawData'].shape
                     distance_travelled=extract_total_distance_travelled(data['position'])
-                    if numNeurons<params['input_neurons'] and distance_travelled<params['distance_travelled_threshold']:
+                    if numNeurons<params['input_neurons'] or distance_travelled<params['distance_travelled_threshold']:
                         excluded_list.append(session_path)
 
 #%% Save list of sessions and stats in yaml files
