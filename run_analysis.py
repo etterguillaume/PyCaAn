@@ -43,13 +43,25 @@ if __name__ == '__main__':
         data = preprocess_data(data, params)
 
         if args.extract_basic_info:
-            extract_basic_info_session(data, params)
+            try:
+                extract_basic_info_session(data, params)
+            except:
+                print(f'Could not extract basic information for {session}')
         if args.extract_tuning:
-            extract_tuning_session(data, params)
+            try:
+                extract_tuning_session(data, params)
+            except:
+                print(f'Could not extract tuning curves for {session}')
         if args.extract_embedding and session not in excluded_list: # Exclude sessions with not enough data
-            extract_embedding_session(data, params)
+            try:
+                extract_embedding_session(data, params)
+            except:
+                print(f'Could not embed neural data for {session}')
         if args.decode_embedding and session not in excluded_list: # Exclude sessions with not enough data
-            decode_embedding_session(data, params)
+            try:
+                decode_embedding_session(data, params)
+            except:
+                print(f'Could not decode embedding for {session}')
     if args.align_embeddings:
         align_embeddings(params)
 
