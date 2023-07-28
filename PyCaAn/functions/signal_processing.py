@@ -36,6 +36,8 @@ def clean_timestamps(data):
     _, unique_timestamps = np.unique(data['behavTime'],return_index=True) # Find unique timestamps
     data['behavTime'] = data['behavTime'][unique_timestamps]
     data['position'] = data['position'][unique_timestamps,:]
+    if 'heading' in data: # If heading signal already exists
+        data['heading'] = data['heading'][unique_timestamps,:]
     if 'tone' in data:
         data['tone'] = data['tone'][unique_timestamps]
     
@@ -96,7 +98,7 @@ def extract_LT_direction(interpolated_position):
 def compute_heading(interpolated_position):
     heading = np.zeros(len(interpolated_position))
     heading = np.mod(np.arctan2(diff(interpolated_position[:,0]), diff(interpolated_position[:,1]))*180/np.pi, 360)
-    heading=np.append(heading,np.nan)
+    heading = np.append(heading,heading[-1]) # vector cannot contain nan, add last value instead
 
     return heading
 

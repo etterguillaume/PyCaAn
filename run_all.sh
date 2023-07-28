@@ -7,6 +7,6 @@
 
 #python3 run_analysis.py --extract_basic_info
 #python3 run_analysis.py --extract_tuning
-#python3 run_analysis.py --extract_embedding
+python3 run_analysis.py --extract_embedding
 python3 run_analysis.py --decode_embedding
 #python3 pycaan/analysis/align_embeddings.py
