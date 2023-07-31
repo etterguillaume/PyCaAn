@@ -3,7 +3,7 @@ seed: 42 # Default seed, for reproducibility
 
 # Paths
 path_to_dataset: ../../datasets/calcium_imaging
-path_to_results: ../../output
+path_to_results: ../../output/results_128neurons # output folder for analysis using current parameters. Recommended to be explicit in naming
 
 # Overwriting parameters
 overwrite_mode: 'always' # 'always', 'never', 'changes_only' for when params changed

@@ -75,3 +75,8 @@ dataset_stats_dict = {'numRegions': numRegions,
 
 with open(os.path.join(params['path_to_results'],'dataset_stats.yaml'),'w') as file:
     yaml.dump(dataset_stats_dict,file)
+
+# Track current parameters
+if not os.path.exists(os.path.join(params['path_to_results'],'params.yaml')) or params['overwrite_mode']=='always':
+    with open(os.path.join(params['path_to_results'],'params.yaml'),"w") as file:
+        yaml.dump(params,file)

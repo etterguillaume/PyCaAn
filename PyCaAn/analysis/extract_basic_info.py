@@ -16,13 +16,10 @@ def get_arguments():
 def extract_basic_info_session(data, params):
     if not os.path.exists(params['path_to_results']):
         os.mkdir(params['path_to_results'])
-    if not os.path.exists(os.path.join(params['path_to_results'], 'results')):
-        os.mkdir(os.path.join(params['path_to_results'], 'results'))
 
     # Create folder with convention (e.g. CA1_M246_LT_2017073)
     working_directory=os.path.join( 
         params['path_to_results'],
-        'results',
         f"{data['region']}_{data['subject']}_{data['task']}_{data['day']}" 
         )
     if not os.path.exists(working_directory): # If folder does not exist, create it
@@ -60,11 +57,6 @@ def extract_basic_info_session(data, params):
             f.create_dataset('marginal_likelihood', data=marginal_likelihood)
             f.create_dataset('trans_prob', data=trans_prob)
             f.create_dataset('total_distance_travelled', data=float(total_distance_travelled))
-
-    # Track current results
-    if not os.path.exists(os.path.join(working_directory,'params.yaml')) or params['overwrite_mode']=='always':
-        with open(os.path.join(working_directory,'params.yaml'),"w") as file:
-            yaml.dump(params,file)
 
 # If used as standalone script
 if __name__ == '__main__': 
