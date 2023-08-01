@@ -10,12 +10,14 @@ from pycaan.analysis.extract_basic_info import extract_basic_info_session
 from pycaan.analysis.extract_tuning import extract_tuning_session
 from pycaan.analysis.extract_embedding import extract_embedding_session
 from pycaan.analysis.extract_neural_structure import extract_neural_structure_session
+from pycaan.analysis.plot_summary import plot_summary_session
 from pycaan.analysis.decode_embedding import decode_embedding_session
 from pycaan.analysis.align_embeddings import align_embeddings
 
 def get_arguments():
     parser = ArgumentParser()
     parser.add_argument('--extract_basic_info', action='store_true', default=False)
+    parser.add_argument('--plot_summary', action='store_true', default=False)
     parser.add_argument('--extract_tuning', action='store_true', default=False)
     parser.add_argument('--extract_embedding', action='store_true', default=False)
     parser.add_argument('--extract_neural_structure', action='store_true', default=False)
@@ -43,6 +45,12 @@ if __name__ == '__main__':
         # Load data and preprocess
         data = load_data(session)
         data = preprocess_data(data, params)
+
+        if args.plot_summary:
+            try:
+                plot_summary_session(data, params)
+            except:
+                print(f'Could not extract basic information for {session}')
 
         if args.extract_basic_info:
             try:
