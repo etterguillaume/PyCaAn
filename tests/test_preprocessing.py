@@ -13,13 +13,10 @@ with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%% Load session
-#session_path = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
-session_path = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
+session_path = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
+#session_path = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
+#session_path = '../../../datasets/calcium_imaging/CA1/M1117/M1117_OF_20200131'
 data = load_data(session_path)
-
-
-#%% TEMP
-
 
 #%%
 data = preprocess_data(data, params)

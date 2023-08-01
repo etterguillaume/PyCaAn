@@ -51,7 +51,7 @@ if __name__ == '__main__':
             try:
                 plot_summary_session(data, params)
             except:
-                print(f'Could not extract basic information for {session}')
+                print(f'Could not extract figures for {session}')
 
         if args.extract_basic_info:
             try:
