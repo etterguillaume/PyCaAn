@@ -85,6 +85,7 @@ def plot_summary_session(data, params):
 
     plt.tight_layout()
     plt.savefig(os.path.join(working_directory,'summary.pdf'))
+    plt.close()
 
 # If used as standalone script
 if __name__ == '__main__': 
