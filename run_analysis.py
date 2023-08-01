@@ -82,6 +82,9 @@ if __name__ == '__main__':
                 decode_embedding_session(data, params)
             except:
                 print(f'Could not decode embedding for {session}')
-    if args.align_embeddings:
-        align_embeddings(params)
-
+    
+    if args.align_embeddings: # Hyperalignment
+        try:
+            align_embeddings(params)
+        except:
+            print(f'Could not perform hyperalignment. Verify that embeddings have already been extracted')
