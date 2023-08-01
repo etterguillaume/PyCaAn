@@ -9,6 +9,7 @@ from pycaan.functions.signal_processing import preprocess_data
 from pycaan.analysis.extract_basic_info import extract_basic_info_session
 from pycaan.analysis.extract_tuning import extract_tuning_session
 from pycaan.analysis.extract_embedding import extract_embedding_session
+from pycaan.analysis.extract_neural_structure import extract_neural_structure_session
 from pycaan.analysis.decode_embedding import decode_embedding_session
 from pycaan.analysis.align_embeddings import align_embeddings
 
@@ -17,6 +18,7 @@ def get_arguments():
     parser.add_argument('--extract_basic_info', action='store_true', default=False)
     parser.add_argument('--extract_tuning', action='store_true', default=False)
     parser.add_argument('--extract_embedding', action='store_true', default=False)
+    parser.add_argument('--extract_neural_structure', action='store_true', default=False)
     parser.add_argument('--decode_embedding', action='store_true', default=False)
     parser.add_argument('--align_embeddings', action='store_true', default=False)
     args = parser.parse_args()
@@ -47,16 +49,25 @@ if __name__ == '__main__':
                 extract_basic_info_session(data, params)
             except:
                 print(f'Could not extract basic information for {session}')
+
         if args.extract_tuning:
             try:
                 extract_tuning_session(data, params)
             except:
                 print(f'Could not extract tuning curves for {session}')
+
+        if args.extract_neural_structure and session not in excluded_list: # Exclude sessions with not enough data
+            try:
+                extract_neural_structure_session(data, params)
+            except:
+                print(f'Could not embed neural data for {session}')
+
         if args.extract_embedding and session not in excluded_list: # Exclude sessions with not enough data
             try:
                 extract_embedding_session(data, params)
             except:
                 print(f'Could not embed neural data for {session}')
+
         if args.decode_embedding and session not in excluded_list: # Exclude sessions with not enough data
             try:
                 decode_embedding_session(data, params)

@@ -2,7 +2,6 @@
 import yaml
 import numpy as np
 from umap.umap_ import UMAP
-import tensorflow as tf
 import joblib
 import os
 import sys
@@ -12,22 +11,13 @@ from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
 import h5py
 
-class hide_output_prints:
-    def __enter__(self):
-        self._original_stdout = sys.stdout
-        sys.stdout = open(os.devnull, 'w')
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        sys.stdout.close()
-        sys.stdout = self._original_stdout
-
 def get_arguments():
     parser = ArgumentParser()
     parser.add_argument('--session_path', type=str, default='')
     args = parser.parse_args()
     return args
 
-def extract_embedding_session(data, params):
+def extract_neural_structure_session(data, params):
     if not os.path.exists(params['path_to_results']):
         os.mkdir(params['path_to_results'])
 
@@ -57,9 +47,9 @@ def extract_embedding_session(data, params):
             data['trainingFrames'][~data['running_ts']] = False
             data['testingFrames'][~data['running_ts']] = False
 
-            # Train embedding model
+            # Train neural_structure model
 
-            embedding_model = UMAP(
+            neural_structure_model = UMAP(
                         n_components=2, # project on 2D
                         n_neighbors=params['n_neighbors'],
                         min_dist=params['min_dist'],
@@ -67,23 +57,23 @@ def extract_embedding_session(data, params):
                         random_state=params['seed']
                         ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']].T)
 
-            train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']].T)
-            test_embedding = embedding_model.transform(data['neuralData'][data['testingFrames'],0:params['input_neurons']].T)
-            embedding = embedding_model.transform(data['neuralData'][:,0:params['input_neurons']])
+            train_neural_structure = neural_structure_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']].T)
+            test_neural_structure = neural_structure_model.transform(data['neuralData'][data['testingFrames'],0:params['input_neurons']].T)
+            neural_structure = neural_structure_model.transform(data['neuralData'][:,0:params['input_neurons']])
 
             # Assess reconstruction error
-            stability_decoder = lin_reg().fit(test_embedding, train_embedding)
-            stability_score = stability_decoder.score(test_embedding, train_embedding)
+            stability_decoder = lin_reg().fit(test_neural_structure, train_neural_structure)
+            stability_score = stability_decoder.score(test_neural_structure, train_neural_structure)
 
             # Save embedding data
             f.create_dataset('trainingFrames', data=data['trainingFrames'])
             f.create_dataset('testingFrames', data=data['testingFrames'])
             f.create_dataset('reconstruction_score', data=stability_score)
-            f.create_dataset('train_embedding', data=train_embedding)
-            f.create_dataset('test_embedding', data=test_embedding)
-            f.create_dataset('embedding', data=embedding)
+            f.create_dataset('train_embedding', data=train_neural_structure)
+            f.create_dataset('test_embedding', data=test_neural_structure)
+            f.create_dataset('neural_structure', data=neural_structure)
 
-            joblib.dump(embedding_model, os.path.join(working_directory,'neural_structure_model.sav'))
+            joblib.dump(neural_structure_model, os.path.join(working_directory,'neural_structure_model.sav'))
 
 # If used as standalone script
 if __name__ == '__main__': 
@@ -95,4 +85,4 @@ if __name__ == '__main__':
 
     data = load_data(args.session_path)
     data = preprocess_data(data, params)
-    extract_embedding_session(data, params)
+    extract_neural_structure_session(data, params)
