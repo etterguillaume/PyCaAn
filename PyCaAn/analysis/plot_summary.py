@@ -9,7 +9,8 @@ from pycaan.functions.signal_processing import preprocess_data
 from pycaan.functions.metrics import extract_total_distance_travelled, extract_firing_properties
 from argparse import ArgumentParser
 
-import h5py
+plt.ioff() # Prevent plotting to save memory
+
 #%%
 def get_arguments():
     parser = ArgumentParser()
