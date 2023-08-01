@@ -16,7 +16,7 @@ from pycaan.analysis.align_embeddings import align_embeddings
 
 def get_arguments():
     parser = ArgumentParser()
-    parser.add_argument('--param_file', action='store_true', default='params.yaml')
+    parser.add_argument('--param_file', type=str, default='params.yaml')
     parser.add_argument('--extract_basic_info', action='store_true', default=False)
     parser.add_argument('--plot_summary', action='store_true', default=False)
     parser.add_argument('--extract_tuning', action='store_true', default=False)

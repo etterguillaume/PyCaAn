@@ -11,6 +11,7 @@ from argparse import ArgumentParser
 def get_arguments():
     parser = ArgumentParser()
     parser.add_argument('--session_path', type=str, default='')
+    parser.add_argument('--param_file', type=str, default='params.yaml')
     args = parser.parse_args()
     return args
 
