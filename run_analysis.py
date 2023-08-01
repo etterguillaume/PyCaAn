@@ -16,6 +16,7 @@ from pycaan.analysis.align_embeddings import align_embeddings
 
 def get_arguments():
     parser = ArgumentParser()
+    parser.add_argument('--param_file', action='store_true', default='params.yaml')
     parser.add_argument('--extract_basic_info', action='store_true', default=False)
     parser.add_argument('--plot_summary', action='store_true', default=False)
     parser.add_argument('--extract_tuning', action='store_true', default=False)
@@ -27,11 +28,11 @@ def get_arguments():
     return args
 
 if __name__ == '__main__':
-    with open('params.yaml','r') as file:
-        params = yaml.full_load(file)
-    
     args = get_arguments() #TODO add params override here
     config = vars(args)
+
+    with open(args.param_file,'r') as file:
+        params = yaml.full_load(file)
 
     with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
         session_file = yaml.full_load(file)
