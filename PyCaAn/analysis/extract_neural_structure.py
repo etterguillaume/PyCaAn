@@ -1,7 +1,6 @@
 #%% Import dependencies
 import yaml
 import numpy as np
-from umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
 from umap.umap_ import UMAP
 import tensorflow as tf
 import joblib
@@ -40,8 +39,8 @@ def extract_embedding_session(data, params):
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
 
-    if not os.path.exists(os.path.join(working_directory,'embedding.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'embedding.h5'),'w') as f:
+    if not os.path.exists(os.path.join(working_directory,'neural_structure.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'neural_structure.h5'),'w') as f:
 
             # Split dataset
             trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
@@ -59,53 +58,32 @@ def extract_embedding_session(data, params):
             data['testingFrames'][~data['running_ts']] = False
 
             # Train embedding model
-            if params['parametric_embedding']:
-                with hide_output_prints():
-                    embedding_model = ParametricUMAP(
-                                verbose=False,
-                                parametric_reconstruction_loss_fcn=tf.keras.losses.MeanSquaredError(),
-                                autoencoder_loss = True,
-                                parametric_reconstruction = True,
-                                n_components=params['embedding_dims'],
-                                n_neighbors=params['n_neighbors'],
-                                min_dist=params['min_dist'],
-                                metric='euclidean',
-                                random_state=params['seed']
-                                ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
-            else:
-                embedding_model = UMAP(
-                                n_components=params['embedding_dims'],
-                                n_neighbors=params['n_neighbors'],
-                                min_dist=params['min_dist'],
-                                metric='euclidean',
-                                random_state=params['seed']
-                                ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
 
-            #train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
-            train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
-            test_embedding = embedding_model.transform(data['neuralData'][data['testingFrames'],0:params['input_neurons']])
+            embedding_model = UMAP(
+                        n_components=2, # project on 2D
+                        n_neighbors=params['n_neighbors'],
+                        min_dist=params['min_dist'],
+                        metric='euclidean',
+                        random_state=params['seed']
+                        ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']].T)
+
+            train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']].T)
+            test_embedding = embedding_model.transform(data['neuralData'][data['testingFrames'],0:params['input_neurons']].T)
             embedding = embedding_model.transform(data['neuralData'][:,0:params['input_neurons']])
 
-            # Reconstruct inputs for both train and test sets
-            reconstruction = embedding_model.inverse_transform(test_embedding)
-
             # Assess reconstruction error
-            reconstruction_decoder = lin_reg().fit(reconstruction, data['neuralData'][data['testingFrames']])
-            reconstruction_score = reconstruction_decoder.score(reconstruction, data['neuralData'][data['testingFrames']])
+            stability_decoder = lin_reg().fit(test_embedding, train_embedding)
+            stability_score = stability_decoder.score(test_embedding, train_embedding)
 
             # Save embedding data
             f.create_dataset('trainingFrames', data=data['trainingFrames'])
             f.create_dataset('testingFrames', data=data['testingFrames'])
-            f.create_dataset('reconstruction_score', data=reconstruction_score)
+            f.create_dataset('reconstruction_score', data=stability_score)
             f.create_dataset('train_embedding', data=train_embedding)
             f.create_dataset('test_embedding', data=test_embedding)
             f.create_dataset('embedding', data=embedding)
 
-        # Save model
-        if params['parametric_embedding']:
-            print('Saving of parametric models not fully supported at this time')
-        else:
-            joblib.dump(embedding_model, os.path.join(working_directory,'model.sav')) # using joblib if non-parametric
+            joblib.dump(embedding_model, os.path.join(working_directory,'neural_structure_model.sav'))
 
 # If used as standalone script
 if __name__ == '__main__': 
