@@ -59,7 +59,7 @@ def extract_neural_structure_session(data, params):
 
             train_neural_structure = neural_structure_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']].T)
             test_neural_structure = neural_structure_model.transform(data['neuralData'][data['testingFrames'],0:params['input_neurons']].T)
-            neural_structure = neural_structure_model.transform(data['neuralData'][:,0:params['input_neurons']])
+            neural_structure = neural_structure_model.transform(data['neuralData'][:,0:params['input_neurons']].T)
 
             # Assess reconstruction error
             stability_decoder = lin_reg().fit(test_neural_structure, train_neural_structure)
@@ -73,7 +73,7 @@ def extract_neural_structure_session(data, params):
             f.create_dataset('test_embedding', data=test_neural_structure)
             f.create_dataset('neural_structure', data=neural_structure)
 
-            joblib.dump(neural_structure_model, os.path.join(working_directory,'neural_structure_model.sav'))
+            # joblib.dump(neural_structure_model, os.path.join(working_directory,'neural_structure_model.sav')) # no need to save
 
 # If used as standalone script
 if __name__ == '__main__': 
