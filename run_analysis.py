@@ -69,7 +69,7 @@ if __name__ == '__main__':
             try:
                 extract_neural_structure_session(data, params)
             except:
-                print(f'Could not embed neural data for {session}')
+                print(f'Could not extract neural structure for {session}')
 
         if args.extract_embedding and session not in excluded_list: # Exclude sessions with not enough data
             try:
