@@ -71,16 +71,17 @@ def plot_summary_session(data, params):
     plt.ylim(0,50)
 
     plt.subplot(4,3,7)
-    plt.title(f'Distance travelled: {total_distance_travelled} cm')
+    plt.title(f'Distance travelled: {total_distance_travelled.round(2)} cm')
     plt.plot(data['position'][:,0],
             data['position'][:,1],
             rasterized=True)
     plt.axis('equal')
 
     plt.subplot(4,3,8)
-    plt.title(f'Max speed: {np.max(data["velocity"])}')
+    plt.title(f'Max speed: {np.max(data["velocity"]).round(2)}')
     plt.hist(data['velocity'],
-            rasterized=True)
+             bins=20,
+             rasterized=True)
     plt.axis('equal')
 
     plt.tight_layout()
