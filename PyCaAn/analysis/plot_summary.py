@@ -4,10 +4,11 @@ import os
 import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
-from functions.dataloaders import load_data
+from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
-from argparse import ArgumentParser
 from pycaan.functions.metrics import extract_total_distance_travelled, extract_firing_properties
+from argparse import ArgumentParser
+
 import h5py
 #%%
 def get_arguments():

@@ -12,12 +12,12 @@ import pandas as pd
 
 def align_embeddings(params):
     #%% List sessions
-    sessionList=os.listdir(os.path.join(params['path_to_results'],'results'))
-    #for i,session in enumerate(sessionList):
-    try:
-        sessionList.remove('.DS_Store') #TODO generalize garbage removal
-    except:
-        print('')
+    garbage_list=[]
+    sessionList=os.listdir(os.path.join(params['path_to_results']))
+    for i,session in enumerate(sessionList):
+        if not session.startswith('M'): # subject names always start with M
+            garbage_list.append(i)
+    sessionList.pop(garbage_list) # remove non_folders
 
     #%% Initialize matrices
     data_list = []
@@ -27,9 +27,9 @@ def align_embeddings(params):
     #%% Extract data
     for session_A, session_B in tqdm(list(itertools.product(sessionList,sessionList)), total=len(sessionList)**2):
         try:
-            info_file_A=open(os.path.join(params['path_to_results'],'results',session_A,'info.yaml'),'r')
+            info_file_A=open(os.path.join(params['path_to_results'],'results','info.yaml'),'r')
             session_A_info = yaml.full_load(info_file_A)
-            info_file_B=open(os.path.join(params['path_to_results'],'results',session_B,'info.yaml'),'r')
+            info_file_B=open(os.path.join(params['path_to_results'],'results','info.yaml'),'r')
             session_B_info = yaml.full_load(info_file_B)
 
             if session_A_info['task']==session_B_info['task']: # Only compare manifolds on similar tasks
@@ -51,12 +51,12 @@ def align_embeddings(params):
 
                     data_A = preprocess_data(load_data(session_A_info['path']), params)
                     data_B = preprocess_data(load_data(session_B_info['path']), params)
-                    with h5py.File(os.path.join(params['path_to_results'],'results',session_A,'embedding.h5'), 'r') as f:
+                    with h5py.File(os.path.join(params['path_to_results'],session_A,'embedding.h5'), 'r') as f:
                         embedding_A=f['embedding'][()]
                         trainingFrames_A=f['trainingFrames'][()]
                         testingFrames_A=f['testingFrames'][()]
                         reconstruction_score_A=f['reconstruction_score'][()]
-                    with h5py.File(os.path.join(params['path_to_results'],'results',session_B,'embedding.h5'), 'r') as f:
+                    with h5py.File(os.path.join(params['path_to_results'],session_B,'embedding.h5'), 'r') as f:
                         embedding_B=f['embedding'][()]
                         trainingFrames_B=f['trainingFrames'][()]
                         testingFrames_B=f['testingFrames'][()]
