@@ -39,31 +39,24 @@ def plot_summary_session(data, params):
     fig.suptitle(data['path'])
     plt.subplot(4,3,1)
     plt.title('Correlation projection')
-    plt.imshow(data['corrProj'])
+    plt.imshow(data['corrProj'].T)
     plt.axis('off')
     #plt.axis('square')
 
     plt.subplot(4,3,2)
     plt.title(f'SFPs: {numNeurons} neurons')
-    plt.imshow(np.max(data['SFPs'],axis=0))
+    plt.imshow(np.max(data['SFPs'],axis=0).T)
     plt.axis('off')
 
-    plt.subplot(1,3,2)
-    plt.title(f'Binarized activity')
-    plt.imshow(data['binaryData'].T, cmap='GnBu', aspect='auto', interpolation='none')
-    #plt.xlim(0,60*params['sampling_frequency'])
-    #plt.ylim(0,50)
-
-    # plt.subplot(4,3,5)
-    # plt.title(f'Raw calcium')
-    # for i in range(50):
-    #     color = cmap(i/(50))
-    #     plt.plot(data['caTime'],data['neuralData'][:,i]/10+i,
-    #             c=color,
-    #             linewidth=1,
-    #             rasterized=True)
-    # plt.xlim(0,60)
-    # plt.axis('off')
+    plt.subplot(4,1,2)
+    plt.title(f'Raw calcium')
+    for i in range(numNeurons):
+        color = cmap(i/(numNeurons))
+        plt.plot(data['caTime'],data['neuralData'][:,i]/10+i,
+                c=color,
+                linewidth=.3,
+                rasterized=True)
+    plt.axis('off')
 
     plt.subplot(4,3,7)
     plt.title(f'Distance travelled: {total_distance_travelled.round(2)} cm')
@@ -75,8 +68,7 @@ def plot_summary_session(data, params):
     plt.subplot(4,3,8)
     plt.title(f'Max speed: {np.max(data["velocity"]).round(2)}')
     plt.hist(data['velocity'],
-             range=(0,75),
-             bins=20,
+             range=(0,50),
              density=True,
              rasterized=True)
     plt.axis('equal')
