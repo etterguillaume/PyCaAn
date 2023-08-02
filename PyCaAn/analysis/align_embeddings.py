@@ -9,15 +9,21 @@ from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
 from pycaan.functions.embedding import extract_hyperalignment_score
 import pandas as pd
+from argparse import ArgumentParser
+
+def get_arguments():
+    parser = ArgumentParser()
+    parser.add_argument('--param_file', type=str, default='params.yaml')
+    args = parser.parse_args()
+    return args
 
 def align_embeddings(params):
     #%% List sessions
     garbage_list=[]
     sessionList=os.listdir(os.path.join(params['path_to_results']))
-    for i,session in enumerate(sessionList):
-        if not session.startswith('M'): # subject names always start with M
-            garbage_list.append(i)
-    sessionList.pop(garbage_list) # remove non_folders
+    for i, session in enumerate(sessionList):
+        if not os.path.isdir(session): # ensure only folders are listed
+            sessionList.remove(session)
 
     #%% Initialize matrices
     data_list = []
@@ -27,9 +33,9 @@ def align_embeddings(params):
     #%% Extract data
     for session_A, session_B in tqdm(list(itertools.product(sessionList,sessionList)), total=len(sessionList)**2):
         try:
-            info_file_A=open(os.path.join(params['path_to_results'],'results','info.yaml'),'r')
+            info_file_A=open(os.path.join(params['path_to_results'],session_A,'info.yaml'),'r')
             session_A_info = yaml.full_load(info_file_A)
-            info_file_B=open(os.path.join(params['path_to_results'],'results','info.yaml'),'r')
+            info_file_B=open(os.path.join(params['path_to_results'],session_B,'info.yaml'),'r')
             session_B_info = yaml.full_load(info_file_B)
 
             if session_A_info['task']==session_B_info['task']: # Only compare manifolds on similar tasks
@@ -170,7 +176,10 @@ def align_embeddings(params):
     df = pd.DataFrame(data_list)
     df.to_csv(os.path.join(params['path_to_results'], 'hyperalignment_data.csv'))
 
-if __name__ == '__main__': 
-    with open('params.yaml','r') as file:
+if __name__ == '__main__':
+    args = get_arguments() #TODO add params override here
+    config = vars(args)
+
+    with open(args.param_file,'r') as file:
         params = yaml.full_load(file)
     align_embeddings(params)
