@@ -46,37 +46,19 @@ if __name__ == '__main__':
         data = preprocess_data(data, params)
 
         if args.plot_summary:
-            try:
-                plot_summary_session(data, params)
-            except:
-                print(f'Could not extract figures for {session}')
+            plot_summary_session(data, params)
 
         if args.extract_basic_info:
-            try:
-                extract_basic_info_session(data, params)
-            except:
-                print(f'Could not extract basic information for {session}')
+            extract_basic_info_session(data, params)
 
         if args.extract_tuning:
-            try:
-                extract_tuning_session(data, params)
-            except:
-                print(f'Could not extract tuning curves for {session}')
-
+            extract_tuning_session(data, params)
+            
         if args.extract_embedding and session not in excluded_list: # Exclude sessions with not enough data
-            try:
-                extract_embedding_session(data, params)
-            except:
-                print(f'Could not embed neural data for {session}')
-
+            extract_embedding_session(data, params)
+            
         if args.decode_embedding and session not in excluded_list: # Exclude sessions with not enough data
-            try:
-                decode_embedding_session(data, params)
-            except:
-                print(f'Could not decode embedding for {session}')
+            decode_embedding_session(data, params)
     
     if args.align_embeddings: # Hyperalignment
-        try:
-            align_embeddings(params)
-        except:
-            print(f'Could not perform hyperalignment. Verify that embeddings have already been extracted')
+        align_embeddings(params)

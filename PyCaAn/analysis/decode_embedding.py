@@ -119,52 +119,43 @@ def decode_embedding_session(data, params):
             f.create_dataset('test_prediction', data=test_prediction)
 
     # Extract direction tuning
-    try:
-        if not os.path.exists(os.path.join(working_directory,'direction_decoding.h5')) or params['overwrite_mode']=='always':
-            with h5py.File(os.path.join(working_directory,'direction_decoding.h5'),'w') as f:
-                if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF' or data['task'] == 'smallOF':
-                    decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['heading'],data, params, train_embedding, test_embedding)
-                    f.create_dataset('decoding_error', data=decoding_error)
-                    f.create_dataset('shuffled_error', data=shuffled_error)
-                
-                elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-                    decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['LT_direction'], data, params, train_embedding, test_embedding)
+    if not os.path.exists(os.path.join(working_directory,'direction_decoding.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'direction_decoding.h5'),'w') as f:
+            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF' or data['task'] == 'smallOF':
+                decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['heading'],data, params, train_embedding, test_embedding)
+                f.create_dataset('decoding_error', data=decoding_error)
+                f.create_dataset('shuffled_error', data=shuffled_error)
             
+            elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+                decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['LT_direction'], data, params, train_embedding, test_embedding)
+        
+            f.create_dataset('decoding_score', data=decoding_score)
+            f.create_dataset('z_score', data=z_score)
+            f.create_dataset('p_value', data=p_value)
+            f.create_dataset('test_prediction', data=test_prediction)
+
+    # Decode tone
+    if data['task'] == 'legoToneLT':
+        if not os.path.exists(os.path.join(working_directory,'tone_decoding.h5')) or params['overwrite_mode']=='always':
+            with h5py.File(os.path.join(working_directory,'tone_decoding.h5'),'w') as f:
+                data=extract_tone(data,params)
+                decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['binaryTone'],data, params, train_embedding, test_embedding)
+        
                 f.create_dataset('decoding_score', data=decoding_score)
                 f.create_dataset('z_score', data=z_score)
                 f.create_dataset('p_value', data=p_value)
                 f.create_dataset('test_prediction', data=test_prediction)
-    except:
-        print('Could not decode heading')
-
-    # Decode tone
-    if data['task'] == 'legoToneLT':
-        try:
-            if not os.path.exists(os.path.join(working_directory,'tone_decoding.h5')) or params['overwrite_mode']=='always':
-                with h5py.File(os.path.join(working_directory,'tone_decoding.h5'),'w') as f:
-                    data=extract_tone(data,params)
-                    decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['binaryTone'],data, params, train_embedding, test_embedding)
-            
-                    f.create_dataset('decoding_score', data=decoding_score)
-                    f.create_dataset('z_score', data=z_score)
-                    f.create_dataset('p_value', data=p_value)
-                    f.create_dataset('test_prediction', data=test_prediction)
-        except:
-            print('Could not decode single tone')
         
     elif data['task'] == 'legoSeqLT':
-        try:
-            if not os.path.exists(os.path.join(working_directory,'seqTone_decoding.h5')) or params['overwrite_mode']=='always':
-                with h5py.File(os.path.join(working_directory,'seqTone_decoding.h5'),'w') as f:
-                    data = extract_seqLT_tone(data,params)
-                    decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['seqLT_state'],data, params, train_embedding, test_embedding)
-            
-                    f.create_dataset('decoding_score', data=decoding_score)
-                    f.create_dataset('z_score', data=z_score)
-                    f.create_dataset('p_value', data=p_value)
-                    f.create_dataset('test_prediction', data=test_prediction)
-        except:
-            print('Could not extract tuning to tone sequence')
+        if not os.path.exists(os.path.join(working_directory,'seqTone_decoding.h5')) or params['overwrite_mode']=='always':
+            with h5py.File(os.path.join(working_directory,'seqTone_decoding.h5'),'w') as f:
+                data = extract_seqLT_tone(data,params)
+                decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['seqLT_state'],data, params, train_embedding, test_embedding)
+        
+                f.create_dataset('decoding_score', data=decoding_score)
+                f.create_dataset('z_score', data=z_score)
+                f.create_dataset('p_value', data=p_value)
+                f.create_dataset('test_prediction', data=test_prediction)
 
 # If used as standalone script
 if __name__ == '__main__': 
