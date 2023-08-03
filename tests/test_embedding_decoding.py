@@ -18,14 +18,14 @@ from pycaan.functions.decoding import decode_embedding
 from pycaan.functions.signal_processing import extract_tone, extract_seqLT_tone
 import h5py
 #%%
-with open('../params.yaml','r') as file:
+with open('../params_CA1.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%%
-working_directory = '../../../output/results/CA1_M246_OF_1/'
+working_directory = '../../../output/results_CA1/CA1_M986_legoSeqLT_20190312'
 
 #%%
-session = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
+session = '../../../datasets/calcium_imaging/CA1/M986/M986_legoSeqLT_20190312'
 data = preprocess_data(load_data(session),params)
 
 #%%
@@ -37,6 +37,18 @@ trainingFrames = embedding_file['trainingFrames'][()]
 testingFrames = embedding_file['testingFrames'][()]
 data['testingFrames'] = testingFrames
 data['trainingFrames'] = trainingFrames
+
+#%%
+data = extract_seqLT_tone(data,params)
+
+#%%
+decoding_score, z_score, p_value, _, _, _ = decode_embedding(data['seqLT_state'],data, params, train_embedding, test_embedding)
+
+#%%
+
+
+
+
 
 #%%
 #with h5py.File(os.path.join(working_directory,'direction_decoding.h5'),'w') as f:

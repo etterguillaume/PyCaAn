@@ -7,7 +7,7 @@ path_to_results: ../../output/results_regions # output folder for analysis using
 path_to_figures: ../../output/figures
 
 # Overwriting parameters
-overwrite_mode: 'never' # 'always', 'never', 'changes_only' for when params changed
+overwrite_mode: 'always' # 'always', 'never', 'changes_only' for when params changed
 
 # Analysis parameters
 sampling_frequency: 30 # frames per second

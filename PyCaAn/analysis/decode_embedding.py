@@ -143,9 +143,9 @@ def decode_embedding_session(data, params):
                     data=extract_tone(data,params)
                     decoding_score, z_score, p_value, _, _, _ = decode_embedding(data['binaryTone'],data, params, train_embedding, test_embedding)
             
-            f.create_dataset('decoding_score', data=decoding_score)
-            f.create_dataset('z_score', data=z_score)
-            f.create_dataset('p_value', data=p_value)
+                    f.create_dataset('decoding_score', data=decoding_score)
+                    f.create_dataset('z_score', data=z_score)
+                    f.create_dataset('p_value', data=p_value)
         except:
             print('Could not decode single tone')
         
@@ -156,9 +156,9 @@ def decode_embedding_session(data, params):
                     data = extract_seqLT_tone(data,params)
                     decoding_score, z_score, p_value, _, _, _ = decode_embedding(data['seqLT_state'],data, params, train_embedding, test_embedding)
             
-            f.create_dataset('decoding_score', data=decoding_score)
-            f.create_dataset('z_score', data=z_score)
-            f.create_dataset('p_value', data=p_value)
+                    f.create_dataset('decoding_score', data=decoding_score)
+                    f.create_dataset('z_score', data=z_score)
+                    f.create_dataset('p_value', data=p_value)
         except:
             print('Could not extract tuning to tone sequence')
 
