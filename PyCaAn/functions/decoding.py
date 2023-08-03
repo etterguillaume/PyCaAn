@@ -51,7 +51,7 @@ def bayesian_decode(var2predict, neural_data, params, trainingFrames, testingFra
     shuffled_error = np.nanmean(shuffled_error)
     return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
 
-def decode_embedding(var2predict, data, params, train_embedding, test_embedding):
+def decode_embedding(var2predict, data, params, train_embedding, test_embedding, isCircular):
     np.random.seed(params['seed'])
     prediction_stats = np.zeros(len(params['num_k']))*np.nan
     error_stats = np.zeros(len(params['num_k']))*np.nan
@@ -59,7 +59,10 @@ def decode_embedding(var2predict, data, params, train_embedding, test_embedding)
         if var2predict.dtype=='float': # Use kNN regressor
             decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(train_embedding, var2predict[data['trainingFrames']])
             test_prediction = decoder.predict(test_embedding)
-            error_stats[i] = MAE(var2predict[data['testingFrames']], test_prediction)
+            if isCircular:
+                error_stats[i] = np.median(np.mod(var2predict[data['testingFrames']] - test_prediction,360))
+            else:
+                error_stats[i] = MAE(var2predict[data['testingFrames']], test_prediction)
         else: # Use kNN classifier
             decoder = knn_class(metric='euclidean', n_neighbors=num_k).fit(train_embedding, var2predict[data['trainingFrames']])
             test_prediction = decoder.predict(test_embedding)
@@ -79,7 +82,11 @@ def decode_embedding(var2predict, data, params, train_embedding, test_embedding)
         if var2predict.dtype=='float': # Use kNN regressor
             decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][optimal_k]).fit(train_embedding, shuffled_var[data['trainingFrames']])
             shuffled_test_prediction = decoder.predict(test_embedding)
-            shuffled_error[shuffle_i] = MAE(var2predict[data['testingFrames']], shuffled_test_prediction)
+            
+            if isCircular:
+                shuffled_error[shuffle_i] = np.median(np.mod(var2predict[data['testingFrames']] - shuffled_test_prediction,360))
+            else:
+                shuffled_error[shuffle_i] = MAE(var2predict[data['testingFrames']], shuffled_test_prediction)
         else: # Use kNN classifier
             decoder = knn_class(metric='euclidean', n_neighbors=params['num_k'][optimal_k]).fit(train_embedding, shuffled_var[data['trainingFrames']])
             #prediction = decoder.predict(test_embedding)
