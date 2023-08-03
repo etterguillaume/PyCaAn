@@ -78,8 +78,8 @@ def decode_embedding(var2predict, data, params, train_embedding, test_embedding)
         shuffled_var = np.concatenate((var2predict[idx:], var2predict[:idx]))
         if var2predict.dtype=='float': # Use kNN regressor
             decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][optimal_k]).fit(train_embedding, shuffled_var[data['trainingFrames']])
-            test_prediction = decoder.predict(test_embedding)
-            shuffled_error[shuffle_i] = MAE(var2predict[data['testingFrames']], test_prediction)
+            shuffled_test_prediction = decoder.predict(test_embedding)
+            shuffled_error[shuffle_i] = MAE(var2predict[data['testingFrames']], shuffled_test_prediction)
         else: # Use kNN classifier
             decoder = knn_class(metric='euclidean', n_neighbors=params['num_k'][optimal_k]).fit(train_embedding, shuffled_var[data['trainingFrames']])
             #prediction = decoder.predict(test_embedding)
