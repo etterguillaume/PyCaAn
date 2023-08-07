@@ -9,15 +9,22 @@ import yaml
 import os
 from pycaan.functions.metrics import extract_firing_properties
 from tqdm import tqdm
+from sklearn.metrics import median_absolute_error as MAE
 
 #%%
 with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%%
-CA3_data = load_data('../' + params['path_to_dataset']+'/CA3/M80/M80_OF_20210528')
+data = load_data('../' + params['path_to_dataset']+'/CA1/M246/M246_OF_1')
 #%%
-CA3_data = preprocess_data(CA3_data, params)
+data = preprocess_data(data, params)
+
+#%% Assess MAE for angles
+heading=data['heading']
+pred_heading=np.mod(heading+90,360)
+vanilla_MAE = MAE(heading,pred_heading)
+
 
 #%%
 marginal_likelihood, prob_off_to_on, prob_on_to_off = extract_firing_properties(CA3_data['binaryData'])

@@ -60,7 +60,7 @@ def decode_embedding(var2predict, data, params, train_embedding, test_embedding,
             decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(train_embedding, var2predict[data['trainingFrames']])
             test_prediction = decoder.predict(test_embedding)
             if isCircular:
-                error_stats[i] = np.median(np.mod(var2predict[data['testingFrames']] - test_prediction,360))
+                error_stats[i] = np.median(abs((var2predict[data['testingFrames']]-test_prediction+180)%360-180))
             else:
                 error_stats[i] = MAE(var2predict[data['testingFrames']], test_prediction)
         else: # Use kNN classifier
@@ -84,7 +84,7 @@ def decode_embedding(var2predict, data, params, train_embedding, test_embedding,
             shuffled_test_prediction = decoder.predict(test_embedding)
             
             if isCircular:
-                shuffled_error[shuffle_i] = np.median(np.mod(var2predict[data['testingFrames']] - shuffled_test_prediction,360))
+                shuffled_error[shuffle_i] = np.median(abs((var2predict[data['testingFrames']]-shuffled_test_prediction+180)%360-180))
             else:
                 shuffled_error[shuffle_i] = MAE(var2predict[data['testingFrames']], shuffled_test_prediction)
         else: # Use kNN classifier
