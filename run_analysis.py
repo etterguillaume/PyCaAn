@@ -12,12 +12,14 @@ from pycaan.analysis.extract_embedding import extract_embedding_session
 from pycaan.analysis.plot_summary import plot_summary_session
 from pycaan.analysis.decode_embedding import decode_embedding_session
 from pycaan.analysis.align_embeddings import align_embeddings
+from pycaan.analysis.extract_covariates import extract_covariates_session
 
 def get_arguments():
     parser = ArgumentParser()
     parser.add_argument('--param_file', type=str, default='params.yaml')
     parser.add_argument('--extract_basic_info', action='store_true', default=False)
     parser.add_argument('--plot_summary', action='store_true', default=False)
+    parser.add_argument('--extract_covariates', action='store_true', default=False)
     parser.add_argument('--extract_tuning', action='store_true', default=False)
     parser.add_argument('--extract_embedding', action='store_true', default=False)
     parser.add_argument('--decode_embedding', action='store_true', default=False)
@@ -53,6 +55,9 @@ if __name__ == '__main__':
 
         if args.extract_tuning:
             extract_tuning_session(data, params)
+
+        if args.extract_covariates:
+            extract_covariates_session(data, params)
             
         if args.extract_embedding and session not in excluded_list: # Exclude sessions with not enough data
             extract_embedding_session(data, params)
