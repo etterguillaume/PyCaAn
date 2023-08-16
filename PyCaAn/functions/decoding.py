@@ -151,6 +151,6 @@ def predict_embedding(data, params, embedding):
     retrospective_distance_prediction = retrospective_distance_decoder.predict(data['distance_travelled'].reshape(-1, 1))
     prospective_distance_prediction = prospective_distance_decoder.predict(data['distance2stop'].reshape(-1, 1))
     heading_prediction = heading_decoder.predict(data['heading'].reshape(-1, 1))
-    speed_prediction = speed_decoder.predict(data['speed'].reshape(-1, 1))
+    speed_prediction = speed_decoder.predict(data['velocity'].reshape(-1, 1))
 
     return spatial_prediction, retrospective_time_prediction, prospective_time_prediction, retrospective_distance_prediction, prospective_distance_prediction, heading_prediction, speed_prediction
