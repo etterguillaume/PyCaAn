@@ -33,10 +33,8 @@ def decode_embedding_session(data, params):
     embedding = embedding_file['embedding'][()]
     train_embedding = embedding_file['train_embedding'][()]
     test_embedding = embedding_file['test_embedding'][()]
-    trainingFrames = embedding_file['trainingFrames'][()]
-    testingFrames = embedding_file['testingFrames'][()]
-    data['testingFrames'] = testingFrames
-    data['trainingFrames'] = trainingFrames
+    data['trainingFrames'] = embedding_file['trainingFrames'][()]
+    data['testingFrames'] = embedding_file['testingFrames'][()]
 
     # Extract inverse decoding
     if not os.path.exists(os.path.join(working_directory,'inverse_decoding.h5')) or params['overwrite_mode']=='always':
