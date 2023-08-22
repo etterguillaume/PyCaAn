@@ -110,7 +110,7 @@ def predict_embedding(data, params, embedding):
     speed_prediction_stats = np.zeros(len(params['num_k']))*np.nan
 
     if 'LT_direction' in data:
-        data['heading'] =data['LT_direction'] # TODO ensure this still provides a meaningful decoding in 1D environments
+        data['heading'] = data['LT_direction'] # TODO ensure this still provides a meaningful decoding in 1D environments
     
     # Find optimal k
     for i, num_k  in enumerate(params['num_k']):
