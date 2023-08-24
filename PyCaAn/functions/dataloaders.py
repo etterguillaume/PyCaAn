@@ -20,7 +20,6 @@ def load_data(path):
                 'age': 0,
                 'condition': 'normal',
                 'darkness': False,
-                'optoStim': False,
                 'rewards': True
                 }
     )
@@ -28,10 +27,6 @@ def load_data(path):
     # Extra conditions
     if 'dark' in split_name:
         data['darkness'] = True
-    if '8Hz' in split_name:
-        data['optoStim'] = '8Hz'
-    if 'scrambled' in split_name:
-        data['optoStim'] = 'scrambled'
     if 'norewards' in split_name:
         data['rewards'] = False
     if 'AD' in split_name:
