@@ -3,7 +3,7 @@ import yaml
 import numpy as np
 import os
 from argparse import ArgumentParser
-from pycaan.functions.decoding import decode_embedding, decode_RWI
+from pycaan.functions.decoding import decode_embedding, predict_embedding
 from pycaan.functions.signal_processing import extract_tone, extract_seqLT_tone
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
@@ -33,20 +33,20 @@ def decode_embedding_session(data, params):
     embedding = embedding_file['embedding'][()]
     train_embedding = embedding_file['train_embedding'][()]
     test_embedding = embedding_file['test_embedding'][()]
-    trainingFrames = embedding_file['trainingFrames'][()]
-    testingFrames = embedding_file['testingFrames'][()]
-    data['testingFrames'] = testingFrames
-    data['trainingFrames'] = trainingFrames
+    data['trainingFrames'] = embedding_file['trainingFrames'][()]
+    data['testingFrames'] = embedding_file['testingFrames'][()]
 
-    # Extract RWI
-    if not os.path.exists(os.path.join(working_directory,'RWI.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'RWI.h5'),'w') as f:
-            RWI, external_prediction, internal_prediction = decode_RWI(data, params, embedding)
-            f.create_dataset('RWI', data=RWI)
-            f.create_dataset('external_prediction', data=external_prediction)
-            f.create_dataset('internal_prediction', data=internal_prediction)
-            f.create_dataset('trainingFrames', data=data['trainingFrames'])
-            f.create_dataset('testingFrames', data=data['testingFrames'])
+    # Extract inverse decoding
+    if not os.path.exists(os.path.join(working_directory,'inverse_decoding.h5')) or params['overwrite_mode']=='always':
+        with h5py.File(os.path.join(working_directory,'inverse_decoding.h5'),'w') as f:
+            spatial_prediction, retrospective_time_prediction, prospective_time_prediction, retrospective_distance_prediction, prospective_distance_prediction, heading_prediction, speed_prediction = predict_embedding(data, params, embedding)
+            f.create_dataset('spatial_prediction', data=spatial_prediction)
+            f.create_dataset('retrospective_time_prediction', data=retrospective_time_prediction)
+            f.create_dataset('prospective_time_prediction', data=prospective_time_prediction)
+            f.create_dataset('retrospective_distance_prediction', data=retrospective_distance_prediction)
+            f.create_dataset('prospective_distance_prediction', data=prospective_distance_prediction)
+            f.create_dataset('heading_prediction', data=heading_prediction)
+            f.create_dataset('speed_prediction', data=speed_prediction)
             
     # Decode
     # Decode elapsed time

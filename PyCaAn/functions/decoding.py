@@ -99,38 +99,58 @@ def decode_embedding(var2predict, data, params, train_embedding, test_embedding,
     shuffled_error = np.nanmean(shuffled_error)
     return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error, test_prediction
 
-def decode_RWI(data, params, embedding):
+def predict_embedding(data, params, embedding):
     np.random.seed(params['seed'])
+    spatial_prediction_stats = np.zeros(len(params['num_k']))*np.nan
+    retrospective_time_prediction_stats = np.zeros(len(params['num_k']))*np.nan
+    prospective_time_prediction_stats = np.zeros(len(params['num_k']))*np.nan
+    retrospective_distance_prediction_stats = np.zeros(len(params['num_k']))*np.nan
+    prospective_distance_prediction_stats = np.zeros(len(params['num_k']))*np.nan
+    heading_prediction_stats = np.zeros(len(params['num_k']))*np.nan
+    speed_prediction_stats = np.zeros(len(params['num_k']))*np.nan
 
-    prediction_stats = np.zeros(len(params['num_k']))*np.nan
-    
-    # Build a new variable containing all internally generated signals
-    internal_var = np.vstack((data['elapsed_time'],
-           data['time2stop'],
-           data['distance_travelled'],
-           data['distance2stop'],
-           data['velocity'])).T
+    if 'LT_direction' in data:
+        data['heading'] = data['LT_direction'] # TODO ensure this still provides a meaningful decoding in 1D environments
     
     # Find optimal k
     for i, num_k  in enumerate(params['num_k']):
-        external_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['position'][data['trainingFrames']], embedding[data['trainingFrames']])
-        internal_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(internal_var[data['trainingFrames']], embedding[data['trainingFrames']])
-        prediction_stats[i] = external_decoder.score(data['position'][data['testingFrames']], embedding[data['testingFrames']]) + internal_decoder.score(internal_var[data['testingFrames']], embedding[data['testingFrames']])
+        spatial_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['position'][data['trainingFrames']], embedding[data['trainingFrames']])
+        spatial_prediction_stats[i] = spatial_decoder.score(data['position'][data['testingFrames']], embedding[data['testingFrames']])
+        
+        retrospective_time_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['elapsed_time'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+        retrospective_time_prediction_stats[i] = retrospective_time_decoder.score(data['elapsed_time'][data['testingFrames']].reshape(-1, 1), embedding[data['testingFrames']])
 
-    optimal_k = np.argmax(prediction_stats)
-    #decoding_score = prediction_stats[optimal_k]
+        prospective_time_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['time2stop'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+        prospective_time_prediction_stats[i] = prospective_time_decoder.score(data['time2stop'][data['testingFrames']].reshape(-1, 1), embedding[data['testingFrames']])
 
-    external_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(data['position'][data['trainingFrames']], embedding[data['trainingFrames']])
-    internal_decoder = knn_reg(metric='euclidean', n_neighbors=optimal_k).fit(internal_var[data['trainingFrames']], embedding[data['trainingFrames']])
-    external_prediction = external_decoder.predict(data['position']) # predict location
-    internal_prediction = internal_decoder.predict(internal_var) # predict internal signals (time, distance, speed)
+        retrospective_distance_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['distance_travelled'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+        retrospective_distance_prediction_stats[i] = retrospective_distance_decoder.score(data['distance_travelled'][data['testingFrames']].reshape(-1, 1), embedding[data['testingFrames']])
+
+        prospective_distance_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['distance2stop'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+        prospective_distance_prediction_stats[i] = prospective_distance_decoder.score(data['distance2stop'][data['testingFrames']].reshape(-1, 1), embedding[data['testingFrames']])
+
+        heading_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['heading'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+        heading_prediction_stats[i] = heading_decoder.score(data['heading'][data['testingFrames']].reshape(-1, 1), embedding[data['testingFrames']])
+
+        speed_decoder = knn_reg(metric='euclidean', n_neighbors=num_k).fit(data['velocity'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+        speed_prediction_stats[i] = speed_decoder.score(data['velocity'][data['testingFrames']].reshape(-1, 1), embedding[data['testingFrames']])
+
+    # use the ideal k num_neighbors
+    spatial_decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][np.argmax(spatial_prediction_stats)]).fit(data['position'][data['trainingFrames']], embedding[data['trainingFrames']])
+    retrospective_time_decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][np.argmax(retrospective_time_prediction_stats)]).fit(data['elapsed_time'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+    prospective_time_decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][np.argmax(prospective_time_prediction_stats)]).fit(data['time2stop'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+    retrospective_distance_decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][np.argmax(retrospective_distance_prediction_stats)]).fit(data['distance_travelled'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+    prospective_distance_decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][np.argmax(prospective_distance_prediction_stats)]).fit(data['distance2stop'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+    heading_decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][np.argmax(heading_prediction_stats)]).fit(data['heading'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
+    speed_decoder = knn_reg(metric='euclidean', n_neighbors=params['num_k'][np.argmax(speed_prediction_stats)]).fit(data['velocity'][data['trainingFrames']].reshape(-1, 1), embedding[data['trainingFrames']])
     
-    external_error = np.zeros(len(embedding))
-    internal_error = np.zeros(len(embedding))
-    for i in range(len(embedding)):
-        external_error[i] = dist(embedding[i], external_prediction[i])
-        internal_error[i] = dist(embedding[i], internal_prediction[i])
+    # predict manifold space using each behavioral variable
+    spatial_prediction = spatial_decoder.predict(data['position'])
+    retrospective_time_prediction = retrospective_time_decoder.predict(data['elapsed_time'].reshape(-1, 1))
+    prospective_time_prediction = prospective_time_decoder.predict(data['time2stop'].reshape(-1, 1))
+    retrospective_distance_prediction = retrospective_distance_decoder.predict(data['distance_travelled'].reshape(-1, 1))
+    prospective_distance_prediction = prospective_distance_decoder.predict(data['distance2stop'].reshape(-1, 1))
+    heading_prediction = heading_decoder.predict(data['heading'].reshape(-1, 1))
+    speed_prediction = speed_decoder.predict(data['velocity'].reshape(-1, 1))
 
-    RWI = internal_error-external_error
-
-    return RWI, external_prediction, internal_prediction
+    return spatial_prediction, retrospective_time_prediction, prospective_time_prediction, retrospective_distance_prediction, prospective_distance_prediction, heading_prediction, speed_prediction

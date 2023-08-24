@@ -113,11 +113,19 @@ def load_data(path):
 
     # Ensure correct SFP shape
     width, height = data['corrProj'].shape
-    numFrames, numNeurons = data['rawData'].shape
+    _, numNeurons = data['rawData'].shape
     current_sfp_shape = np.array(data['SFPs'].shape)
-    pos_numNeurons = int(np.where(current_sfp_shape==numNeurons,)[0])
-    pos_width = int(np.where(current_sfp_shape==width)[0])
-    pos_height = int(np.where(current_sfp_shape==height)[0])
-    data['SFPs']=np.transpose(data['SFPs'],(pos_numNeurons, pos_width, pos_height))
+    
+    if width!=numNeurons and height!=numNeurons and width!=height: # rare
+        pos_numNeurons = int(np.where(current_sfp_shape==numNeurons,)[0])
+        pos_width = int(np.where(current_sfp_shape==width)[0])
+        pos_height = int(np.where(current_sfp_shape==height)[0])
+        data['SFPs']=np.transpose(data['SFPs'],(pos_numNeurons, pos_width, pos_height))
+    elif width==height:
+        pos_numNeurons = int(np.where(current_sfp_shape==numNeurons,)[0])
+        data['SFPs']=np.transpose(data['SFPs'],(pos_numNeurons, 0, 1))
+    else: # for square recordings
+        data['SFPs']=np.transpose(data['SFPs'],(2, 1, 0)) # most likely
+        
 
     return data

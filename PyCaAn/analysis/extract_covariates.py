@@ -7,65 +7,29 @@ from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import preprocess_data
 from pycaan.functions.tuning import assess_covariate
 from pycaan.functions.metrics import extract_total_distance_travelled
+from argparse import ArgumentParser
 import h5py
 
-#%% Load parameters
-with open('params.yaml','r') as file:
-    params = yaml.full_load(file)
-
-#%% Load folders to analyze from yaml file?
-with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
-    session_file = yaml.full_load(file)
-session_list = session_file['sessions']
-print(f'{len(session_list)} sessions to process')
+def get_arguments():
+    parser = ArgumentParser()
+    parser.add_argument('--session_path', type=str, default='')
+    args = parser.parse_args()
+    return args
 
 # If tuning_data folder does not exist, create it
-if not os.path.exists(params['path_to_results']):
-    os.mkdir(params['path_to_results'])
-if not os.path.exists(os.path.join(params['path_to_results'],'covariates')):
-    os.mkdir(os.path.join(params['path_to_results'],'covariates'))
+
+
 
 #%%
-for i, session in enumerate(tqdm(session_list)):
-    data = load_data(session)
-
-    # Create folder with convention (e.g. CA1_M246_LT_2017073)
+def extract_covariates_session(data, params):
+    if not os.path.exists(params['path_to_results']):
+        os.mkdir(params['path_to_results'])
     working_directory=os.path.join( 
         params['path_to_results'],
-        'covariates',
         f"{data['region']}_{data['subject']}_{data['task']}_{data['day']}" 
         )
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
-
-    # Pre-process data
-    data=preprocess_data(data,params)
-
-    # Save basic info
-    numFrames, numNeurons = data['rawData'].shape
-    total_distance_travelled = extract_total_distance_travelled(data['position'])
-    info_dict = {
-                'day': data['day'],
-                'task': data['task'],
-                'subject': data['subject'],
-                'region': data['region'],
-                'sex': data['sex'],
-                'age': data['age'],
-                'condition': data['day'],
-                'darkness': data['darkness'],
-                'optoStim': data['optoStim'],
-                'rewards': data['rewards'],
-                'darkness': data['darkness'],
-                'condition': data['condition'],
-                'numNeurons': numNeurons,
-                'numFrames': numFrames,
-                'total_distance_travelled': float(total_distance_travelled),
-                'duration': float(data['caTime'][-1]),
-                'speed_threshold': params['speed_threshold']
-        }
-    if not os.path.exists(os.path.join(working_directory,'info.yaml')) or params['overwrite_mode']=='always':
-        with open(os.path.join(working_directory,'info.yaml'),"w") as file:
-            yaml.dump(info_dict,file)
 
     if not os.path.exists(os.path.join(working_directory,'covariates.h5')) or params['overwrite_mode']=='always':
         # Pre-allocate data for covariates
@@ -75,19 +39,18 @@ for i, session in enumerate(tqdm(session_list)):
         labels=['space','time','distance','speed','heading']
 
         position=data['position']
-        if data['task'] == 'OF':
-            mazeSize=45
-        elif data['task'] == 'legoOF':
+        if data['task'] == 'legoOF':
             mazeSize=50
         elif data['task'] == 'plexiOF':
             mazeSize=49
+        else:
+            mazeSize=45
 
-        if data['task'] == 'LT':
-            mazeSize=100
-            position=data['position'][:,0]
-
-        elif data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+        if data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
             mazeSize=134
+            position=data['position'][:,0]
+        else:
+            mazeSize=100
             position=data['position'][:,0]
 
         # Location vs time
@@ -260,3 +223,15 @@ for i, session in enumerate(tqdm(session_list)):
             f.create_dataset('p_value', data=pvalue_matrix)
             f.create_dataset('correlation', data=correlation_matrix)
             f.create_dataset('labels', data=labels)
+
+# If used as standalone script
+if __name__ == '__main__': 
+    args = get_arguments()
+    config = vars(args)
+
+    with open('params.yaml','r') as file:
+        params = yaml.full_load(file)
+
+    data = load_data(args.session_path)
+    data = preprocess_data(data, params)
+    extract_covariates_session(data, params)

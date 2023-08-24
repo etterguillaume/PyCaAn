@@ -4,7 +4,6 @@ seed: 42 # Default seed, for reproducibility
 # Paths
 path_to_dataset: ../../datasets/calcium_imaging
 path_to_results: ../../output/results_CA1 # output folder for analysis using current parameters. Recommended to be explicit in naming
-path_to_figures: ../../output/figures
 
 # Overwriting parameters
 overwrite_mode: 'never' # 'always', 'never', 'changes_only' for when params changed
