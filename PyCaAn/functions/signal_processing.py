@@ -207,9 +207,8 @@ def extract_seqLT_tone(data, params):
 
 def preprocess_data(data, params):
     # Error checking
-    assert len(data['behavTime'])==len(data['position']), 'behavTime and behavioral vector are not the same length'
-
     data = clean_timestamps(data) # only include unique timestamps
+    assert len(data['behavTime'])==len(data['position']), 'behavTime and behavioral vector are not the same length'
     data['position'] = interpolate_2D(data['position'], data['behavTime'], data['caTime'])
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
     data['elapsed_time'], data['distance_travelled'], data['time2stop'], data['distance2stop'] = compute_distance_time(data['position'], 
