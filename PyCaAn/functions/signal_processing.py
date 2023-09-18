@@ -87,6 +87,14 @@ def compute_velocity(interpolated_position, caTime, speed_threshold):
     
     return velocity, running_ts
 
+def compute_acceleration(velocity, caTime):
+    acceleration = np.diff(velocity)
+    acceleration = np.append(acceleration,0)
+    acceleration = signal.savgol_filter(acceleration, 15, 3)
+    acceleration = np.digitize(acceleration, bins=[-10000,-.1,.1,10000], right=False)
+    
+    return acceleration
+
 def extract_LT_direction(interpolated_position):
     LT_direction=diff(interpolated_position)
     LT_direction=np.append(LT_direction,0) # Add last missing datapoint
@@ -211,6 +219,7 @@ def preprocess_data(data, params):
     assert len(data['behavTime'])==len(data['position']), 'behavTime and behavioral vector are not the same length'
     data['position'] = interpolate_2D(data['position'], data['behavTime'], data['caTime'])
     data['velocity'], data['running_ts'] = compute_velocity(data['position'], data['caTime'], params['speed_threshold'])
+    data['acceleration'] = compute_acceleration(data['velocity'], data['caTime'])
     data['elapsed_time'], data['distance_travelled'], data['time2stop'], data['distance2stop'] = compute_distance_time(data['position'], 
                                                                              data['velocity'], 
                                                                              data['caTime'], 
