@@ -119,7 +119,7 @@ def extract_tuning_session(data, params):
         with h5py.File(os.path.join(working_directory,'acceleration_tuning.h5'),'w') as f:
             info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
                                                                     data['acceleration'],
-                                                                    [data['running_ts']],
+                                                                    data['running_ts'],
                                                                     )
             f.create_dataset('info', data=info)
             f.create_dataset('p_value', data=p_value)

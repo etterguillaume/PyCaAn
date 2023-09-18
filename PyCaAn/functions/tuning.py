@@ -58,8 +58,8 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
 
     return info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val
 
-def extract_discrete_tuning(binaryData, var, inclusion_ts, var_length):
-    discrete_bin_vector = np.arange(var_length)
+def extract_discrete_tuning(binaryData, var, inclusion_ts):
+    discrete_bin_vector = np.unique(var)
     binaryData = binaryData[inclusion_ts]
     var = var[inclusion_ts]
     numFrames, numNeurons = binaryData.shape
@@ -71,7 +71,7 @@ def extract_discrete_tuning(binaryData, var, inclusion_ts, var_length):
     peak_loc = np.zeros(numNeurons, dtype=int)
 
     # Compute occupancy
-    occupancy_frames = np.bincount(var, minlength=var_length)
+    occupancy_frames = np.bincount(var, minlength=len(discrete_bin_vector))
 
     # Bin activity
     for neuron in range(numNeurons):

@@ -91,7 +91,7 @@ def compute_acceleration(velocity, caTime):
     acceleration = np.diff(velocity)
     acceleration = np.append(acceleration,0)
     acceleration = signal.savgol_filter(acceleration, 15, 3)
-    acceleration = np.digitize(acceleration, bins=[-10000,-.1,.1,10000], right=False)
+    acceleration = np.digitize(acceleration, bins=[-10000,-.1,.1,10000], right=False)-1 # bring to [0,1,2]
     
     return acceleration
 
