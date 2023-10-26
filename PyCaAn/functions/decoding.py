@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.linear_model import LinearRegression as lin_reg
 from sklearn.neighbors import KNeighborsRegressor as knn_reg
 from sklearn.neighbors import KNeighborsClassifier as knn_class
 from sklearn.linear_model import BayesianRidge
@@ -154,3 +155,20 @@ def predict_embedding(data, params, embedding):
     speed_prediction = speed_decoder.predict(data['velocity'].reshape(-1, 1))
 
     return spatial_prediction, retrospective_time_prediction, prospective_time_prediction, retrospective_distance_prediction, prospective_distance_prediction, heading_prediction, speed_prediction
+
+def extract_continuous_HAS(embedding_ref,
+                            var_ref,
+                            embedding_pred,
+                            var_pred):
+    
+    #TODO use pipeline?
+    # Learn mapping between embedding_ref and var_ref
+    decoder_var_ref = knn_reg(metric='euclidean', n_neighbors=num_k).fit(embedding_ref, var_ref)
+
+    # Learn mapping between embedding_pred and embedding_ref, 
+    decoder_var_pred = decoder_var_ref.predict(lin_reg().fit(embedding_pred, var_pred))
+
+    # Compute score
+    HAS = decoder_var_pred.score()
+
+    return HAS

@@ -1,4 +1,6 @@
 from sklearn.linear_model import LinearRegression as lin_reg
+from sklearn.neighbors import KNeighborsRegressor as knn_reg
+
 import numpy as np
 import warnings
 
@@ -39,9 +41,6 @@ def extract_hyperalignment_score(embedding_ref,
     quantized_embedding_ref = np.delete(quantized_embedding_ref, to_delete, axis=0)
     quantized_embedding_pred = np.delete(quantized_embedding_pred, to_delete, axis=0)
     bin_vec = np.delete(bin_vec,to_delete, axis=0)
-
-    # Normalize embeddings
-    # (theoretically useless)
 
     # Train decoder
     decoder_AB = lin_reg().fit(quantized_embedding_ref, quantized_embedding_pred)
