@@ -42,7 +42,36 @@ trainingFrames = embedding_file['trainingFrames'][()]
 testingFrames = embedding_file['testingFrames'][()]
 data['testingFrames'] = testingFrames
 data['trainingFrames'] = trainingFrames
-bin_vec=np.arange(100)
+bin_vec=(np.linspace(0,134,params['quantization_steps']))
+
+#%%
+from pycaan.functions.embedding import quantize_embedding
+
+#%%
+train_quantized_embedding_ref, _ = quantize_embedding(train_embedding,
+                                                            data['position'][trainingFrames,0], 
+                                                            bin_vec)
+test_quantized_embedding_ref, _ = quantize_embedding(test_embedding,
+                                                            data['position'][testingFrames,0], 
+                                                            bin_vec)
+
+#%%
+import matplotlib.pyplot as plt
+plt.scatter(train_quantized_embedding_ref[:,0], test_quantized_embedding_ref[:,0], c=bin_vec)
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
 
 #%% Implement griddata
 from scipy.interpolate import griddata
