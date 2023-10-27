@@ -6,6 +6,11 @@
 import yaml
 import numpy as np
 import joblib
+
+from torch import nn
+import torch
+import torch.nn.functional as F
+
 from umap.umap_ import UMAP
 from umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
 import tensorflow as tf
@@ -41,8 +46,16 @@ data['trainingFrames'] = trainingFrames
 # %%
 from sklearn.linear_model import LinearRegression as lin_reg
 from sklearn.neighbors import KNeighborsRegressor as knn_reg
+
 #%%
 decoder_var_ref = knn_reg(metric='euclidean', n_neighbors=15).fit(train_embedding, data['position'][data['trainingFrames'],0])
+
 # %%
-decoder_var_pred = decoder_var_ref.predict(lin_reg().fit(train_embedding, data['position'][data['trainingFrames'],0]))
+
+
+
+data['position'][data['trainingFrames'],0]
+
+
+decoder_var_pred = (lin_reg().fit(train_embedding,)
 # %%
