@@ -71,7 +71,7 @@ def align_embeddings(params):
                     ## Hyperalignment
                     # Time
                     bin_vec=(np.linspace(0,params['max_temporal_length'],params['quantization_steps']))
-                    temporal_HAS_AB, temporal_HAS_BA, _, _, _, _, _ = extract_hyperalignment_score(
+                    temporal_HAS_AB, temporal_HAS_BA = extract_hyperalignment_score(
                         embedding_ref=embedding_A,
                         var_ref=data_A['elapsed_time'],
                         trainingFrames_ref = trainingFrames_A,
@@ -85,7 +85,7 @@ def align_embeddings(params):
 
                     # Distance
                     bin_vec=(np.linspace(0,params['max_distance_length'],params['quantization_steps']))
-                    distance_HAS_AB, distance_HAS_BA, _, _, _, _, _ = extract_hyperalignment_score(
+                    distance_HAS_AB, distance_HAS_BA = extract_hyperalignment_score(
                         embedding_ref=embedding_A,
                         var_ref=data_A['distance_travelled'],
                         trainingFrames_ref = trainingFrames_A,
@@ -99,7 +99,7 @@ def align_embeddings(params):
                     
                     # Speed
                     bin_vec=(np.linspace(0,params['max_velocity_length'],params['quantization_steps']))
-                    speed_HAS_AB, speed_HAS_BA, _, _, _, _, _ = extract_hyperalignment_score(
+                    speed_HAS_AB, speed_HAS_BA = extract_hyperalignment_score(
                         embedding_ref=embedding_A,
                         var_ref=data_A['velocity'],
                         trainingFrames_ref = trainingFrames_A,
@@ -116,7 +116,7 @@ def align_embeddings(params):
                         bin_vec=(np.linspace(0,100,params['quantization_steps']))
                     elif task=='legoLT' or task=='legoToneLT' or task=='legoSeqLT':
                         bin_vec=(np.linspace(0,134,params['quantization_steps']))
-                    spatial_HAS_AB, spatial_HAS_BA, _, _, _, _, _ = extract_hyperalignment_score(
+                    spatial_HAS_AB, spatial_HAS_BA = extract_hyperalignment_score(
                         embedding_ref=embedding_A,
                         var_ref=data_A['position'][:,0],
                         trainingFrames_ref = trainingFrames_A,
