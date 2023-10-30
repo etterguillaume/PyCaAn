@@ -25,7 +25,7 @@ def quantize_embedding(embedding, var, bin_vec):
                                         fill_value="extrapolate")
                 quantized_embedding[:,dim] = interp_func(quantized_embedding[:,dim])
 
-        return quantized_embedding, quantized_var
+        return quantized_embedding
 
 def extract_hyperalignment_score(embedding_ref,
                                 var_ref,
@@ -47,17 +47,17 @@ def extract_hyperalignment_score(embedding_ref,
     train_var_pred = var_pred[trainingFrames_pred]
     test_var_pred = var_pred[testingFrames_pred]
 
-    train_quantized_embedding_ref, _ = quantize_embedding(train_embedding_ref,
+    train_quantized_embedding_ref = quantize_embedding(train_embedding_ref,
                                                             train_var_ref, 
                                                             bin_vec)
-    test_quantized_embedding_ref, _ = quantize_embedding(test_embedding_ref,
+    test_quantized_embedding_ref = quantize_embedding(test_embedding_ref,
                                                             test_var_ref,
                                                             bin_vec)
-    train_quantized_embedding_pred, _ = quantize_embedding(train_embedding_pred,
-                                                            train_var_ref,
+    train_quantized_embedding_pred = quantize_embedding(train_embedding_pred,
+                                                            train_var_pred,
                                                             bin_vec)
-    test_quantized_embedding_pred, _ = quantize_embedding(test_embedding_pred,
-                                                            test_var_ref,
+    test_quantized_embedding_pred = quantize_embedding(test_embedding_pred,
+                                                            test_var_pred,
                                                             bin_vec)
     
     # Train decoder #TODO fix first and last bins

@@ -27,40 +27,82 @@ with open('../params_CA1.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%%
-working_directory = '../../../output/results_CA1/CA1_M986_legoSeqLT_20190312'
+working_directory_A = '../../../output/results_CA1/CA1_M246_LT_4'
+working_directory_B = '../../../output/results_CA1/CA1_M246_LT_6'
 
 #%%
-session = '../../../datasets/calcium_imaging/CA1/M986/M986_legoSeqLT_20190312'
-data = preprocess_data(load_data(session),params)
+session_A = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_4'
+session_B = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
+data_A = preprocess_data(load_data(session_A),params)
+data_B = preprocess_data(load_data(session_B),params)
 
 #%%
-embedding_file = h5py.File(os.path.join(working_directory,'embedding.h5'),'r')
-embedding = embedding_file['embedding'][()]
-train_embedding = embedding_file['train_embedding'][()]
-test_embedding = embedding_file['test_embedding'][()]
-trainingFrames = embedding_file['trainingFrames'][()]
-testingFrames = embedding_file['testingFrames'][()]
-data['testingFrames'] = testingFrames
-data['trainingFrames'] = trainingFrames
-bin_vec=(np.linspace(0,134,params['quantization_steps']))
+embedding_file_A = h5py.File(os.path.join(working_directory_A,'embedding.h5'),'r')
+embedding_file_B = h5py.File(os.path.join(working_directory_B,'embedding.h5'),'r')
+embedding_A = embedding_file_A['embedding'][()]
+embedding_B = embedding_file_B['embedding'][()]
+train_embedding_A = embedding_file_A['train_embedding'][()]
+train_embedding_B = embedding_file_B['train_embedding'][()]
+test_embedding_A = embedding_file_A['test_embedding'][()]
+test_embedding_B = embedding_file_B['test_embedding'][()]
+trainingFrames_A = embedding_file_A['trainingFrames'][()]
+trainingFrames_B = embedding_file_B['trainingFrames'][()]
+testingFrames_A = embedding_file_A['testingFrames'][()]
+testingFrames_B = embedding_file_B['testingFrames'][()]
+bin_vec=(np.linspace(0,100,params['quantization_steps']))
 
 #%%
-from pycaan.functions.embedding import quantize_embedding
+from pycaan.functions.embedding import quantize_embedding, extract_hyperalignment_score
 
 #%%
-train_quantized_embedding_ref, _ = quantize_embedding(train_embedding,
-                                                            data['position'][trainingFrames,0], 
-                                                            bin_vec)
-test_quantized_embedding_ref, _ = quantize_embedding(test_embedding,
-                                                            data['position'][testingFrames,0], 
-                                                            bin_vec)
+from scipy.interpolate import interp1d
+def quantize_embedding(embedding, var, bin_vec):
+        # Digitize labels
+        quantized_var=np.digitize(var, bin_vec, right=False)
+
+        # Quantize and align embeddings
+        quantized_embedding = np.zeros((len(bin_vec),embedding.shape[1]))
+
+        for i, bin_val in enumerate(bin_vec):
+                quantized_embedding[i,:] = np.nanmean(embedding[quantized_var==i],axis=0)
+
+        # Interpolate through missing values
+        for dim in range(quantized_embedding.shape[1]):
+                nan_vec = np.isnan(quantized_embedding[:,dim])
+                interp_func = interp1d(bin_vec[~nan_vec],
+                                        quantized_embedding[~nan_vec,dim],
+                                        fill_value="extrapolate")
+                quantized_embedding[:,dim] = interp_func(quantized_embedding[:,dim])
+
+        return quantized_embedding
+#%%
+train_quantized_embedding_B = quantize_embedding(train_embedding_B,
+                                                        data_B['position'][trainingFrames_B,0], 
+                                                        bin_vec)
+test_quantized_embedding_B = quantize_embedding(test_embedding_B,
+                                                    data_B['position'][testingFrames_B,0], 
+                                                    bin_vec)
+
+#%%
+train_quantized_embedding_B
 
 #%%
 import matplotlib.pyplot as plt
-plt.scatter(train_quantized_embedding_ref[:,0], test_quantized_embedding_ref[:,0], c=bin_vec)
+plt.scatter(train_quantized_embedding_A[:,3], train_quantized_embedding_B[:,3], c=bin_vec)
 
 #%%
+extract_hyperalignment_score(embedding_A,
+                                data_A['position'][:,0],
+                                trainingFrames_A,
+                                testingFrames_A,
+                                embedding_B,
+                                data_B['position'][:,0],
+                                trainingFrames_B,
+                                testingFrames_B,
+                                bin_vec)
 
+
+#%%
 
 
 
