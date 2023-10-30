@@ -76,19 +76,32 @@ def quantize_embedding(embedding, var, bin_vec):
 
         return quantized_embedding
 #%%
+train_quantized_embedding_A = quantize_embedding(train_embedding_A,
+                                                        data_A['position'][trainingFrames_A,0], 
+                                                        bin_vec)
+test_quantized_embedding_A = quantize_embedding(test_embedding_A,
+                                                    data_A['position'][testingFrames_A,0], 
+                                                    bin_vec)
+
 train_quantized_embedding_B = quantize_embedding(train_embedding_B,
                                                         data_B['position'][trainingFrames_B,0], 
                                                         bin_vec)
 test_quantized_embedding_B = quantize_embedding(test_embedding_B,
                                                     data_B['position'][testingFrames_B,0], 
                                                     bin_vec)
-
 #%%
-train_quantized_embedding_B
+from sklearn.impute import SimpleImputer
+imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
+train_quantized_embedding_fixed = imputer.fit_transform(train_quantized_embedding_A)
 
 #%%
 import matplotlib.pyplot as plt
-plt.scatter(train_quantized_embedding_A[:,3], train_quantized_embedding_B[:,3], c=bin_vec)
+plt.figure()
+plt.scatter(train_quantized_embedding_A[:,0], test_quantized_embedding_A[:,0], c=bin_vec)
+plt.figure()
+plt.scatter(train_quantized_embedding_B[:,0], test_quantized_embedding_B[:,0], c=bin_vec)
+plt.figure()
+plt.scatter(test_quantized_embedding_A.flatten(), test_quantized_embedding_B.flatten())
 
 #%%
 extract_hyperalignment_score(embedding_A,
@@ -103,12 +116,6 @@ extract_hyperalignment_score(embedding_A,
 
 
 #%%
-
-
-
-
-
-
 
 
 

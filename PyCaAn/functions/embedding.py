@@ -1,6 +1,6 @@
 from sklearn.linear_model import LinearRegression as lin_reg
 from sklearn.neighbors import KNeighborsRegressor as knn_reg
-from scipy.interpolate import interp1d
+from sklearn.impute import SimpleImputer
 
 import numpy as np
 import warnings
@@ -17,13 +17,13 @@ def quantize_embedding(embedding, var, bin_vec):
                 #warnings.simplefilter("ignore", category=RuntimeWarning)
                 quantized_embedding[i,:] = np.nanmean(embedding[quantized_var==i],axis=0)
 
-        # Interpolate through missing values
-        for dim in range(quantized_embedding.shape[1]):
-                nan_vec = np.isnan(quantized_embedding[:,dim])
-                interp_func = interp1d(bin_vec[~nan_vec],
-                                        quantized_embedding[~nan_vec,dim],
-                                        fill_value="extrapolate")
-                quantized_embedding[:,dim] = interp_func(quantized_embedding[:,dim])
+        # Interpolate through missing values #LEGACY
+        # for dim in range(quantized_embedding.shape[1]):
+        #         nan_vec = np.isnan(quantized_embedding[:,dim])
+        #         interp_func = interp1d(bin_vec[~nan_vec],
+        #                                 quantized_embedding[~nan_vec,dim],
+        #                                 fill_value="extrapolate")
+        #         quantized_embedding[:,dim] = interp_func(quantized_embedding[:,dim])
 
         return quantized_embedding
 
@@ -60,12 +60,19 @@ def extract_hyperalignment_score(embedding_ref,
                                                             test_var_pred,
                                                             bin_vec)
     
-    # Train decoder #TODO fix first and last bins
-    decoder_AB = lin_reg().fit(train_quantized_embedding_ref[1:-1], train_quantized_embedding_pred[1:-1])
-    decoder_BA = lin_reg().fit(train_quantized_embedding_pred[1:-1], train_quantized_embedding_ref[1:-1])
+    # Impute missing value
+    imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
+    train_quantized_embedding_ref = imputer.fit_transform(train_quantized_embedding_ref)
+    test_quantized_embedding_ref = imputer.fit_transform(test_quantized_embedding_ref)
+    train_quantized_embedding_pred = imputer.fit_transform(train_quantized_embedding_pred)
+    test_quantized_embedding_pred = imputer.fit_transform(test_quantized_embedding_pred)
+
+    # Train decoder
+    decoder_AB = lin_reg().fit(train_quantized_embedding_ref, train_quantized_embedding_pred)
+    decoder_BA = lin_reg().fit(train_quantized_embedding_pred, train_quantized_embedding_ref)
     
     # Assess reconstruction error
-    HAS_AB = decoder_AB.score(test_quantized_embedding_ref[1:-1], test_quantized_embedding_pred[1:-1])
-    HAS_BA = decoder_BA.score(test_quantized_embedding_pred[1:-1], test_quantized_embedding_ref[1:-1])
+    HAS_AB = decoder_AB.score(test_quantized_embedding_ref, test_quantized_embedding_pred)
+    HAS_BA = decoder_BA.score(test_quantized_embedding_pred, test_quantized_embedding_ref)
 
     return HAS_AB, HAS_BA
