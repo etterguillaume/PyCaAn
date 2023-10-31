@@ -49,7 +49,7 @@ trainingFrames_A = embedding_file_A['trainingFrames'][()]
 trainingFrames_B = embedding_file_B['trainingFrames'][()]
 testingFrames_A = embedding_file_A['testingFrames'][()]
 testingFrames_B = embedding_file_B['testingFrames'][()]
-bin_vec=(np.linspace(0,100,256))
+bin_vec=(np.linspace(0,100,100))
 
 #%%
 from pycaan.functions.embedding import quantize_embedding, extract_hyperalignment_score
@@ -69,8 +69,16 @@ test_quantized_embedding_B = quantize_embedding(test_embedding_B,
                                                     data_B['position'][testingFrames_B,0], 
                                                     bin_vec)
 
+#%% Identify nans
+train_nans = np.logical_and(np.isnan(train_quantized_embedding_A), np.isnan(train_quantized_embedding_B)).prod(axis=1)
+test_nans = np.logical_and(np.isnan(test_quantized_embedding_A), np.isnan(test_quantized_embedding_B)).prod(axis=1)
 
-
+#%% Fit
+# Train decoder
+decoder_AB = lin_reg().fit(train_quantized_embedding_A[~train_nans],
+                            train_quantized_embedding_B[~train_nans])
+decoder_BA = lin_reg().fit(train_quantized_embedding_A[~train_nans],
+                            train_quantized_embedding_B[~train_nans])
 
 
 
