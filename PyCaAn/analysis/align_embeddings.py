@@ -26,8 +26,6 @@ def align_embeddings(params):
     #%% Initialize matrices
     data_list = []
 
-    #TODO prepare list of session pairs in advance, given constraints (e.g. task type)
-
     #%% Extract data
     for session_A, session_B in tqdm(list(itertools.product(sessionList,sessionList)), total=len(sessionList)**2):
         info_file_A=open(os.path.join(params['path_to_results'],session_A,'info.yaml'),'r')
@@ -35,13 +33,9 @@ def align_embeddings(params):
         info_file_B=open(os.path.join(params['path_to_results'],session_B,'info.yaml'),'r')
         session_B_info = yaml.full_load(info_file_B)
 
-        if session_A_info['task']==session_B_info['task']: # Only compare manifolds on similar tasks
+        if session_A!=session_B and session_A_info['task']==session_B_info['task']: # Only compare manifolds on similar tasks
             task=session_A_info['task']
             if task=='LT' or task=='legoLT' or task=='legoToneLT' or task=='legoSeqLT':
-                if session_A_info['path']==session_B_info['path']:
-                    sameSession=True
-                else:
-                    sameSession=False
                 if session_A_info['subject']==session_B_info['subject']:
                     sameMouse=True
                     sameRegion=True
@@ -134,7 +128,6 @@ def align_embeddings(params):
                     'Predicted_region': session_B_info['region'],
                     'Predicted_subject': session_B_info['subject'],
                     'Predicted_day': session_B_info['day'],
-                    'sameSession': sameSession,
                     'sameMouse': sameMouse,
                     'sameRegion': sameRegion,
                     'reconstruction_score_ref': reconstruction_score_A,
@@ -155,7 +148,6 @@ def align_embeddings(params):
                     'Predicted_region': session_A_info['region'],
                     'Predicted_subject': session_A_info['subject'],
                     'Predicted_day': session_A_info['day'],
-                    'sameSession': sameSession,
                     'sameMouse': sameMouse,
                     'sameRegion': sameRegion,
                     'reconstruction_score_ref': reconstruction_score_B,

@@ -49,32 +49,11 @@ trainingFrames_A = embedding_file_A['trainingFrames'][()]
 trainingFrames_B = embedding_file_B['trainingFrames'][()]
 testingFrames_A = embedding_file_A['testingFrames'][()]
 testingFrames_B = embedding_file_B['testingFrames'][()]
-bin_vec=(np.linspace(0,100,params['quantization_steps']))
+bin_vec=(np.linspace(0,100,256))
 
 #%%
 from pycaan.functions.embedding import quantize_embedding, extract_hyperalignment_score
 
-#%%
-from scipy.interpolate import interp1d
-def quantize_embedding(embedding, var, bin_vec):
-        # Digitize labels
-        quantized_var=np.digitize(var, bin_vec, right=False)
-
-        # Quantize and align embeddings
-        quantized_embedding = np.zeros((len(bin_vec),embedding.shape[1]))
-
-        for i, bin_val in enumerate(bin_vec):
-                quantized_embedding[i,:] = np.nanmean(embedding[quantized_var==i],axis=0)
-
-        # Interpolate through missing values
-        for dim in range(quantized_embedding.shape[1]):
-                nan_vec = np.isnan(quantized_embedding[:,dim])
-                interp_func = interp1d(bin_vec[~nan_vec],
-                                        quantized_embedding[~nan_vec,dim],
-                                        fill_value="extrapolate")
-                quantized_embedding[:,dim] = interp_func(quantized_embedding[:,dim])
-
-        return quantized_embedding
 #%%
 train_quantized_embedding_A = quantize_embedding(train_embedding_A,
                                                         data_A['position'][trainingFrames_A,0], 
@@ -89,10 +68,27 @@ train_quantized_embedding_B = quantize_embedding(train_embedding_B,
 test_quantized_embedding_B = quantize_embedding(test_embedding_B,
                                                     data_B['position'][testingFrames_B,0], 
                                                     bin_vec)
+
+
+
+
+
+
+#%% Using grid-data
+# from scipy.interpolate import griddata
+# train_quantized_embedding_A_grid= griddata(train_embedding_A, data_A['position'][trainingFrames_A,0], (data_B['position'][trainingFrames_B,0]*np.ones((4,1))).T, method='linear')
+
 #%%
-from sklearn.impute import SimpleImputer
-imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
-train_quantized_embedding_fixed = imputer.fit_transform(train_quantized_embedding_A)
+import matplotlib.pyplot as plt
+plt.scatter(train_embedding_A[:,0],
+train_embedding_A[:,1],
+c=data_A['position'][trainingFrames_A,1])
+
+#%%
+plt.scatter(train_quantized_embedding_A[:,0],
+train_quantized_embedding_A[:,1],
+c=bin_vec)
+
 
 #%%
 import matplotlib.pyplot as plt
@@ -115,23 +111,15 @@ extract_hyperalignment_score(embedding_A,
                                 bin_vec)
 
 
-#%%
-
-
-
-
-
-
-#%% Implement griddata
-from scipy.interpolate import griddata
 # %%
 from sklearn.linear_model import LinearRegression as lin_reg
 from sklearn.neighbors import KNeighborsRegressor as knn_reg
 
 #%% Inverse decoding
 # First, predict manifold from behavior in mouse A
-ref_manifold_predictor = knn_reg(metric='euclidean', n_neighbors=15).fit(data['position'][data['trainingFrames'],:], train_embedding)
+ref_manifold_predictor = knn_reg(metric='euclidean', n_neighbors=15).fit(data_A['position'][trainingFrames_A,:], train_embedding_A)
 
+#%%
 # Next, predict manifold from B given behavior from B and decoder from A
 pred_target_manifold = ref_manifold_predictor.predict(data['position'][data['testingFrames'],:])
 quantized_embedding = griddata(train_embedding, data['position'][trainingFrames,0], (data['position'][testingFrames,0]*np.ones((4,1))).T, method='nearest')
