@@ -70,16 +70,12 @@ test_quantized_embedding_B = quantize_embedding(test_embedding_B,
                                                     bin_vec)
 
 #%% Identify nans
-train_nans = np.logical_and(np.isnan(train_quantized_embedding_A), np.isnan(train_quantized_embedding_B)).prod(axis=1)
-test_nans = np.logical_and(np.isnan(test_quantized_embedding_A), np.isnan(test_quantized_embedding_B)).prod(axis=1)
+train_nans = np.logical_or(np.isnan(train_quantized_embedding_A), np.isnan(train_quantized_embedding_B)).prod(axis=1)
 
 #%% Fit
 # Train decoder
 decoder_AB = lin_reg().fit(train_quantized_embedding_A[~train_nans],
                             train_quantized_embedding_B[~train_nans])
-decoder_BA = lin_reg().fit(train_quantized_embedding_A[~train_nans],
-                            train_quantized_embedding_B[~train_nans])
-
 
 
 #%% Using grid-data

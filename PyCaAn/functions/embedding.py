@@ -50,8 +50,8 @@ def extract_hyperalignment_score(embedding_ref,
                                                             test_var_pred,
                                                             bin_vec)
     
-    train_nans = np.logical_and(np.isnan(train_quantized_embedding_ref),np.isnan(train_quantized_embedding_pred)).prod(axis=1)
-    test_nans = np.logical_and(np.isnan(test_quantized_embedding_ref),np.isnan(test_quantized_embedding_pred)).prod(axis=1)
+    train_nans = np.logical_or(np.isnan(train_quantized_embedding_ref).prod(axis=1),np.isnan(train_quantized_embedding_pred).prod(axis=1))
+    test_nans = np.logical_or(np.isnan(test_quantized_embedding_ref).prod(axis=1),np.isnan(test_quantized_embedding_pred).prod(axis=1))
 
     # Train decoder
     decoder_AB = lin_reg().fit(train_quantized_embedding_ref[~train_nans],
