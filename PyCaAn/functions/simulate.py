@@ -1,4 +1,114 @@
+#%% Imports
+import os
+import ratinabox
+from ratinabox.Environment import Environment
+from ratinabox.Agent import Agent
+from ratinabox.Neurons import Neurons, PlaceCells, RandomSpatialNeurons, GridCells
+from ratinabox.contribs.NeuralNetworkNeurons import NeuralNetworkNeurons
+ratinabox.autosave_plots = False
 import numpy as np
+from sklearn.linear_model import LogisticRegression
+
+def fit_ANNs(data, params):
+    if not os.path.exists(params['path_to_results']):
+        os.mkdir(params['path_to_results'])
+
+    # Create folder with convention (e.g. CA1_M246_LT_2017073)
+    working_directory=os.path.join( 
+        params['path_to_results'],
+        f"{data['region']}_{data['subject']}_{data['task']}_{data['day']}" 
+        )
+    if not os.path.exists(working_directory): # If folder does not exist, create it
+        os.mkdir(working_directory)
+
+    #%% Initialize environment
+    maze_width = {'OF':45,
+                  'legoOF': 50,
+                  'plexiOF': 49,
+                  'LT': 100,
+                  'legoLT':134,
+                  'legoToneLT':134,
+                  'legoSeqLT':134,
+                  }
+
+    if data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF':
+        environment = Environment(params={
+        "scale": 1,
+        'boundary':[[0,0],
+                    [0,maze_width[data['task']]/100],
+                    [maze_width[data['task']]/100,maze_width[data['task']]/100],
+                    [maze_width[data['task']]/100,0]]
+        })
+    elif data['task']=='LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT': # For linear tracks
+        environment = Environment(params={
+        "scale": 1,
+        'boundary':[[0,0],
+                    [0,0.1],
+                    [maze_width[data['task']]/100,0.1],
+                    [maze_width[data['task']]/100,0]]
+        })
+
+    #%% Initialize agent
+    agent = Agent(environment)
+    agent.import_trajectory(times=data['caTime'], positions=data['position']/100) # Import existing coordinates
+
+    #%% Initialize place cells
+    simulated_place_cells = PlaceCells(
+        agent,
+        params={
+                "n": 128,
+                "widths": .1,
+                })
+    simulated_grid_cells = GridCells(
+        agent,
+        params={
+                "n": 128,
+                "gridscale": (.1,.5),
+                })
+
+    #%% Simulate neural activity based on real exploration
+    previous_t = 0
+    for i, t in enumerate(data['caTime']):
+        dt = t-previous_t
+        agent.update(dt=dt)
+        simulated_place_cells.update()
+        simulated_grid_cells.update()
+        previous_t=t
+
+    #%% Split dataset
+    trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
+
+    if params['train_set_selection']=='random':
+        trainingFrames[np.random.choice(np.arange(len(data['caTime'])), size=int(len(data['caTime'])*params['train_test_ratio']), replace=False)] = True
+    elif params['train_set_selection']=='split':
+        trainingFrames[0:int(params['train_test_ratio']*len(data['caTime']))] = True 
+
+    testingFrames = ~trainingFrames
+
+    # Exclude immobility from all sets
+    trainingFrames[~data['running_ts']] = False
+    testingFrames[~data['running_ts']] = False
+    
+    #%% Convert simulation results into arrays
+    place_cells_activity = np.array(simulated_place_cells.history['firingrate'])
+    grid_cells_activity = np.array(simulated_grid_cells.history['firingrate'])
+
+    #%% Train model to predict real neural activity based in simulated grid/place cells, then extract fit score
+    PC_model_prediction_scores = np.zeros(data['binaryData'].shape[1])
+    GC_model_prediction_scores = np.zeros(data['binaryData'].shape[1])
+    for neuron_i in range(data['binaryData'].shape[1]):
+        place_model_neuron = LogisticRegression(penalty='l2',
+                                                random_state=params['seed']).fit(place_cells_activity[trainingFrames],
+                                                                                data['binaryData'][trainingFrames,neuron_i])
+        grid_model_neuron = LogisticRegression(penalty='l2',
+                                                random_state=params['seed']).fit(grid_cells_activity[trainingFrames],
+                                                                                data['binaryData'][trainingFrames,neuron_i])
+        PC_model_prediction_scores[neuron_i] = place_model_neuron.score(place_cells_activity[testingFrames],
+                                data['binaryData'][testingFrames,neuron_i])
+        GC_model_prediction_scores[neuron_i] = grid_model_neuron.score(grid_cells_activity[testingFrames],
+                                data['binaryData'][testingFrames,neuron_i])
+        
+        PC_model_prediction_scores, GC_model_prediction_scores
 
 def simulate_activity(recording_length, num_bins, ground_truth_info, sampling):
     assert num_bins>1
