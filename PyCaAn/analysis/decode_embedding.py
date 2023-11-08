@@ -30,23 +30,23 @@ def decode_embedding_session(data, params):
         embedding_file = h5py.File(os.path.join(working_directory,'embedding.h5'),'r')
     except:
         print('Could not find embedding file. Please first extract embedding data.')
-    embedding = embedding_file['embedding'][()]
+    # embedding = embedding_file['embedding'][()]
     train_embedding = embedding_file['train_embedding'][()]
     test_embedding = embedding_file['test_embedding'][()]
     data['trainingFrames'] = embedding_file['trainingFrames'][()]
     data['testingFrames'] = embedding_file['testingFrames'][()]
 
     # Extract inverse decoding
-    if not os.path.exists(os.path.join(working_directory,'inverse_decoding.h5')) or params['overwrite_mode']=='always':
-        with h5py.File(os.path.join(working_directory,'inverse_decoding.h5'),'w') as f:
-            spatial_prediction, retrospective_time_prediction, prospective_time_prediction, retrospective_distance_prediction, prospective_distance_prediction, heading_prediction, speed_prediction = predict_embedding(data, params, embedding)
-            f.create_dataset('spatial_prediction', data=spatial_prediction)
-            f.create_dataset('retrospective_time_prediction', data=retrospective_time_prediction)
-            f.create_dataset('prospective_time_prediction', data=prospective_time_prediction)
-            f.create_dataset('retrospective_distance_prediction', data=retrospective_distance_prediction)
-            f.create_dataset('prospective_distance_prediction', data=prospective_distance_prediction)
-            f.create_dataset('heading_prediction', data=heading_prediction)
-            f.create_dataset('speed_prediction', data=speed_prediction)
+    # if not os.path.exists(os.path.join(working_directory,'inverse_decoding.h5')) or params['overwrite_mode']=='always':
+    #     with h5py.File(os.path.join(working_directory,'inverse_decoding.h5'),'w') as f:
+    #         spatial_prediction, retrospective_time_prediction, prospective_time_prediction, retrospective_distance_prediction, prospective_distance_prediction, heading_prediction, speed_prediction = predict_embedding(data, params, embedding)
+    #         f.create_dataset('spatial_prediction', data=spatial_prediction)
+    #         f.create_dataset('retrospective_time_prediction', data=retrospective_time_prediction)
+    #         f.create_dataset('prospective_time_prediction', data=prospective_time_prediction)
+    #         f.create_dataset('retrospective_distance_prediction', data=retrospective_distance_prediction)
+    #         f.create_dataset('prospective_distance_prediction', data=prospective_distance_prediction)
+    #         f.create_dataset('heading_prediction', data=heading_prediction)
+    #         f.create_dataset('speed_prediction', data=speed_prediction)
             
     # Decode
     # Decode elapsed time
