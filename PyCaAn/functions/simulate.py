@@ -21,7 +21,6 @@ def fit_ANNs(data, params):
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
 
-    #%% Initialize environment
     maze_width = {'OF':45,
                   'legoOF': 50,
                   'plexiOF': 49,
@@ -48,11 +47,9 @@ def fit_ANNs(data, params):
                     [maze_width[data['task']]/100,0]]
         })
 
-    #%% Initialize agent
     agent = Agent(environment)
     agent.import_trajectory(times=data['caTime'], positions=data['position']/100) # Import existing coordinates
 
-    #%% Initialize place cells
     simulated_place_cells = PlaceCells(
         agent,
         params={
@@ -66,7 +63,6 @@ def fit_ANNs(data, params):
                 "gridscale": (.1,.5),
                 })
 
-    #%% Simulate neural activity based on real exploration
     previous_t = 0
     for i, t in enumerate(data['caTime']):
         dt = t-previous_t
@@ -75,7 +71,6 @@ def fit_ANNs(data, params):
         simulated_grid_cells.update()
         previous_t=t
 
-    #%% Split dataset
     trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
 
     if params['train_set_selection']=='random':
@@ -85,15 +80,12 @@ def fit_ANNs(data, params):
 
     testingFrames = ~trainingFrames
 
-    # Exclude immobility from all sets
     trainingFrames[~data['running_ts']] = False
     testingFrames[~data['running_ts']] = False
     
-    #%% Convert simulation results into arrays
     place_cells_activity = np.array(simulated_place_cells.history['firingrate'])
     grid_cells_activity = np.array(simulated_grid_cells.history['firingrate'])
 
-    #%% Train model to predict real neural activity based in simulated grid/place cells, then extract fit score
     PC_model_prediction_scores = np.zeros(data['binaryData'].shape[1])
     GC_model_prediction_scores = np.zeros(data['binaryData'].shape[1])
     for neuron_i in range(data['binaryData'].shape[1]):
@@ -111,6 +103,7 @@ def fit_ANNs(data, params):
         PC_model_prediction_scores, GC_model_prediction_scores
 
 def simulate_activity(recording_length, num_bins, ground_truth_info, sampling):
+    # Use this function to simulate binarized calcium activity
     assert num_bins>1
     if num_bins==2:
         variable = np.ones(recording_length)

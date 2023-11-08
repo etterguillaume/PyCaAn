@@ -11,8 +11,8 @@ from pycaan.analysis.extract_tuning import extract_tuning_session
 from pycaan.analysis.extract_embedding import extract_embedding_session
 from pycaan.analysis.plot_summary import plot_summary_session
 from pycaan.analysis.decode_embedding import decode_embedding_session
-from pycaan.analysis.align_embeddings import align_embeddings
 from pycaan.analysis.extract_covariates import extract_covariates_session
+from pycaan.analysis.extract_model_predictions import extract_model_predictions_session
 
 def get_arguments():
     parser = ArgumentParser()
@@ -23,7 +23,7 @@ def get_arguments():
     parser.add_argument('--extract_tuning', action='store_true', default=False)
     parser.add_argument('--extract_embedding', action='store_true', default=False)
     parser.add_argument('--decode_embedding', action='store_true', default=False)
-    parser.add_argument('--align_embeddings', action='store_true', default=False)
+    parser.add_argument('--fit_model', action='store_true', default=False)
     args = parser.parse_args()
     return args
 
@@ -58,12 +58,12 @@ if __name__ == '__main__':
 
         if args.extract_covariates:
             extract_covariates_session(data, params)
+
+        if args.fit_model:
+            extract_model_predictions_session(data, params)
             
         if args.extract_embedding and session not in excluded_list: # Exclude sessions with not enough data
             extract_embedding_session(data, params)
             
         if args.decode_embedding and session not in excluded_list: # Exclude sessions with not enough data
             decode_embedding_session(data, params)
-    
-    if args.align_embeddings: # Hyperalignment
-        align_embeddings(params)
