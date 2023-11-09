@@ -86,32 +86,33 @@ def fit_ANNs(data, params):
     place_cells_activity = np.array(simulated_place_cells.history['firingrate'])
     grid_cells_activity = np.array(simulated_grid_cells.history['firingrate'])
 
-    PC_scores = np.zeros(data['binaryData'].shape[1])
-    PC_Fscores = np.zeros(data['binaryData'].shape[1])
-    GC_scores = np.zeros(data['binaryData'].shape[1])
-    GC_Fscores = np.zeros(data['binaryData'].shape[1])
+    PC_scores = np.zeros(data['binaryData'].shape[1])*np.nan
+    PC_Fscores = np.zeros(data['binaryData'].shape[1])*np.nan
+    GC_scores = np.zeros(data['binaryData'].shape[1])*np.nan
+    GC_Fscores = np.zeros(data['binaryData'].shape[1])*np.nan
 
     for neuron_i in range(data['binaryData'].shape[1]):
-        place_model_neuron = LogisticRegression(
-                                        class_weight='balanced',
-                                        penalty='l2',
-                                        random_state=params['seed']).fit(standardize.fit_transform(place_cells_activity[trainingFrames]),
-                                                                        data['binaryData'][trainingFrames,neuron_i])
-        grid_model_neuron = LogisticRegression(
+        if sum(data['binaryData'][trainingFrames,neuron_i])>0:
+            place_model_neuron = LogisticRegression(
                                             class_weight='balanced',
                                             penalty='l2',
-                                            random_state=params['seed']).fit(standardize.fit_transform(grid_cells_activity[trainingFrames]),
-                                                                                data['binaryData'][trainingFrames,neuron_i])
+                                            random_state=params['seed']).fit(standardize.fit_transform(place_cells_activity[trainingFrames]),
+                                                                            data['binaryData'][trainingFrames,neuron_i])
+            grid_model_neuron = LogisticRegression(
+                                                class_weight='balanced',
+                                                penalty='l2',
+                                                random_state=params['seed']).fit(standardize.fit_transform(grid_cells_activity[trainingFrames]),
+                                                                                    data['binaryData'][trainingFrames,neuron_i])
 
-        PC_scores[neuron_i]=place_model_neuron.score(standardize.fit_transform(place_cells_activity[testingFrames]),
-                                                                                data['binaryData'][testingFrames,neuron_i])
-        PC_pred = place_model_neuron.predict(standardize.fit_transform(place_cells_activity[testingFrames]))
-        PC_Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], PC_pred)
+            PC_scores[neuron_i]=place_model_neuron.score(standardize.fit_transform(place_cells_activity[testingFrames]),
+                                                                                    data['binaryData'][testingFrames,neuron_i])
+            PC_pred = place_model_neuron.predict(standardize.fit_transform(place_cells_activity[testingFrames]))
+            PC_Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], PC_pred)
 
-        GC_scores[neuron_i] = grid_model_neuron.score(standardize.fit_transform(grid_cells_activity[testingFrames]),
-                                                                                data['binaryData'][testingFrames,neuron_i])
-        GC_pred = grid_model_neuron.predict(standardize.fit_transform(grid_cells_activity[testingFrames]))
-        GC_Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], GC_pred)
+            GC_scores[neuron_i] = grid_model_neuron.score(standardize.fit_transform(grid_cells_activity[testingFrames]),
+                                                                                    data['binaryData'][testingFrames,neuron_i])
+            GC_pred = grid_model_neuron.predict(standardize.fit_transform(grid_cells_activity[testingFrames]))
+            GC_Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], GC_pred)
         
     return PC_scores, PC_Fscores, GC_scores, GC_Fscores
 
