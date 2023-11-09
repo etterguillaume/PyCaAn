@@ -4,10 +4,12 @@ import ratinabox
 from ratinabox.Environment import Environment
 from ratinabox.Agent import Agent
 from ratinabox.Neurons import Neurons, PlaceCells, RandomSpatialNeurons, GridCells
-from ratinabox.contribs.NeuralNetworkNeurons import NeuralNetworkNeurons
 ratinabox.autosave_plots = False
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
+from sklearn.preprocessing import StandardScaler
+standardize = StandardScaler()
 
 def fit_ANNs(data, params):
     if not os.path.exists(params['path_to_results']):
@@ -53,23 +55,21 @@ def fit_ANNs(data, params):
     simulated_place_cells = PlaceCells(
         agent,
         params={
-                "n": 128,
+                "n": params['num_artificial_PCs'],
                 "widths": .1,
                 })
     simulated_grid_cells = GridCells(
         agent,
         params={
-                "n": 128,
+                "n": params['num_artificial_GCs'],
                 "gridscale": (.1,.5),
                 })
 
-    previous_t = 0
+    dt = 1/params['sampling_frequency'] #TODO implement variable sampling rate
     for i, t in enumerate(data['caTime']):
-        dt = t-previous_t
         agent.update(dt=dt)
         simulated_place_cells.update()
         simulated_grid_cells.update()
-        previous_t=t
 
     trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
 
@@ -86,21 +86,34 @@ def fit_ANNs(data, params):
     place_cells_activity = np.array(simulated_place_cells.history['firingrate'])
     grid_cells_activity = np.array(simulated_grid_cells.history['firingrate'])
 
-    PC_model_prediction_scores = np.zeros(data['binaryData'].shape[1])
-    GC_model_prediction_scores = np.zeros(data['binaryData'].shape[1])
+    PC_scores = np.zeros(data['binaryData'].shape[1])
+    PC_Fscores = np.zeros(data['binaryData'].shape[1])
+    GC_scores = np.zeros(data['binaryData'].shape[1])
+    GC_Fscores = np.zeros(data['binaryData'].shape[1])
+
     for neuron_i in range(data['binaryData'].shape[1]):
-        place_model_neuron = LogisticRegression(penalty='l2',
-                                                random_state=params['seed']).fit(place_cells_activity[trainingFrames],
+        place_model_neuron = LogisticRegression(
+                                        class_weight='balanced',
+                                        penalty='l2',
+                                        random_state=params['seed']).fit(standardize.fit_transform(place_cells_activity[trainingFrames]),
+                                                                        data['binaryData'][trainingFrames,neuron_i])
+        grid_model_neuron = LogisticRegression(
+                                            class_weight='balanced',
+                                            penalty='l2',
+                                            random_state=params['seed']).fit(standardize.fit_transform(grid_cells_activity[trainingFrames]),
                                                                                 data['binaryData'][trainingFrames,neuron_i])
-        grid_model_neuron = LogisticRegression(penalty='l2',
-                                                random_state=params['seed']).fit(grid_cells_activity[trainingFrames],
-                                                                                data['binaryData'][trainingFrames,neuron_i])
-        PC_model_prediction_scores[neuron_i] = place_model_neuron.score(place_cells_activity[testingFrames],
-                                data['binaryData'][testingFrames,neuron_i])
-        GC_model_prediction_scores[neuron_i] = grid_model_neuron.score(grid_cells_activity[testingFrames],
-                                data['binaryData'][testingFrames,neuron_i])
+
+        PC_scores[neuron_i]=place_model_neuron.score(standardize.fit_transform(place_cells_activity[testingFrames]),
+                                                                                data['binaryData'][testingFrames,neuron_i])
+        PC_pred = place_model_neuron.predict(standardize.fit_transform(place_cells_activity[testingFrames]))
+        PC_Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], PC_pred)
+
+        GC_scores[neuron_i] = grid_model_neuron.score(standardize.fit_transform(grid_cells_activity[testingFrames]),
+                                                                                data['binaryData'][testingFrames,neuron_i])
+        GC_pred = grid_model_neuron.predict(standardize.fit_transform(grid_cells_activity[testingFrames]))
+        GC_Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], GC_pred)
         
-        PC_model_prediction_scores, GC_model_prediction_scores
+    return PC_scores, PC_Fscores, GC_scores, GC_Fscores
 
 def simulate_activity(recording_length, num_bins, ground_truth_info, sampling):
     # Use this function to simulate binarized calcium activity
