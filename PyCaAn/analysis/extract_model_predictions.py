@@ -29,10 +29,12 @@ def extract_model_predictions_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'model_predictions.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'model_predictions.h5'),'w') as f:
 
-            PC_model_prediction_scores, GC_model_prediction_scores = fit_ANNs(data, params)
+            PC_scores, PC_Fscores, GC_scores, GC_Fscores = fit_ANNs(data, params)
 
-            f.create_dataset('PC_model_prediction_scores', data=PC_model_prediction_scores)
-            f.create_dataset('GC_model_prediction_scores', data=GC_model_prediction_scores)      
+            f.create_dataset('PC_scores', data=PC_scores)
+            f.create_dataset('GC_scores', data=GC_scores)
+            f.create_dataset('PC_Fscores', data=PC_Fscores)
+            f.create_dataset('GC_Fscores', data=GC_Fscores)            
 
 # If used as standalone script
 if __name__ == '__main__': 
