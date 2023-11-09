@@ -55,7 +55,7 @@ parametric_embedding: True
 embedding_dims: 4
 train_set_selection: random # 'random', random frames. 'split', split recording using train_test_ratio
 train_test_ratio: .8 # portion of recording used to train embedding model and decoders
-quantization_steps: 100 # Number of discrete behavioral states (bins) used to quantize embeddings when aligning
+quantization_steps: 32 # Number of discrete behavioral states (bins) used to quantize embeddings when aligning
 
 # UMAP-specific settings
 min_dist: .8 # high values encourage smooth latents, low values encourage clustering
