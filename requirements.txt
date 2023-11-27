@@ -12,6 +12,7 @@ matplotlib
 tqdm
 opencv-python
 seqnmf
+ratinabox
 
 umap-learn==0.5
 tensorflow; sys_platform == 'linux'
