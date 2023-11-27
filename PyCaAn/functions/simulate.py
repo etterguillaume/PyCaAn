@@ -71,13 +71,14 @@ def model_data(data, params):
     maze_width = {'OF':45,
                   'legoOF': 50,
                   'plexiOF': 49,
+                  'smallOF': 38,
                   'LT': 100,
                   'legoLT':134,
                   'legoToneLT':134,
                   'legoSeqLT':134,
                   }
 
-    if data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF':
+    if data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF' or data['task']=='smallOF':
         environment = Environment(params={
         "scale": 1,
         'boundary':[[0,0],
