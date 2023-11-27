@@ -11,7 +11,52 @@ from sklearn.metrics import f1_score
 from sklearn.preprocessing import StandardScaler
 standardize = StandardScaler()
 
-def fit_ANNs(data, params):
+def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
+    trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
+
+    if params['train_set_selection']=='random':
+        trainingFrames[np.random.choice(np.arange(len(data['caTime'])), size=int(len(data['caTime'])*params['train_test_ratio']), replace=False)] = True
+    elif params['train_set_selection']=='split':
+        trainingFrames[0:int(params['train_test_ratio']*len(data['caTime']))] = True 
+
+    testingFrames = ~trainingFrames
+
+    trainingFrames[~data['running_ts']] = False
+    testingFrames[~data['running_ts']] = False
+
+    scores = np.zeros(data['binaryData'].shape[1])*np.nan
+    Fscores = np.zeros(data['binaryData'].shape[1])*np.nan
+
+    # Sort neurons from best to worst for a given variable
+
+
+    for j, num_neurons in enumerate(total_num_neurons_list):
+        if sum(data['binaryData'][trainingFrames,neuron_i])>0:
+            temp = np.zeros(data['binaryData'].shape[1])
+            k=1
+            #for k in range(data['binaryData'].shape[1]):
+            num_PCs = int(port_GCs*num_neurons)
+            simulated_activity = np.concatenate((
+                place_cells_activity[:,0:num_PCs],
+                grid_cells_activity[:,num_PCs:-1],
+            ),axis=1
+            )
+
+            model_neuron = LogisticRegression(
+                                            class_weight='balanced',
+                                            penalty='l2',
+                                            random_state=params['seed']).fit(standardize.fit_transform(simulated_activity[trainingFrames]),
+                                                                            data['binaryData'][trainingFrames,k])
+
+            model_neuron.score()
+            pred = model_neuron.predict(standardize.fit_transform(simulated_activity[testingFrames]))
+            temp[k] = f1_score(data['binaryData'][testingFrames,k], pred)
+            grid_results[i,j] = np.nanmean(temp)
+            
+        
+    return scores, Fscores
+
+def model_data(data, params):
     if not os.path.exists(params['path_to_results']):
         os.mkdir(params['path_to_results'])
 
@@ -83,38 +128,10 @@ def fit_ANNs(data, params):
     trainingFrames[~data['running_ts']] = False
     testingFrames[~data['running_ts']] = False
     
-    place_cells_activity = np.array(simulated_place_cells.history['firingrate'])
-    grid_cells_activity = np.array(simulated_grid_cells.history['firingrate'])
-
-    PC_scores = np.zeros(data['binaryData'].shape[1])*np.nan
-    PC_Fscores = np.zeros(data['binaryData'].shape[1])*np.nan
-    GC_scores = np.zeros(data['binaryData'].shape[1])*np.nan
-    GC_Fscores = np.zeros(data['binaryData'].shape[1])*np.nan
-
-    for neuron_i in range(data['binaryData'].shape[1]):
-        if sum(data['binaryData'][trainingFrames,neuron_i])>0:
-            place_model_neuron = LogisticRegression(
-                                            class_weight='balanced',
-                                            penalty='l2',
-                                            random_state=params['seed']).fit(standardize.fit_transform(place_cells_activity[trainingFrames]),
-                                                                            data['binaryData'][trainingFrames,neuron_i])
-            grid_model_neuron = LogisticRegression(
-                                                class_weight='balanced',
-                                                penalty='l2',
-                                                random_state=params['seed']).fit(standardize.fit_transform(grid_cells_activity[trainingFrames]),
-                                                                                    data['binaryData'][trainingFrames,neuron_i])
-
-            PC_scores[neuron_i]=place_model_neuron.score(standardize.fit_transform(place_cells_activity[testingFrames]),
-                                                                                    data['binaryData'][testingFrames,neuron_i])
-            PC_pred = place_model_neuron.predict(standardize.fit_transform(place_cells_activity[testingFrames]))
-            PC_Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], PC_pred)
-
-            GC_scores[neuron_i] = grid_model_neuron.score(standardize.fit_transform(grid_cells_activity[testingFrames]),
-                                                                                    data['binaryData'][testingFrames,neuron_i])
-            GC_pred = grid_model_neuron.predict(standardize.fit_transform(grid_cells_activity[testingFrames]))
-            GC_Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], GC_pred)
+    modeled_place_activity = np.array(simulated_place_cells.history['firingrate'])
+    modeled_grid_activity = np.array(simulated_grid_cells.history['firingrate'])
         
-    return PC_scores, PC_Fscores, GC_scores, GC_Fscores
+    return modeled_place_activity, modeled_grid_activity
 
 def simulate_activity(recording_length, num_bins, ground_truth_info, sampling):
     # Use this function to simulate binarized calcium activity

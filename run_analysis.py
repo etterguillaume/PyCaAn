@@ -12,6 +12,7 @@ from pycaan.analysis.extract_embedding import extract_embedding_session
 from pycaan.analysis.plot_summary import plot_summary_session
 from pycaan.analysis.decode_embedding import decode_embedding_session
 from pycaan.analysis.extract_covariates import extract_covariates_session
+from pycaan.analysis.extract_model import extract_model_session
 from pycaan.analysis.extract_model_predictions import extract_model_predictions_session
 
 def get_arguments():
@@ -23,6 +24,7 @@ def get_arguments():
     parser.add_argument('--extract_tuning', action='store_true', default=False)
     parser.add_argument('--extract_embedding', action='store_true', default=False)
     parser.add_argument('--decode_embedding', action='store_true', default=False)
+    parser.add_argument('--extract_model', action='store_true', default=False)
     parser.add_argument('--fit_model', action='store_true', default=False)
     args = parser.parse_args()
     return args
@@ -58,6 +60,9 @@ if __name__ == '__main__':
 
         if args.extract_covariates:
             extract_covariates_session(data, params)
+
+        if args.extract_model:
+            extract_model_session(data, params)
 
         if args.fit_model:
             extract_model_predictions_session(data, params)
