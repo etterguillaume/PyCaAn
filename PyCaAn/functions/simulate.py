@@ -3,7 +3,7 @@ import os
 import ratinabox
 from ratinabox.Environment import Environment
 from ratinabox.Agent import Agent
-from ratinabox.Neurons import Neurons, PlaceCells, RandomSpatialNeurons, GridCells
+from ratinabox.Neurons import PlaceCells, GridCells
 ratinabox.autosave_plots = False
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -27,8 +27,8 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
     num_neurons_list = params['num_neurons_list']
     port_gridcells_list = params['port_gridcells_list']
 
-    scores = np.zeros(data['binaryData'].shape[1],num_neurons_list,)*np.nan
-    Fscores = np.zeros(data['binaryData'].shape[1],num_neurons_list,)*np.nan
+    scores = np.zeros(data['binaryData'].shape[1],len(num_neurons_list),len(port_gridcells_list))*np.nan
+    Fscores = np.zeros(data['binaryData'].shape[1],len(num_neurons_list),len(port_gridcells_list))*np.nan
 
     # Sort neurons from best to worst for a given variable
     for neuron_i in range(data['binaryData'].shape[1]):
