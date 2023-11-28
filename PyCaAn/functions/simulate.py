@@ -104,13 +104,13 @@ def model_data(data, params):
     simulated_place_cells = PlaceCells(
         agent,
         params={
-                "n": params['num_artificial_PCs'],
+                "n": params['num_neurons_list'][-1],
                 "widths": .1,
                 })
     simulated_grid_cells = GridCells(
         agent,
         params={
-                "n": params['num_artificial_GCs'],
+                "n": params['num_neurons_list'][-1],
                 "gridscale": (.1,.5),
                 })
 
