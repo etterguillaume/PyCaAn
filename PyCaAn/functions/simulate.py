@@ -24,34 +24,37 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
     trainingFrames[~data['running_ts']] = False
     testingFrames[~data['running_ts']] = False
 
-    scores = np.zeros(data['binaryData'].shape[1])*np.nan
-    Fscores = np.zeros(data['binaryData'].shape[1])*np.nan
+    num_neurons_list = params['num_neurons_list']
+    port_gridcells_list = params['port_gridcells_list']
+
+    scores = np.zeros(data['binaryData'].shape[1],num_neurons_list,)*np.nan
+    Fscores = np.zeros(data['binaryData'].shape[1],num_neurons_list,)*np.nan
 
     # Sort neurons from best to worst for a given variable
+    for neuron_i in range(data['binaryData'].shape[1]):
+        if sum(data['binaryData'][trainingFrames, neuron_i])>0:
+            for j, num_neurons_used in enumerate(num_neurons_list):
+                for k, port_gridcells_used in enumerate(port_gridcells_list):
+                    num_GCs = int(port_gridcells_used*num_neurons_used)
+                    num_PCs = int((1-port_gridcells_used)*num_neurons_used)
+                    selected_PCs=np.random.choice(num_neurons_used,num_PCs)
+                    selected_GCs=np.random.choice(num_neurons_used,num_GCs)
+                    simulated_activity = np.concatenate((
+                        modeled_place_activity[selected_PCs],
+                        modeled_grid_activity[selected_GCs],
+                    ),axis=1
+                    )
 
+                    model_neuron = LogisticRegression(
+                                                    class_weight='balanced',
+                                                    penalty='l2',
+                                                    random_state=params['seed']).fit(standardize.fit_transform(simulated_activity[trainingFrames]),
+                                                                                    data['binaryData'][trainingFrames,j])
 
-    for j, num_neurons in enumerate(total_num_neurons_list):
-        if sum(data['binaryData'][trainingFrames,neuron_i])>0:
-            temp = np.zeros(data['binaryData'].shape[1])
-            k=1
-            #for k in range(data['binaryData'].shape[1]):
-            num_PCs = int(port_GCs*num_neurons)
-            simulated_activity = np.concatenate((
-                place_cells_activity[:,0:num_PCs],
-                grid_cells_activity[:,num_PCs:-1],
-            ),axis=1
-            )
-
-            model_neuron = LogisticRegression(
-                                            class_weight='balanced',
-                                            penalty='l2',
-                                            random_state=params['seed']).fit(standardize.fit_transform(simulated_activity[trainingFrames]),
-                                                                            data['binaryData'][trainingFrames,k])
-
-            model_neuron.score()
-            pred = model_neuron.predict(standardize.fit_transform(simulated_activity[testingFrames]))
-            temp[k] = f1_score(data['binaryData'][testingFrames,k], pred)
-            grid_results[i,j] = np.nanmean(temp)
+                    scores=model_neuron.score(standardize.fit_transform(simulated_activity[testingFrames]),
+                                                                                    data['binaryData'][testingFrames,j])
+                    pred = model_neuron.predict(standardize.fit_transform(simulated_activity[testingFrames]))
+                    Fscores=[neuron_i,num_neurons_used,port_gridcells_used] = f1_score(data['binaryData'][testingFrames,j], pred)
             
         
     return scores, Fscores
