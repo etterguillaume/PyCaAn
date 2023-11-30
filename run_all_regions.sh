@@ -8,5 +8,5 @@
 #python3 run_analysis.py --param_file 'params_regions.yaml' --extract_tuning  --extract_embedding --decode_embedding
 #python3 pycaan/analysis/align_embeddings.py --param_file 'params_regions.yaml'
 #python3 pycaan/analysis/align_embeddings.py --param_file 'params_regions.yaml'
-
-python3 run_analysis.py --param_file 'params_regions.yaml' --fit_model
+python3 run_analysis.py --param_file 'params_regions.yaml' --extract_model
+#python3 run_analysis.py --param_file 'params_regions.yaml' --fit_model

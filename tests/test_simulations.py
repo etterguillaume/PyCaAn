@@ -5,8 +5,7 @@ from pycaan.functions.signal_processing import preprocess_data
 import ratinabox
 from ratinabox.Environment import Environment
 from ratinabox.Agent import Agent
-from ratinabox.Neurons import Neurons, PlaceCells, RandomSpatialNeurons, GridCells
-from ratinabox.contribs.NeuralNetworkNeurons import NeuralNetworkNeurons
+from ratinabox.Neurons import PlaceCells, GridCells
 ratinabox.autosave_plots = False
 import numpy as np
 from sklearn.linear_model import LogisticRegression
@@ -15,7 +14,7 @@ import yaml
 import os
 
 #%%
-with open('../params.yaml','r') as file:
+with open('../params_regions.yaml','r') as file:
     params = yaml.full_load(file)
 # %%
 path = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
@@ -56,13 +55,13 @@ agent.import_trajectory(times=data['caTime'], positions=data['position']/100) # 
 simulated_place_cells = PlaceCells(
     agent,
     params={
-            "n": 256,
+            "n": params['num_neurons_list'][-1],
             "widths": .1,
             })
 simulated_grid_cells = GridCells(
     agent,
     params={
-            "n": 256,
+            "n": params['num_neurons_list'][-1],
             "gridscale": (.1,.5),
             })
 # %% Simulate
@@ -88,38 +87,47 @@ testingFrames = ~trainingFrames
 trainingFrames[~data['running_ts']] = False
 testingFrames[~data['running_ts']] = False
 
-place_cells_activity = np.array(simulated_place_cells.history['firingrate'])
-grid_cells_activity = np.array(simulated_grid_cells.history['firingrate'])
+modeled_place_activity = np.array(simulated_place_cells.history['firingrate'])
+modeled_grid_activity = np.array(simulated_grid_cells.history['firingrate'])
 # %%
 from sklearn.preprocessing import StandardScaler
 standardize = StandardScaler()
 from sklearn.metrics import f1_score
 
-neuron_ID=5
+#%%
+num_neurons_list = params['num_neurons_list']
+port_gridcells_list = params['port_gridcells_list']
 
-place_model_neuron = LogisticRegression(
-                                        class_weight='balanced',
-                                        penalty='l2',
-                                        random_state=params['seed']).fit(standardize.fit_transform(place_cells_activity[trainingFrames]),
-                                                                        data['binaryData'][trainingFrames,neuron_ID])
-grid_model_neuron = LogisticRegression(
-                                       class_weight='balanced',
-                                       penalty='l2',
-                                       random_state=params['seed']).fit(standardize.fit_transform(grid_cells_activity[trainingFrames]),
-                                                                        data['binaryData'][trainingFrames,neuron_ID])
+scores = np.zeros((data['binaryData'].shape[1],len(num_neurons_list),len(port_gridcells_list)))*np.nan
+Fscores = np.zeros((data['binaryData'].shape[1],len(num_neurons_list),len(port_gridcells_list)))*np.nan
 
-PC_score=place_model_neuron.score(standardize.fit_transform(place_cells_activity[testingFrames]),
-                                                                        data['binaryData'][testingFrames,neuron_ID])
-PC_pred = place_model_neuron.predict(standardize.fit_transform(place_cells_activity[testingFrames]))
-PC_Fscore=f1_score(data['binaryData'][testingFrames,neuron_ID], PC_pred)
+# Sort neurons from best to worst for a given variable
+neuron_i=10
+num_neurons_used = 1024
+port_gridcells_used = .5
+num_GCs = int(port_gridcells_used*num_neurons_used)
+num_PCs = int((1-port_gridcells_used)*num_neurons_used)
+selected_PCs=np.random.choice(num_neurons_used,num_PCs)
+selected_GCs=np.random.choice(num_neurons_used,num_GCs)
+simulated_activity = np.concatenate((
+    modeled_place_activity[:,selected_PCs],
+    modeled_grid_activity[:,selected_GCs],
+),axis=1
+)
 
-GC_score=grid_model_neuron.score(standardize.fit_transform(grid_cells_activity[testingFrames]),
-                                                                        data['binaryData'][testingFrames,neuron_ID])
-GC_pred = grid_model_neuron.predict(standardize.fit_transform(grid_cells_activity[testingFrames]))
-GC_Fscore=f1_score(data['binaryData'][testingFrames,neuron_ID], GC_pred)
+model_neuron = LogisticRegression(
+                                class_weight='balanced',
+                                penalty='l2',
+                                random_state=params['seed']).fit(standardize.fit_transform(simulated_activity[trainingFrames]),
+                                                                data['binaryData'][trainingFrames,neuron_i])
 
+score=model_neuron.score(standardize.fit_transform(simulated_activity[testingFrames]),
+                                                                data['binaryData'][testingFrames,neuron_i])
+pred = model_neuron.predict(standardize.fit_transform(simulated_activity[testingFrames]))
+Fscore = f1_score(data['binaryData'][testingFrames,neuron_i], pred)
 
-# %%
-PC_model_prediction_DF = place_model_neuron.decision_function(place_cells_activity[testingFrames])
-GC_model_prediction_DF = grid_model_neuron.decision_function(grid_cells_activity[testingFrames])
+#%%
+print(Fscore)
+plt.plot(data['binaryData'][testingFrames,neuron_i])
+plt.plot(pred/2)
 # %%
