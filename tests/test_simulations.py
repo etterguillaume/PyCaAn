@@ -11,6 +11,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 import matplotlib.pyplot as plt
 import yaml
+from tqdm import tqdm
 import os
 
 #%%
@@ -55,15 +56,16 @@ agent.import_trajectory(times=data['caTime'], positions=data['position']/100) # 
 simulated_place_cells = PlaceCells(
     agent,
     params={
-            "n": params['num_neurons_list'][-1],
+            "n": params['num_neurons_to_simulate'],
             "widths": .1,
             })
 simulated_grid_cells = GridCells(
     agent,
     params={
-            "n": params['num_neurons_list'][-1],
+            "n": params['num_neurons_to_simulate'],
             "gridscale": (.1,.5),
             })
+
 # %% Simulate
 test=[]
 previous_t = 0
@@ -95,39 +97,36 @@ standardize = StandardScaler()
 from sklearn.metrics import f1_score
 
 #%%
-num_neurons_list = params['num_neurons_list']
-port_gridcells_list = params['port_gridcells_list']
+num_neurons_used = 1024
+port_gridcells_used = .75
 
-scores = np.zeros((data['binaryData'].shape[1],len(num_neurons_list),len(port_gridcells_list)))*np.nan
-Fscores = np.zeros((data['binaryData'].shape[1],len(num_neurons_list),len(port_gridcells_list)))*np.nan
+scores = np.zeros(data['binaryData'].shape[1])*np.nan
 
 # Sort neurons from best to worst for a given variable
-neuron_i=10
-num_neurons_used = 1024
-port_gridcells_used = .5
-num_GCs = int(port_gridcells_used*num_neurons_used)
-num_PCs = int((1-port_gridcells_used)*num_neurons_used)
-selected_PCs=np.random.choice(num_neurons_used,num_PCs)
-selected_GCs=np.random.choice(num_neurons_used,num_GCs)
-simulated_activity = np.concatenate((
-    modeled_place_activity[:,selected_PCs],
-    modeled_grid_activity[:,selected_GCs],
-),axis=1
-)
+for neuron_i in tqdm(range(data['binaryData'].shape[1])):
+    num_GCs = int(port_gridcells_used*num_neurons_used)
+    num_PCs = int((1-port_gridcells_used)*num_neurons_used)
+    selected_PCs=np.random.choice(num_neurons_used,num_PCs)
+    selected_GCs=np.random.choice(num_neurons_used,num_GCs)
+    simulated_activity = standardize.fit_transform(np.concatenate((
+        modeled_place_activity[:,selected_PCs],
+        modeled_grid_activity[:,selected_GCs],
+    ), axis=1))
+    
+    input_data = data['binaryData'][:,neuron_i].reshape(-1,1)
+    model_neuron = LogisticRegression(
+        penalty='l2',
+        class_weight='balanced',
+        random_state=params['seed']
+    ).fit(simulated_activity[trainingFrames],
+            input_data[trainingFrames])
 
-model_neuron = LogisticRegression(
-                                class_weight='balanced',
-                                penalty='l2',
-                                random_state=params['seed']).fit(standardize.fit_transform(simulated_activity[trainingFrames]),
-                                                                data['binaryData'][trainingFrames,neuron_i])
+    pred = model_neuron.predict(simulated_activity[testingFrames])
 
-score=model_neuron.score(standardize.fit_transform(simulated_activity[testingFrames]),
-                                                                data['binaryData'][testingFrames,neuron_i])
-pred = model_neuron.predict(standardize.fit_transform(simulated_activity[testingFrames]))
-Fscore = f1_score(data['binaryData'][testingFrames,neuron_i], pred)
+    scores[neuron_i]=f1_score(input_data[testingFrames],
+                    pred)
 
 #%%
-print(Fscore)
-plt.plot(data['binaryData'][testingFrames,neuron_i])
-plt.plot(pred/2)
+plt.plot(scores)
+
 # %%
