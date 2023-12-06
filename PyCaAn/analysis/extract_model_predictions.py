@@ -26,15 +26,15 @@ def extract_model_predictions_session(data, params):
     if not os.path.exists(working_directory): # If folder does not exist, create it
         os.mkdir(working_directory)
 
-    # try:
-    #     modeled_data_file = h5py.File(os.path.join(working_directory,'model_data.h5'),'r')
-    # except:
-    #     print('Could not find modeled data file. Please first extract modeled data.')
+    try:
+        modeled_data_file = h5py.File(os.path.join(working_directory,'model_data.h5'),'r')
+    except:
+        print('Could not find modeled data file. Please first extract modeled data.')
 
-    # modeled_place_activity = modeled_data_file['modeled_place_activity'][()]
-    # modeled_grid_activity = modeled_data_file['modeled_grid_activity'][()]
+    modeled_place_activity = modeled_data_file['modeled_place_activity'][()]
+    modeled_grid_activity = modeled_data_file['modeled_grid_activity'][()]
 
-    modeled_place_activity, modeled_grid_activity = model_data(data, params)
+    #modeled_place_activity, modeled_grid_activity = model_data(data, params) # Compute model directly
 
     if not os.path.exists(os.path.join(working_directory,'model_predictions.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'model_predictions.h5'),'w') as f:
