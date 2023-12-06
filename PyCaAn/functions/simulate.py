@@ -24,9 +24,6 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
     trainingFrames[~data['running_ts']] = False
     testingFrames[~data['running_ts']] = False
 
-    num_neurons_list = params['num_neurons_list']
-    port_gridcells_list = params['port_gridcells_list']
-
     Fscores_placeModel = np.zeros(data['binaryData'].shape[1])*np.nan
     Fscores_gridModel = np.zeros(data['binaryData'].shape[1])*np.nan
 
@@ -98,13 +95,13 @@ def model_data(data, params):
     simulated_place_cells = PlaceCells(
         agent,
         params={
-                "n": params['num_neurons_simulated_neurons'],
+                "n": params['num_simulated_neurons'],
                 "widths": params['sim_PC_widths'],
                 })
     simulated_grid_cells = GridCells(
         agent,
         params={
-                "n": params['num_neurons_simulated_neurons'],
+                "n": params['num_simulated_neurons'],
                 "gridscale": (.1,.5),
                 })
 
