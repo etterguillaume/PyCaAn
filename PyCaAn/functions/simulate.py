@@ -10,7 +10,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import StandardScaler
 standardize = StandardScaler()
+from sklearn.utils._testing import ignore_warnings
+from sklearn.exceptions import ConvergenceWarning
 
+@ignore_warnings(category=ConvergenceWarning)
 def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
     trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
 
@@ -30,7 +33,7 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
     # Sort neurons from best to worst for a given variable
     for neuron_i in range(data['binaryData'].shape[1]):
         if sum(data['binaryData'][trainingFrames, neuron_i])>0:
-            place_model = LogisticRegression(
+            place_model = LogisticRegression(verbose=False,
                                             class_weight='balanced',
                                             penalty='l2',
                                             random_state=params['seed']).fit(standardize.fit_transform(modeled_place_activity[trainingFrames]),
