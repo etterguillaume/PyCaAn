@@ -27,37 +27,31 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
     num_neurons_list = params['num_neurons_list']
     port_gridcells_list = params['port_gridcells_list']
 
-    scores = np.zeros((data['binaryData'].shape[1],len(num_neurons_list),len(port_gridcells_list)))*np.nan
-    Fscores = np.zeros((data['binaryData'].shape[1],len(num_neurons_list),len(port_gridcells_list)))*np.nan
+    Fscores_placeModel = np.zeros(data['binaryData'].shape[1])*np.nan
+    Fscores_gridModel = np.zeros(data['binaryData'].shape[1])*np.nan
 
     # Sort neurons from best to worst for a given variable
     for neuron_i in range(data['binaryData'].shape[1]):
         if sum(data['binaryData'][trainingFrames, neuron_i])>0:
-            for j, num_neurons_used in enumerate(num_neurons_list):
-                for k, port_gridcells_used in enumerate(port_gridcells_list):
-                    num_GCs = int(port_gridcells_used*num_neurons_used)
-                    num_PCs = int((1-port_gridcells_used)*num_neurons_used)
-                    selected_PCs=np.random.choice(num_neurons_used,num_PCs)
-                    selected_GCs=np.random.choice(num_neurons_used,num_GCs)
-                    simulated_activity = np.concatenate((
-                        modeled_place_activity[:,selected_PCs],
-                        modeled_grid_activity[:,selected_GCs],
-                    ),axis=1
-                    )
+            place_model = LogisticRegression(
+                                            class_weight='balanced',
+                                            penalty='l2',
+                                            random_state=params['seed']).fit(standardize.fit_transform(modeled_place_activity[trainingFrames]),
+                                                                            data['binaryData'][trainingFrames,neuron_i])
 
-                    model_neuron = LogisticRegression(
-                                                    class_weight='balanced',
-                                                    penalty='l2',
-                                                    random_state=params['seed']).fit(standardize.fit_transform(simulated_activity[trainingFrames]),
-                                                                                    data['binaryData'][trainingFrames,j])
+            grid_model = LogisticRegression(
+                                            class_weight='balanced',
+                                            penalty='l2',
+                                            random_state=params['seed']).fit(standardize.fit_transform(modeled_grid_activity[trainingFrames]),
+                                                                            data['binaryData'][trainingFrames,neuron_i])
 
-                    scores=model_neuron.score(standardize.fit_transform(simulated_activity[testingFrames]),
-                                                                                    data['binaryData'][testingFrames,j])
-                    pred = model_neuron.predict(standardize.fit_transform(simulated_activity[testingFrames]))
-                    Fscores[neuron_i,j,k] = f1_score(data['binaryData'][testingFrames,j], pred)
+            place_pred = place_model.predict(standardize.fit_transform(modeled_place_activity[testingFrames]))
+            grid_pred = grid_model.predict(standardize.fit_transform(modeled_grid_activity[testingFrames]))
+
+            Fscores_placeModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], place_pred)
+            Fscores_gridModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], grid_pred)
             
-        
-    return scores, Fscores
+    return Fscores_placeModel, Fscores_gridModel
 
 def model_data(data, params):
     if not os.path.exists(params['path_to_results']):
@@ -104,13 +98,13 @@ def model_data(data, params):
     simulated_place_cells = PlaceCells(
         agent,
         params={
-                "n": params['num_neurons_list'][-1],
-                "widths": .1,
+                "n": params['num_neurons_simulated_neurons'],
+                "widths": params['sim_PC_widths'],
                 })
     simulated_grid_cells = GridCells(
         agent,
         params={
-                "n": params['num_neurons_list'][-1],
+                "n": params['num_neurons_simulated_neurons'],
                 "gridscale": (.1,.5),
                 })
 

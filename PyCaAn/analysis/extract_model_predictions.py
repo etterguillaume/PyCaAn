@@ -37,15 +37,13 @@ def extract_model_predictions_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'model_predictions.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'model_predictions.h5'),'w') as f:
 
-
-
-            scores, F_scores = fit_ANNs(data,
+            Fscores_placeModel, Fscores_gridModel = fit_ANNs(data,
                                         params,
                                         modeled_place_activity,
                                         modeled_grid_activity)
 
-            f.create_dataset('scores', data=scores)
-            f.create_dataset('F_scores', data=F_scores)
+            f.create_dataset('Fscores_placeModel', data=Fscores_placeModel)
+            f.create_dataset('Fscores_gridModel', data=Fscores_gridModel)
 
 # If used as standalone script
 if __name__ == '__main__': 

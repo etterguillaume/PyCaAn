@@ -70,5 +70,5 @@ hs_embedding_dims: [2,3,4,5,8]
 hs_input_neurons: [2,4,8,16,32,64,128,256,512]
 
 # Simulation settings
-num_neurons_to_simulate: 4096
-port_gridcells_list: [0,.25,.5,.75,1]
+num_neurons_to_simulate: 1024
+sim_PC_widths: .1
