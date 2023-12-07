@@ -27,9 +27,13 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity, modele
     testingFrames[~data['running_ts']] = False
 
     # Extract standardization on train set to avoid leaking dataset stats into test set
-    place_standardizer = StandardScaler.fit(modeled_place_activity[trainingFrames])
-    grid_standardizer = StandardScaler.fit(modeled_grid_activity[trainingFrames])
-    BVC_standardizer = StandardScaler.fit(modeled_BVC_activity[trainingFrames])
+    place_standardizer = StandardScaler()
+    grid_standardizer = StandardScaler()
+    BVC_standardizer = StandardScaler()
+    
+    place_standardizer.fit(modeled_place_activity[trainingFrames])
+    grid_standardizer.fit(modeled_grid_activity[trainingFrames])
+    BVC_standardizer.fit(modeled_BVC_activity[trainingFrames])
 
     Fscores_placeModel = np.zeros(data['binaryData'].shape[1])*np.nan
     Fscores_gridModel = np.zeros(data['binaryData'].shape[1])*np.nan

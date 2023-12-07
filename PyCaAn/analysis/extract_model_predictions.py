@@ -43,7 +43,8 @@ def extract_model_predictions_session(data, params):
             Fscores_placeModel, Fscores_gridModel, Fscores_BVCModel = fit_ANNs(data,
                                         params,
                                         modeled_place_activity,
-                                        modeled_grid_activity)
+                                        modeled_grid_activity,
+                                        modeled_BVC_activity)
 
             f.create_dataset('Fscores_placeModel', data=Fscores_placeModel)
             f.create_dataset('Fscores_gridModel', data=Fscores_gridModel)
