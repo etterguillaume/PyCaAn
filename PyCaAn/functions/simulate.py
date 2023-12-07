@@ -3,18 +3,17 @@ import os
 import ratinabox
 from ratinabox.Environment import Environment
 from ratinabox.Agent import Agent
-from ratinabox.Neurons import PlaceCells, GridCells
+from ratinabox.Neurons import PlaceCells, GridCells, BoundaryVectorCells
 ratinabox.autosave_plots = False
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import StandardScaler
-standardize = StandardScaler()
 from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 
 @ignore_warnings(category=ConvergenceWarning)
-def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
+def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity, modeled_BVC_activity):
     trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
 
     if params['train_set_selection']=='random':
@@ -27,8 +26,14 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
     trainingFrames[~data['running_ts']] = False
     testingFrames[~data['running_ts']] = False
 
+    # Extract standardization on train set to avoid leaking dataset stats into test set
+    place_standardizer = StandardScaler.fit(modeled_place_activity[trainingFrames])
+    grid_standardizer = StandardScaler.fit(modeled_grid_activity[trainingFrames])
+    BVC_standardizer = StandardScaler.fit(modeled_BVC_activity[trainingFrames])
+
     Fscores_placeModel = np.zeros(data['binaryData'].shape[1])*np.nan
     Fscores_gridModel = np.zeros(data['binaryData'].shape[1])*np.nan
+    Fscores_BVCModel = np.zeros(data['binaryData'].shape[1])*np.nan
 
     # Sort neurons from best to worst for a given variable
     for neuron_i in range(data['binaryData'].shape[1]):
@@ -36,20 +41,28 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity):
             place_model = LogisticRegression(verbose=False,
                                             class_weight='balanced',
                                             penalty='l2',
-                                            random_state=params['seed']).fit(standardize.fit_transform(modeled_place_activity[trainingFrames]),
+                                            random_state=params['seed']).fit(place_standardizer.transform(modeled_place_activity[trainingFrames]),
                                                                             data['binaryData'][trainingFrames,neuron_i])
 
             grid_model = LogisticRegression(
                                             class_weight='balanced',
                                             penalty='l2',
-                                            random_state=params['seed']).fit(standardize.fit_transform(modeled_grid_activity[trainingFrames]),
+                                            random_state=params['seed']).fit(grid_standardizer.transform(modeled_grid_activity[trainingFrames]),
+                                                                            data['binaryData'][trainingFrames,neuron_i])
+            
+            BVC_model = LogisticRegression(
+                                            class_weight='balanced',
+                                            penalty='l2',
+                                            random_state=params['seed']).fit(BVC_standardizer.transform(modeled_grid_activity[trainingFrames]),
                                                                             data['binaryData'][trainingFrames,neuron_i])
 
-            place_pred = place_model.predict(standardize.fit_transform(modeled_place_activity[testingFrames]))
-            grid_pred = grid_model.predict(standardize.fit_transform(modeled_grid_activity[testingFrames]))
+            place_pred = place_model.predict(place_standardizer.transform(modeled_place_activity[testingFrames]))
+            grid_pred = grid_model.predict(grid_standardizer.transform(modeled_grid_activity[testingFrames]))
+            BVC_pred = BVC_model.predict(BVC_standardizer.transform(modeled_BVC_activity[testingFrames]))
 
             Fscores_placeModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], place_pred)
             Fscores_gridModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], grid_pred)
+            Fscores_BVCModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], BVC_pred)
             
     return Fscores_placeModel, Fscores_gridModel
 
@@ -101,11 +114,22 @@ def model_data(data, params):
                 "n": params['num_simulated_neurons'],
                 "widths": params['sim_PC_widths'],
                 })
+    
     simulated_grid_cells = GridCells(
         agent,
         params={
                 "n": params['num_simulated_neurons'],
-                "gridscale": (.1,.5),
+                "gridscale_distribution":'rayleigh',
+                "gridscale": (.1,.5)
+                })
+    
+    simulated_BVCs = BoundaryVectorCells(
+        agent,
+        params={
+                "n": params['num_simulated_neurons'],
+                "cell_arrangement": "random",
+                "distance_distribution": "uniform",
+                "distance_distribution_params": [.1,.5],
                 })
 
     dt = 1/params['sampling_frequency'] #TODO implement variable sampling rate
@@ -113,23 +137,13 @@ def model_data(data, params):
         agent.update(dt=dt)
         simulated_place_cells.update()
         simulated_grid_cells.update()
-
-    trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
-
-    if params['train_set_selection']=='random':
-        trainingFrames[np.random.choice(np.arange(len(data['caTime'])), size=int(len(data['caTime'])*params['train_test_ratio']), replace=False)] = True
-    elif params['train_set_selection']=='split':
-        trainingFrames[0:int(params['train_test_ratio']*len(data['caTime']))] = True 
-
-    testingFrames = ~trainingFrames
-
-    trainingFrames[~data['running_ts']] = False
-    testingFrames[~data['running_ts']] = False
+        simulated_BVCs.update()
     
     modeled_place_activity = np.array(simulated_place_cells.history['firingrate'])
     modeled_grid_activity = np.array(simulated_grid_cells.history['firingrate'])
+    modeled_BVC_activity = np.array(simulated_BVCs.history['firingrate'])
         
-    return modeled_place_activity, modeled_grid_activity
+    return modeled_place_activity, modeled_grid_activity, modeled_BVC_activity
 
 def simulate_activity(recording_length, num_bins, ground_truth_info, sampling):
     # Use this function to simulate binarized calcium activity

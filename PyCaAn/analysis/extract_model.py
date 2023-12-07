@@ -29,10 +29,11 @@ def extract_model_session(data, params):
     if not os.path.exists(os.path.join(working_directory,'model_data.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'model_data.h5'),'w') as f:
 
-            modeled_place_activity, modeled_grid_activity = model_data(data, params)
+            modeled_place_activity, modeled_grid_activity, modeled_BVC_activity = model_data(data, params)
 
             f.create_dataset('modeled_place_activity', data=modeled_place_activity)
-            f.create_dataset('modeled_grid_activity', data=modeled_grid_activity)   
+            f.create_dataset('modeled_grid_activity', data=modeled_grid_activity)
+            f.create_dataset('modeled_BVC_activity', data=modeled_BVC_activity)   
 
 # If used as standalone script
 if __name__ == '__main__': 
