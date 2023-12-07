@@ -64,7 +64,7 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity, modele
             Fscores_gridModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], grid_pred)
             Fscores_BVCModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], BVC_pred)
             
-    return Fscores_placeModel, Fscores_gridModel
+    return Fscores_placeModel, Fscores_gridModel, Fscores_BVCModel
 
 def model_data(data, params):
     if not os.path.exists(params['path_to_results']):

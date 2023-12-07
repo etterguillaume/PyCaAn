@@ -33,19 +33,21 @@ def extract_model_predictions_session(data, params):
 
     modeled_place_activity = modeled_data_file['modeled_place_activity'][()]
     modeled_grid_activity = modeled_data_file['modeled_grid_activity'][()]
+    modeled_BVC_activity = modeled_data_file['modeled_BVC_activity'][()]
 
     #modeled_place_activity, modeled_grid_activity = model_data(data, params) # Compute model directly
 
     if not os.path.exists(os.path.join(working_directory,'model_predictions.h5')) or params['overwrite_mode']=='always':
         with h5py.File(os.path.join(working_directory,'model_predictions.h5'),'w') as f:
 
-            Fscores_placeModel, Fscores_gridModel = fit_ANNs(data,
+            Fscores_placeModel, Fscores_gridModel, Fscores_BVCModel = fit_ANNs(data,
                                         params,
                                         modeled_place_activity,
                                         modeled_grid_activity)
 
             f.create_dataset('Fscores_placeModel', data=Fscores_placeModel)
             f.create_dataset('Fscores_gridModel', data=Fscores_gridModel)
+            f.create_dataset('Fscores_BVCModel', data=Fscores_BVCModel)
 
 # If used as standalone script
 if __name__ == '__main__': 
