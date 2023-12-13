@@ -13,7 +13,7 @@ from sklearn.utils._testing import ignore_warnings
 from sklearn.exceptions import ConvergenceWarning
 
 @ignore_warnings(category=ConvergenceWarning)
-def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity, modeled_BVC_activity):
+def fit_ANNs(data, params, modeled_activity):
     trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
 
     if params['train_set_selection']=='random':
@@ -27,17 +27,11 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity, modele
     testingFrames[~data['running_ts']] = False
 
     # Extract standardization on train set to avoid leaking dataset stats into test set
-    place_standardizer = StandardScaler()
-    grid_standardizer = StandardScaler()
-    BVC_standardizer = StandardScaler()
+    standardizer = StandardScaler()
     
-    place_standardizer.fit(modeled_place_activity[trainingFrames])
-    grid_standardizer.fit(modeled_grid_activity[trainingFrames])
-    BVC_standardizer.fit(modeled_BVC_activity[trainingFrames])
+    standardizer.fit(modeled_activity[trainingFrames])
 
-    Fscores_placeModel = np.zeros(data['binaryData'].shape[1])*np.nan
-    Fscores_gridModel = np.zeros(data['binaryData'].shape[1])*np.nan
-    Fscores_BVCModel = np.zeros(data['binaryData'].shape[1])*np.nan
+    Fscores = np.zeros(data['binaryData'].shape[1])*np.nan
 
     # Sort neurons from best to worst for a given variable
     for neuron_i in range(data['binaryData'].shape[1]):
@@ -45,30 +39,13 @@ def fit_ANNs(data, params, modeled_place_activity, modeled_grid_activity, modele
             place_model = LogisticRegression(verbose=False,
                                             class_weight='balanced',
                                             penalty='l2',
-                                            random_state=params['seed']).fit(place_standardizer.transform(modeled_place_activity[trainingFrames]),
+                                            random_state=params['seed']).fit(standardizer.transform(modeled_activity[trainingFrames]),
                                                                             data['binaryData'][trainingFrames,neuron_i])
 
-            grid_model = LogisticRegression(
-                                            class_weight='balanced',
-                                            penalty='l2',
-                                            random_state=params['seed']).fit(grid_standardizer.transform(modeled_grid_activity[trainingFrames]),
-                                                                            data['binaryData'][trainingFrames,neuron_i])
+            pred = place_model.predict(standardizer.transform(modeled_activity[testingFrames]))
+            Fscores[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], pred)
             
-            BVC_model = LogisticRegression(
-                                            class_weight='balanced',
-                                            penalty='l2',
-                                            random_state=params['seed']).fit(BVC_standardizer.transform(modeled_grid_activity[trainingFrames]),
-                                                                            data['binaryData'][trainingFrames,neuron_i])
-
-            place_pred = place_model.predict(place_standardizer.transform(modeled_place_activity[testingFrames]))
-            grid_pred = grid_model.predict(grid_standardizer.transform(modeled_grid_activity[testingFrames]))
-            BVC_pred = BVC_model.predict(BVC_standardizer.transform(modeled_BVC_activity[testingFrames]))
-
-            Fscores_placeModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], place_pred)
-            Fscores_gridModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], grid_pred)
-            Fscores_BVCModel[neuron_i] = f1_score(data['binaryData'][testingFrames,neuron_i], BVC_pred)
-            
-    return Fscores_placeModel, Fscores_gridModel, Fscores_BVCModel
+    return Fscores
 
 def model_data(data, params):
     if not os.path.exists(params['path_to_results']):

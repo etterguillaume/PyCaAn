@@ -6,7 +6,7 @@ path_to_dataset: ../../datasets/calcium_imaging
 path_to_results: ../../output/results_regions # output folder for analysis using current parameters. Recommended to be explicit in naming
 
 # Overwriting parameters
-overwrite_mode: 'always' # 'always', 'never', 'changes_only'(not implemented yet) for when params changed
+overwrite_mode: 'never' # 'always', 'never', 'changes_only'(not implemented yet) for when params changed
 
 # Analysis parameters
 sampling_frequency: 30 # frames per second
@@ -70,5 +70,5 @@ hs_embedding_dims: [2,3,4,5,8]
 hs_input_neurons: [2,4,8,16,32,64,128,256,512]
 
 # Simulation settings
-num_simulated_neurons: 16
+num_simulated_neurons: 1024
 sim_PC_widths: .1
