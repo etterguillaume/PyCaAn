@@ -160,7 +160,7 @@ def align_embeddings(params):
                 )
 
     df = pd.DataFrame(data_list)
-    df.to_csv(os.path.join(params['path_to_results'], 'hyperalignment_data.csv'))
+    df.to_csv(os.path.join(params['path_to_results'], 'hyperalignment_data.csv')) #TODO append to H5 dataframe iteratively
 
 if __name__ == '__main__':
     args = get_arguments() #TODO add params override here

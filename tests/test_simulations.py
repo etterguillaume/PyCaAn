@@ -18,7 +18,7 @@ import os
 with open('../params_regions.yaml','r') as file:
     params = yaml.full_load(file)
 # %%
-path = '../../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
+path = '../../../datasets/calcium_imaging/CA1/M111/M111_smallOF_20190827'
 
 #%%
 data=load_data(path)
@@ -27,13 +27,14 @@ data = preprocess_data(data, params)
 maze_width = {'OF':45,
                   'legoOF': 50,
                   'plexiOF': 49,
+                  'smallOF': 38,
                   'LT': 100,
                   'legoLT':134,
                   'legoToneLT':134,
                   'legoSeqLT':134,
                   }
 
-if data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF':
+if data['task']=='OF' or data['task']=='legoOF' or data['task']=='plexiOF' or data['task']=='smallOF':
     environment = Environment(params={
     "scale": 1,
     'boundary':[[0,0],
@@ -49,33 +50,38 @@ elif data['task']=='LT' or data['task']=='legoLT' or data['task']=='legoToneLT' 
                 [maze_width[data['task']]/100,0.1],
                 [maze_width[data['task']]/100,0]]
     })
-# %%
+
 agent = Agent(environment)
 agent.import_trajectory(times=data['caTime'], positions=data['position']/100) # Import existing coordinates
 
 simulated_place_cells = PlaceCells(
     agent,
     params={
-            "n": params['num_neurons_to_simulate'],
-            "widths": .1,
+            "n": params['num_simulated_neurons'],
+            "widths": params['sim_PC_widths'],
             })
+
 simulated_grid_cells = GridCells(
     agent,
     params={
-            "n": params['num_neurons_to_simulate'],
-            "gridscale": (.1,.5),
+            "n": params['num_simulated_neurons'],
+            "gridscale_distribution":'rayleigh',
+            "gridscale": (.1,.5)
             })
 
-# %% Simulate
-test=[]
-previous_t = 0
+dt = 1/params['sampling_frequency'] #TODO implement variable sampling rate
 for i, t in enumerate(data['caTime']):
-    dt = 1/params['sampling_frequency']
-    test.append(dt)
     agent.update(dt=dt)
     simulated_place_cells.update()
     simulated_grid_cells.update()
-    previous_t=t
+
+modeled_place_activity = np.array(simulated_place_cells.history['firingrate'])
+modeled_grid_activity = np.array(simulated_grid_cells.history['firingrate'])
+
+agent.plot_trajectory()
+
+
+
 # %%
 trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
 

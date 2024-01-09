@@ -35,24 +35,12 @@ def decode_embedding_session(data, params):
     test_embedding = embedding_file['test_embedding'][()]
     data['trainingFrames'] = embedding_file['trainingFrames'][()]
     data['testingFrames'] = embedding_file['testingFrames'][()]
-
-    # Extract inverse decoding
-    # if not os.path.exists(os.path.join(working_directory,'inverse_decoding.h5')) or params['overwrite_mode']=='always':
-    #     with h5py.File(os.path.join(working_directory,'inverse_decoding.h5'),'w') as f:
-    #         spatial_prediction, retrospective_time_prediction, prospective_time_prediction, retrospective_distance_prediction, prospective_distance_prediction, heading_prediction, speed_prediction = predict_embedding(data, params, embedding)
-    #         f.create_dataset('spatial_prediction', data=spatial_prediction)
-    #         f.create_dataset('retrospective_time_prediction', data=retrospective_time_prediction)
-    #         f.create_dataset('prospective_time_prediction', data=prospective_time_prediction)
-    #         f.create_dataset('retrospective_distance_prediction', data=retrospective_distance_prediction)
-    #         f.create_dataset('prospective_distance_prediction', data=prospective_distance_prediction)
-    #         f.create_dataset('heading_prediction', data=heading_prediction)
-    #         f.create_dataset('speed_prediction', data=speed_prediction)
             
     # Decode
     # Decode elapsed time
     if not os.path.exists(os.path.join(working_directory,'retrospective_temporal_decoding.h5')) or params['overwrite_mode']=='always':
+        decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['elapsed_time'],data, params, train_embedding, test_embedding, isCircular=False)
         with h5py.File(os.path.join(working_directory,'retrospective_temporal_decoding.h5'),'w') as f:
-            decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['elapsed_time'],data, params, train_embedding, test_embedding, isCircular=False)
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
@@ -61,8 +49,8 @@ def decode_embedding_session(data, params):
             f.create_dataset('test_prediction', data=test_prediction)
 
     if not os.path.exists(os.path.join(working_directory,'prospective_temporal_decoding.h5')) or params['overwrite_mode']=='always':
+        decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['time2stop'],data, params, train_embedding, test_embedding, isCircular=False)
         with h5py.File(os.path.join(working_directory,'prospective_temporal_decoding.h5'),'w') as f:
-            decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['time2stop'],data, params, train_embedding, test_embedding, isCircular=False)
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
@@ -72,8 +60,8 @@ def decode_embedding_session(data, params):
 
     # Decode distance travelled
     if not os.path.exists(os.path.join(working_directory,'retrospective_distance_decoding.h5')) or params['overwrite_mode']=='always':
+        decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['distance_travelled'],data, params, train_embedding, test_embedding, isCircular=False)
         with h5py.File(os.path.join(working_directory,'retrospective_distance_decoding.h5'),'w') as f:
-            decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['distance_travelled'],data, params, train_embedding, test_embedding, isCircular=False)
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
@@ -82,8 +70,8 @@ def decode_embedding_session(data, params):
             f.create_dataset('test_prediction', data=test_prediction)
 
     if not os.path.exists(os.path.join(working_directory,'prospective_distance_decoding.h5')) or params['overwrite_mode']=='always':
+        decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['distance2stop'],data, params, train_embedding, test_embedding, isCircular=False)
         with h5py.File(os.path.join(working_directory,'prospective_distance_decoding.h5'),'w') as f:
-            decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['distance2stop'],data, params, train_embedding, test_embedding, isCircular=False)
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
@@ -93,8 +81,8 @@ def decode_embedding_session(data, params):
     
     # Decode velocity
     if not os.path.exists(os.path.join(working_directory,'velocity_decoding.h5')) or params['overwrite_mode']=='always':
+        decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['velocity'],data, params, train_embedding, test_embedding, isCircular=False)
         with h5py.File(os.path.join(working_directory,'velocity_decoding.h5'),'w') as f:
-            decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['velocity'],data, params, train_embedding, test_embedding, isCircular=False)
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
@@ -103,14 +91,12 @@ def decode_embedding_session(data, params):
             f.create_dataset('test_prediction', data=test_prediction)
 
     # Decode position
-    if not os.path.exists(os.path.join(working_directory,'spatial_decoding.h5')) or params['overwrite_mode']=='always':
+    if not os.path.exists(os.path.join(working_directory,'spatial_decoding.h5')) or params['overwrite_mode']=='always':        
+        if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
+            decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['position'],data, params, train_embedding, test_embedding, isCircular=False)
+        elif data['task'] == 'LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
+            decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['position'][:,0],data, params, train_embedding, test_embedding, isCircular=False)
         with h5py.File(os.path.join(working_directory,'spatial_decoding.h5'),'w') as f:
-            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
-                decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['position'],data, params, train_embedding, test_embedding, isCircular=False)
-
-            elif data['task'] == 'LT' or data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
-                decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['position'][:,0],data, params, train_embedding, test_embedding, isCircular=False)
-
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
@@ -120,15 +106,13 @@ def decode_embedding_session(data, params):
 
     # Extract direction tuning
     if not os.path.exists(os.path.join(working_directory,'direction_decoding.h5')) or params['overwrite_mode']=='always':
+        if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF' or data['task'] == 'smallOF':
+            decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['heading'],data, params, train_embedding, test_embedding, isCircular=True)
+            f.create_dataset('decoding_error', data=decoding_error)
+            f.create_dataset('shuffled_error', data=shuffled_error)
+        elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+            decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['LT_direction'], data, params, train_embedding, test_embedding, isCircular=False)
         with h5py.File(os.path.join(working_directory,'direction_decoding.h5'),'w') as f:
-            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF' or data['task'] == 'smallOF':
-                decoding_score, z_score, p_value, decoding_error, shuffled_error, test_prediction = decode_embedding(data['heading'],data, params, train_embedding, test_embedding, isCircular=True)
-                f.create_dataset('decoding_error', data=decoding_error)
-                f.create_dataset('shuffled_error', data=shuffled_error)
-            
-            elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-                decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['LT_direction'], data, params, train_embedding, test_embedding, isCircular=False)
-        
             f.create_dataset('decoding_score', data=decoding_score)
             f.create_dataset('z_score', data=z_score)
             f.create_dataset('p_value', data=p_value)
@@ -137,10 +121,9 @@ def decode_embedding_session(data, params):
     # Decode tone
     if data['task'] == 'legoToneLT':
         if not os.path.exists(os.path.join(working_directory,'tone_decoding.h5')) or params['overwrite_mode']=='always':
+            data=extract_tone(data,params)
+            decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['binaryTone'],data, params, train_embedding, test_embedding, isCircular=False)
             with h5py.File(os.path.join(working_directory,'tone_decoding.h5'),'w') as f:
-                data=extract_tone(data,params)
-                decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['binaryTone'],data, params, train_embedding, test_embedding, isCircular=False)
-        
                 f.create_dataset('decoding_score', data=decoding_score)
                 f.create_dataset('z_score', data=z_score)
                 f.create_dataset('p_value', data=p_value)
@@ -148,10 +131,9 @@ def decode_embedding_session(data, params):
         
     elif data['task'] == 'legoSeqLT':
         if not os.path.exists(os.path.join(working_directory,'seqTone_decoding.h5')) or params['overwrite_mode']=='always':
+            data = extract_seqLT_tone(data,params)
+            decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['seqLT_state'],data, params, train_embedding, test_embedding, isCircular=False)
             with h5py.File(os.path.join(working_directory,'seqTone_decoding.h5'),'w') as f:
-                data = extract_seqLT_tone(data,params)
-                decoding_score, z_score, p_value, _, _, test_prediction = decode_embedding(data['seqLT_state'],data, params, train_embedding, test_embedding, isCircular=False)
-        
                 f.create_dataset('decoding_score', data=decoding_score)
                 f.create_dataset('z_score', data=z_score)
                 f.create_dataset('p_value', data=p_value)

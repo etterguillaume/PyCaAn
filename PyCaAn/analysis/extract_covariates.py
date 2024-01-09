@@ -16,11 +16,6 @@ def get_arguments():
     args = parser.parse_args()
     return args
 
-# If tuning_data folder does not exist, create it
-
-
-
-#%%
 def extract_covariates_session(data, params):
     if not os.path.exists(params['path_to_results']):
         os.mkdir(params['path_to_results'])
