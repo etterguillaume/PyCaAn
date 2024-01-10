@@ -30,7 +30,8 @@ def decode_neural_data(var2predict, neural_data, params, trainingFrames, testing
     shuffled_error = np.nanmean(shuffled_error)
     return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
 
-def bayesian_decode(var2predict, neural_data, params, trainingFrames, testingFrames): #TODO
+def bayesian_decode(var2predict, neural_data, params, selected_neurons, trainingFrames, testingFrames):
+    neural_data = neural_data[:,selected_neurons]
     np.random.seed(params['seed'])
     decoder = BayesianRidge().fit(neural_data[trainingFrames], var2predict[trainingFrames])
     prediction = decoder.predict(neural_data[testingFrames])
@@ -50,7 +51,7 @@ def bayesian_decode(var2predict, neural_data, params, trainingFrames, testingFra
     decoding_zscore = (decoding_score-np.mean(shuffled_score))/np.std(shuffled_score)
     decoding_pvalue = np.sum(shuffled_score>decoding_score)/params['num_surrogates']
     shuffled_error = np.nanmean(shuffled_error)
-    return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
+    return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error, prediction
 
 def decode_embedding(var2predict, data, params, train_embedding, test_embedding, isCircular):
     np.random.seed(params['seed'])

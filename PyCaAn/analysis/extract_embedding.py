@@ -41,7 +41,12 @@ def extract_embedding_session(data, params):
         os.mkdir(working_directory)
 
     if not os.path.exists(os.path.join(working_directory,'embedding.h5')) or params['overwrite_mode']=='always':
-    
+        # Select neurons used to embed the data
+        selected_neurons = np.arange(params['input_neurons']) # Use the first n neurons in the recording
+        
+        # Alternatively, if you have a list of selected_neurons already saved in your folder
+        # f = h5py.File(os.path.join(working_directory,'selected_neurons.h5'),'r')
+        # selected_neurons = f['selected_neurons'][()]
 
         # Split dataset
         trainingFrames = np.zeros(len(data['caTime']), dtype=bool)
@@ -71,7 +76,7 @@ def extract_embedding_session(data, params):
                             min_dist=params['min_dist'],
                             metric='euclidean',
                             random_state=params['seed']
-                            ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
+                            ).fit(data['neuralData'][data['trainingFrames'],selected_neurons])
         else:
             embedding_model = UMAP(
                             n_components=params['embedding_dims'],
@@ -79,7 +84,7 @@ def extract_embedding_session(data, params):
                             min_dist=params['min_dist'],
                             metric='euclidean',
                             random_state=params['seed']
-                            ).fit(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
+                            ).fit(data['neuralData'][data['trainingFrames'],selected_neurons])
 
         #train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
         train_embedding = embedding_model.transform(data['neuralData'][data['trainingFrames'],0:params['input_neurons']])
