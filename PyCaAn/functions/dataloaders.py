@@ -9,20 +9,21 @@ def load_data(path):
     split_name = split_path[-1].split('_')
     
     # Basic information
-    data.update(
-                {
-                'path': path,
-                'day': int(split_name[-1]),
-                'task':split_name[1],
-                'subject':split_path[-2],
-                'region': split_path[-3],
-                'sex': 'U',
-                'age': 0,
-                'condition': 'normal',
-                'darkness': False,
-                'rewards': True
-                }
-    )
+    if len(split_name)>1:
+        data.update(
+                    {
+                    'path': path,
+                    'day': int(split_name[-1]),
+                    'task':split_name[1],
+                    'subject':split_path[-2],
+                    'region': split_path[-3],
+                    'sex': 'U',
+                    'age': 0,
+                    'condition': 'normal',
+                    'darkness': False,
+                    'rewards': True
+                    }
+        )
 
     # Extra conditions
     if 'dark' in split_name:

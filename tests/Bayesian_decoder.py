@@ -32,6 +32,16 @@ testingFrames = ~trainingFrames
 trainingFrames[~data['running_ts']] = False
 testingFrames[~data['running_ts']] = False
 
+#%%
+# mask = np.zeros(data['rawData'].shape[1], dtype=bool)
+# mask[selected_neurons] = True
+# frameMask = np.where(trainingFrames)
+#%%
+trainingData = data['rawData'][trainingFrames]
+test = trainingData[:,selected_neurons]
+test.shape
+
+
 #%% Decode position in the open field
 decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error, prediction = bayesian_decode(
     data['position'][:,0],
