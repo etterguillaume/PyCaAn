@@ -1,9 +1,6 @@
 from sklearn.linear_model import LinearRegression as lin_reg
-from sklearn.neighbors import KNeighborsRegressor as knn_reg
-from sklearn.impute import SimpleImputer
 
 import numpy as np
-import warnings
 
 def quantize_embedding(embedding, var, bin_vec):
         # Digitize labels
