@@ -2,7 +2,7 @@
   <img width="60%" src="docs/logo.png">
 </p>
 
-PyCaAn stands for  **Python Calcium imaging Analysis** (pronounced 'puh-can')
+PyCaAn stands for  **Python Calcium imaging Analysis**
 This repository contains tools to analyze large datasets of calcium imaging data, plot, and extract statistics.
 
 Features:
@@ -14,7 +14,8 @@ Features:
 - and more!
 
 # Installation
-To use internal functions in other projects:
+To use internal functions in other projects, you need to install PyCaAn in your preferred environment.
+Currently, this is done with a developer install:
 `
 pip install -e .
 `
