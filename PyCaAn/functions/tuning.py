@@ -6,7 +6,6 @@ from scipy.stats import pearsonr as corr
 
 np.seterr(divide="ignore", invalid="ignore")  # Ignore zero divide warnings
 
-
 def extract_tuning(binaryData, var, inclusion_ts, bins):
     if var.ndim > 1:
         bin_dims = tuple([len(b) for b in bins])  # TODO assert that d_var == d_bins

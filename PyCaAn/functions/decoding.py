@@ -30,28 +30,34 @@ def decode_neural_data(var2predict, neural_data, params, trainingFrames, testing
     shuffled_error = np.nanmean(shuffled_error)
     return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error
 
-def bayesian_decode(var2predict, neural_data, params, selected_neurons, trainingFrames, testingFrames):
-    neural_data = neural_data[:,selected_neurons]
-    np.random.seed(params['seed'])
-    decoder = BayesianRidge().fit(neural_data[trainingFrames], var2predict[trainingFrames])
-    prediction = decoder.predict(neural_data[testingFrames])
-    decoding_score = decoder.score(neural_data[testingFrames], var2predict[testingFrames])
-    decoding_error = MAE(var2predict[testingFrames],prediction)
+def bayesian_decode(tuning_curves, prior, marginal_likelihood, binary_data):
+    '''
+    Predict a behavioral variable with neural data using naive Bayes classifier.
+    Uniform priors are recommanded unless strong priors are known.
 
-    shuffled_score = np.zeros(params['num_surrogates'])
-    shuffled_error = np.zeros(params['num_surrogates'])
-    for shuffle_i in tqdm(range(params['num_surrogates'])):
-        idx = np.random.randint(len(neural_data))
-        shuffled_var = np.concatenate((var2predict[idx:], var2predict[:idx]))
-        decoder = knn_reg().fit(neural_data[trainingFrames], shuffled_var[trainingFrames])
-        prediction = decoder.predict(neural_data[testingFrames])
-        shuffled_score[shuffle_i] = decoder.score(neural_data[testingFrames],shuffled_var[testingFrames])
-        shuffled_error[shuffle_i] = MAE(var2predict[testingFrames],prediction)
+    Returns posterior_probs and MAP (maximum a posteriori)
+    '''
+    numFrames, numNeurons = binary_data.shape
+    numBins = tuning_curves.shape[1]
 
-    decoding_zscore = (decoding_score-np.mean(shuffled_score))/np.std(shuffled_score)
-    decoding_pvalue = np.sum(shuffled_score>decoding_score)/params['num_surrogates']
-    shuffled_error = np.nanmean(shuffled_error)
-    return decoding_score, decoding_zscore, decoding_pvalue, decoding_error, shuffled_error, prediction
+    posterior_probs = np.zeros((numFrames,numBins))*np.nan
+
+    for frame_i in range(numFrames):
+        bayesian_step_prob = np.empty((numNeurons,numBins))
+        for cell_i in range(numNeurons):
+            if binary_data[frame_i,cell_i]:
+                active_tuning_curve = tuning_curves[cell_i]
+                bayesian_step_prob[cell_i,:] = (active_tuning_curve*prior)/marginal_likelihood[cell_i]
+            else:
+                inactive_tuning_curve = 1-tuning_curves[cell_i]
+                bayesian_step_prob[cell_i,:] = (inactive_tuning_curve*prior)/(1-marginal_likelihood[cell_i])
+        
+        posterior_probs[frame_i,:] = np.expm1(np.nansum(np.log1p(bayesian_step_prob),axis=1)) # This should be used instead of simple product to avoid numerical underflow
+        posterior_probs[frame_i,:] = posterior_probs[:,frame_i]/np.nansum(posterior_probs[:,frame_i])    # Normalize into a probability distribution
+        
+        MAP = np.argmax(posterior_probs,axis=1)
+
+    return posterior_probs, MAP
 
 def decode_embedding(var2predict, data, params, train_embedding, test_embedding, isCircular):
     np.random.seed(params['seed'])
