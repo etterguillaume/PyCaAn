@@ -55,9 +55,9 @@ def bayesian_decode(tuning_curves, prior, marginal_likelihood, binary_data):
         posterior_probs[frame_i,:] = np.expm1(np.nansum(np.log1p(bayesian_step_prob),axis=1)) # This should be used instead of simple product to avoid numerical underflow
         posterior_probs[frame_i,:] = posterior_probs[:,frame_i]/np.nansum(posterior_probs[:,frame_i])    # Normalize into a probability distribution
         
-        MAP = np.argmax(posterior_probs,axis=1)
+        map = np.argmax(posterior_probs,axis=1)
 
-    return posterior_probs, MAP
+    return (posterior_probs, map)
 
 def decode_embedding(var2predict, data, params, train_embedding, test_embedding, isCircular):
     np.random.seed(params['seed'])
