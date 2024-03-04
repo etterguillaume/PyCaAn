@@ -52,8 +52,8 @@ def bayesian_decode(tuning_curves, prior, marginal_likelihood, binary_data):
                 inactive_tuning_curve = 1-tuning_curves[cell_i]
                 bayesian_step_prob[cell_i,:] = (inactive_tuning_curve*prior)/(1-marginal_likelihood[cell_i])
         
-        posterior_probs[frame_i,:] = np.expm1(np.nansum(np.log1p(bayesian_step_prob),axis=1)) # This should be used instead of simple product to avoid numerical underflow
-        posterior_probs[frame_i,:] = posterior_probs[:,frame_i]/np.nansum(posterior_probs[:,frame_i])    # Normalize into a probability distribution
+        posterior_probs[frame_i,:] = np.expm1(np.nansum(np.log1p(bayesian_step_prob),axis=0)) # This should be used instead of simple product to avoid numerical underflow
+        posterior_probs[frame_i,:] = posterior_probs[frame_i,:]/np.nansum(posterior_probs[frame_i,:])    # Normalize into a probability distribution
         
         map = np.argmax(posterior_probs,axis=1)
 
