@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name="PyCaAn",
+    name="pycaan",
     version="0.1.0",
     description="Python calcium imaging analysis (PyCaAn)",
     author="Guillaume Etter",
@@ -10,4 +10,3 @@ setup(
     # packages=['numpy'],
     py_modules=["functions", "analysis"],
 )
-
