@@ -59,6 +59,34 @@ def bayesian_decode(tuning_curves, prior, marginal_likelihood, binary_data):
 
     return (posterior_probs, map)
 
+def temporal_bayesian_filter(posterior_probs, windowSize):
+    '''
+    Applies temporal filtering using window_size (in samples, should be even number).
+    Uses a window step of 1, and automatically zero-pads start-end of input data.
+    '''
+    assert (windowSize % 2) == 0, "window_size should be an even number"
+
+    smoothed_posteriors = np.zeros((posterior_probs.shape))*np.nan
+    
+    # Zero-padding
+    posterior_probs = np.concatenate((
+        np.zero((int(windowSize/2),posterior_probs.shape[1])),
+        posterior_probs,
+        np.zero((int(windowSize/2),posterior_probs.shape[1]))
+        ))
+
+    ct=0
+    currentWindowIdx = np.arange('windowSize')
+
+    while currentWindowIdx[-1]<len(posterior_probs):
+        bayesian_step_prob = posterior_probs[currentWindowIdx]
+        smoothed_posteriors[ct,:] = np.expm1(np.nansum(np.log1p(bayesian_step_prob),axis=0)) # This should be used instead of simple product to avoid numerical underflow
+        smoothed_posteriors[ct,:] = smoothed_posteriors[ct,:]/np.nansum(smoothed_posteriors[ct,:]) # Normalize into a probability distribution
+    ct+=1
+    currentWindowIdx+=ct # Step forward
+
+    return (smoothed_posteriors)
+
 def decode_embedding(var2predict, data, params, train_embedding, test_embedding, isCircular):
     np.random.seed(params['seed'])
     prediction_stats = np.zeros(len(params['num_k']))*np.nan
