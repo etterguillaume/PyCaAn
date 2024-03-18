@@ -76,7 +76,7 @@ def temporal_bayesian_filter(posterior_probs, windowSize):
         ))
 
     ct=0
-    currentWindowIdx = np.arange('windowSize')
+    currentWindowIdx = np.arange(windowSize)
 
     while currentWindowIdx[-1]<len(posterior_probs):
         bayesian_step_prob = posterior_probs[currentWindowIdx]
