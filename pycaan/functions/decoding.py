@@ -70,13 +70,13 @@ def temporal_bayesian_filter(posterior_probs, windowSize):
     
     # Zero-padding
     posterior_probs = np.concatenate((
-        np.zero((int(windowSize/2),posterior_probs.shape[1])),
+        np.zeros((int(windowSize/2),posterior_probs.shape[1])),
         posterior_probs,
-        np.zero((int(windowSize/2),posterior_probs.shape[1]))
+        np.zeros((int(windowSize/2),posterior_probs.shape[1]))
         ))
 
     ct=0
-    currentWindowIdx = np.arange('windowSize')
+    currentWindowIdx = np.arange(windowSize)
 
     while currentWindowIdx[-1]<len(posterior_probs):
         bayesian_step_prob = posterior_probs[currentWindowIdx]
