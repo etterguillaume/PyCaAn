@@ -182,18 +182,15 @@ def extract_tuning_session(data, params):
     try:
         if not os.path.exists(os.path.join(working_directory,'direction_tuning.h5')) or params['overwrite_mode']=='always':
             
-            if data['task'] == 'OF' or data['task'] == 'legoOF' or data['task'] == 'plexiOF':
-                bin_vec=(np.arange(0,360+params['directionBinSize'],params['directionBinSize']))
-                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
-                                                                data['heading'],
-                                                                data['running_ts'],
-                                                                bins=bin_vec)
-                f.create_dataset('bins', data=bin_vec)
-            elif data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
-                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
-                                                                data['LT_direction'],
-                                                                data['running_ts'])
+            
+            bin_vec=(np.arange(0,360+params['directionBinSize'],params['directionBinSize']))
+            info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
+                                                            data['heading'],
+                                                            data['running_ts'],
+                                                            bins=bin_vec)
+            
             with h5py.File(os.path.join(working_directory,'direction_tuning.h5'),'w') as f:
+                f.create_dataset('bins', data=bin_vec)
                 f.create_dataset('info', data=info)
                 f.create_dataset('p_value', data=p_value)
                 f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
@@ -204,6 +201,26 @@ def extract_tuning_session(data, params):
 
     except:
         print('Could not extract tuning to direction')
+
+    # Extract direction (discrete) tuning
+    try:
+        if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
+            if not os.path.exists(os.path.join(working_directory,'discrete_direction_tuning.h5')) or params['overwrite_mode']=='always':
+                info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_discrete_tuning(data['binaryData'],
+                                                                data['LT_direction'],
+                                                                data['running_ts'])
+                
+                with h5py.File(os.path.join(working_directory,'discrete_direction_tuning.h5'),'w') as f:
+                    f.create_dataset('info', data=info)
+                    f.create_dataset('p_value', data=p_value)
+                    f.create_dataset('occupancy_frames', data=occupancy_frames, dtype=int)
+                    f.create_dataset('active_frames_in_bin', data=active_frames_in_bin, dtype=int)
+                    f.create_dataset('tuning_curves', data=tuning_curves)
+                    f.create_dataset('peak_loc', data=peak_loc)
+                    f.create_dataset('peak_val', data=peak_val)
+                
+    except:
+        print('Could not extract tuning to discrete direction')
 
     # Extract tuning to tone
     if data['task'] == 'legoToneLT':

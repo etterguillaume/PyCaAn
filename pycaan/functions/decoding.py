@@ -75,15 +75,13 @@ def temporal_bayesian_filter(posterior_probs, windowSize):
         np.zeros((int(windowSize/2),posterior_probs.shape[1]))
         ))
 
-    ct=0
     currentWindowIdx = np.arange(windowSize)
 
-    while currentWindowIdx[-1]<len(posterior_probs):
+    for i in range(len(smoothed_posteriors)):
         bayesian_step_prob = posterior_probs[currentWindowIdx]
-        smoothed_posteriors[ct,:] = np.expm1(np.nansum(np.log1p(bayesian_step_prob),axis=0)) # This should be used instead of simple product to avoid numerical underflow
-        smoothed_posteriors[ct,:] = smoothed_posteriors[ct,:]/np.nansum(smoothed_posteriors[ct,:]) # Normalize into a probability distribution
-    ct+=1
-    currentWindowIdx+=ct # Step forward
+        smoothed_posteriors[i,:] = np.expm1(np.nansum(np.log1p(bayesian_step_prob),axis=0)) # This should be used instead of simple product to avoid numerical underflow
+        smoothed_posteriors[i,:] = smoothed_posteriors[i,:]/np.nansum(smoothed_posteriors[i,:]) # Normalize into a probability distribution
+        currentWindowIdx+=1 # Step forward
 
     return (smoothed_posteriors)
 
