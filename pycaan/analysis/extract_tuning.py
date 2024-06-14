@@ -181,8 +181,6 @@ def extract_tuning_session(data, params):
     # Extract direction tuning
     try:
         if not os.path.exists(os.path.join(working_directory,'direction_tuning.h5')) or params['overwrite_mode']=='always':
-            
-            
             bin_vec=(np.arange(0,360+params['directionBinSize'],params['directionBinSize']))
             info, p_value, occupancy_frames, active_frames_in_bin, tuning_curves, peak_loc, peak_val = extract_tuning(data['binaryData'],
                                                             data['heading'],

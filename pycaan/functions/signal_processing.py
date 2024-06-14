@@ -225,11 +225,9 @@ def preprocess_data(data, params):
                                                                              data['caTime'], 
                                                                              params['speed_threshold'])
     
+    data['heading'] = compute_heading(data['position'])
     if data['task'] == 'LT' or data['task'] == 'legoLT' or data['task'] == 'legoToneLT' or data['task'] == 'legoSeqLT':
         data['LT_direction'] = extract_LT_direction(data['position'][:,0])
-
-    else: #Compute heading
-        data['heading'] = compute_heading(data['position'])
 
     # Interpolate tone if present
     if 'tone' in data:
