@@ -32,10 +32,12 @@ spatialBinSize: 2.5 # cm
 distanceBinSize: 2.5 # cm
 directionBinSize: 4.5 # º
 velocityBinSize: 1 # cm.s-1
+internalBinSize: 1 # Arb. unit
 
 max_distance_length: 100
 max_temporal_length: 8
 max_velocity_length: 50
+max_internal_distance: 3
 
 # Tuning curve analysis
 smoothing_sigma: 2 # sigma for gaussian smoothing. Computed AFTER info metrics

@@ -37,7 +37,7 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
         bin_vector = np.zeros(len(digitized))
         for i in range(len(digitized)):
             bin_vector[i] = np.ravel_multi_index(
-                multi_index=digitized[i] - 1, dims=bin_dims
+                multi_index=digitized[i], dims=bin_dims
             )  # Convert to 1D
 
     else:
