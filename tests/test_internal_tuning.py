@@ -45,10 +45,20 @@ bin_vec = (np.arange(-params['max_internal_distance'],params['max_internal_dista
            np.arange(-params['max_internal_distance'],params['max_internal_distance']+params['internalBinSize'],params['internalBinSize']),
            np.arange(-params['max_internal_distance'],params['max_internal_distance']+params['internalBinSize'],params['internalBinSize']),
            np.arange(-params['max_internal_distance'],params['max_internal_distance']+params['internalBinSize'],params['internalBinSize']))
-info, p_value, occupancy_frames, active_frames_in_bin, tuning_curve, marginal_likelihood, peak_loc, peak_val = extract_tuning(
-                                        data['binaryData'][trainingFrames],
-                                        std_embedding,
-                                        np.ones(sum(trainingFrames),dtype='bool'), # Immobility already filtered
-                                        bins=bin_vec)
+
+(
+        info,
+        p_value,
+        occupancy_frames,
+        active_frames_in_bin,
+        tuning_curves,
+        peak_loc,
+        peak_val,
+    ) = extract_tuning(
+            data['binaryData'][trainingFrames],
+            std_embedding,
+            np.ones(sum(trainingFrames),dtype='bool'), # Immobility already filtered
+            bins=bin_vec
+                                        )
 
 # %%

@@ -20,7 +20,7 @@ def extract_tuning(binaryData, var, inclusion_ts, bins):
     info = np.zeros(numNeurons)
     p_value = np.zeros(numNeurons)
     peak_val = np.zeros(numNeurons)
-    peak_loc = np.zeros((numNeurons, var.ndim), dtype=int)
+    peak_loc = np.zeros((numNeurons, len(bin_dims)), dtype=int)
 
     # Compute occupancy
     if var.ndim > 1:
