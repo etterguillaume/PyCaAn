@@ -40,7 +40,6 @@ def extract_basic_info_session(data, params):
                 'age': data['age'],
                 'condition': data['day'],
                 'darkness': data['darkness'],
-                'optoStim': data['optoStim'],
                 'rewards': data['rewards'],
                 'darkness': data['darkness'],
                 'condition': data['condition'],

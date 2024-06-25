@@ -6,7 +6,7 @@ path_to_dataset: ../../datasets/calcium_imaging
 path_to_results: ../../output/results_CA1 # output folder for analysis using current parameters. Recommended to be explicit in naming
 
 # Overwriting parameters
-overwrite_mode: 'never' # 'always', 'never', 'changes_only' for when params changed
+overwrite_mode: "never" # 'always', 'never', 'changes_only' for when params changed
 
 # Analysis parameters
 sampling_frequency: 30 # frames per second
@@ -64,9 +64,10 @@ min_dist: .8 # high values encourage smooth latents, low values encourage cluste
 n_neighbors: 30
 
 # Hyperparameter search (hs)
-num_k: [1,5,8,16,25] # kNN reg search
-hs_seeds: [1,2,3,4,5]
-hs_min_dist: [.1,.2,.4,.8,1]
-hs_n_neighbors: [2,4,8,16,32,64,128]
-hs_embedding_dims: [2,3,4,5,8]
-hs_input_neurons: [2,4,8,16,32,64,128,256,512]
+num_k: [1, 5, 8, 16, 25] # kNN reg search
+hs_seeds: [1, 2, 3, 4, 5]
+hs_min_dist: [.1, .2, .4, .8, 1]
+hs_n_neighbors: [2, 4, 8, 16, 32, 64, 128]
+hs_embedding_dims: [2, 3, 4, 5, 8]
+hs_input_neurons: [2, 4, 8, 16, 32, 64, 128, 256, 512]
+

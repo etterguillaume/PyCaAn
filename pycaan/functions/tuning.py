@@ -7,20 +7,23 @@ from scipy.stats import pearsonr as corr
 np.seterr(divide="ignore", invalid="ignore")  # Ignore zero divide warnings
 
 def extract_tuning(binaryData, var, inclusion_ts, bins):
+    _, numNeurons = binaryData.shape
     if var.ndim > 1:
         bin_dims = tuple([len(b) for b in bins])  # TODO assert that d_var == d_bins
+        peak_loc = np.zeros((numNeurons, len(bin_dims)), dtype=int)
     else:
         bin_dims = len(bins)
+        peak_loc = np.zeros((numNeurons, 1), dtype=int)
     binaryData = binaryData[inclusion_ts]
     var = var[inclusion_ts]
-    _, numNeurons = binaryData.shape
+    
     active_frames_in_bin = np.zeros(
         (np.hstack((numNeurons, np.asarray(bin_dims) - 1))), dtype=int
     )
+
     info = np.zeros(numNeurons)
     p_value = np.zeros(numNeurons)
     peak_val = np.zeros(numNeurons)
-    peak_loc = np.zeros((numNeurons, len(bin_dims)), dtype=int)
 
     # Compute occupancy
     if var.ndim > 1:
