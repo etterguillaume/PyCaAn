@@ -32,14 +32,14 @@ def extract_internal_tuning_session(data, params):
         or params["overwrite_mode"] == "always"
     ) and (os.path.exists(os.path.join(working_directory, "embedding.h5"))):
 
-        embedding_file = h5py.File(
+        with h5py.File(
             os.path.join(working_directory, "embedding.h5"), "r"
-        )
+        ) as embedding_file:
 
-        # Filter epochs and normalize embedding
-        train_embedding = embedding_file["train_embedding"][()]
-        trainingFrames = embedding_file["trainingFrames"][()]
-        std_embedding = zscore(train_embedding)
+            # Filter epochs and normalize embedding
+            train_embedding = embedding_file["train_embedding"][()]
+            trainingFrames = embedding_file["trainingFrames"][()]
+            std_embedding = zscore(train_embedding)
 
         bin_vec = (
             np.arange(
