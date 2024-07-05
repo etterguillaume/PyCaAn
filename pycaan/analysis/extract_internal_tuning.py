@@ -30,7 +30,7 @@ def extract_internal_tuning_session(data, params):
     if (
         not os.path.exists(os.path.join(working_directory, "internal_tuning.h5"))
         or params["overwrite_mode"] == "always"
-    ):
+    ) and (os.path.exists(os.path.join(working_directory, "embedding.h5"))):
 
         embedding_file = h5py.File(
             os.path.join(working_directory, "embedding.h5"), "r"

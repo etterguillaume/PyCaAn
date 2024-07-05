@@ -71,3 +71,7 @@ hs_n_neighbors: [2, 4, 8, 16, 32, 64, 128]
 hs_embedding_dims: [2, 3, 4, 5, 8]
 hs_input_neurons: [2, 4, 8, 16, 32, 64, 128, 256, 512]
 
+# Simulation settings
+num_simulated_neurons: 32
+sim_PC_widths: .1
+
