@@ -161,6 +161,14 @@ def extract_tuning_session(data, params):
                                                             data['position'][:,0],
                                                             data['running_ts'],
                                                             bins=bin_vec)
+            r_info, r_p_value, r_occupancy_frames, r_active_frames_in_bin, r_tuning_curves, r_peak_loc, r_peak_val = extract_tuning(data['binaryData'],
+                                                            data['position'][:,0],
+                                                            data['LT_direction']==0,
+                                                            bins=bin_vec)
+            l_info, l_p_value, l_occupancy_frames, l_active_frames_in_bin, l_tuning_curves, l_peak_loc, l_peak_val = extract_tuning(data['binaryData'],
+                                                            data['position'][:,0],
+                                                            data['LT_direction']==1,
+                                                            bins=bin_vec)
             
         elif data['task']=='legoLT' or data['task']=='legoToneLT' or data['task']=='legoSeqLT':
             bin_vec=(np.arange(0,135+params['spatialBinSize'],params['spatialBinSize']))
@@ -168,6 +176,15 @@ def extract_tuning_session(data, params):
                                                             data['position'][:,0],
                                                             data['running_ts'],
                                                             bins=bin_vec)
+            r_info, r_p_value, r_occupancy_frames, r_active_frames_in_bin, r_tuning_curves, r_peak_loc, r_peak_val = extract_tuning(data['binaryData'],
+                                                            data['position'][:,0],
+                                                            data['LT_direction']==0,
+                                                            bins=bin_vec)
+            l_info, l_p_value, l_occupancy_frames, l_active_frames_in_bin, l_tuning_curves, l_peak_loc, l_peak_val = extract_tuning(data['binaryData'],
+                                                            data['position'][:,0],
+                                                            data['LT_direction']==1,
+                                                            bins=bin_vec)
+            
         with h5py.File(os.path.join(working_directory,'spatial_tuning.h5'),'w') as f:
             f.create_dataset('info', data=info)
             f.create_dataset('p_value', data=p_value)
@@ -176,6 +193,20 @@ def extract_tuning_session(data, params):
             f.create_dataset('tuning_curves', data=tuning_curves)
             f.create_dataset('peak_loc', data=peak_loc)
             f.create_dataset('peak_val', data=peak_val)
+            f.create_dataset('r_info', data=r_info)
+            f.create_dataset('r_p_value', data=r_p_value)
+            f.create_dataset('r_occupancy_frames', data=r_occupancy_frames, dtype=int)
+            f.create_dataset('r_active_frames_in_bin', data=r_active_frames_in_bin, dtype=int)
+            f.create_dataset('r_tuning_curves', data=r_tuning_curves)
+            f.create_dataset('r_peak_loc', data=r_peak_loc)
+            f.create_dataset('r_peak_val', data=r_peak_val)
+            f.create_dataset('l_info', data=l_info)
+            f.create_dataset('l_p_value', data=l_p_value)
+            f.create_dataset('l_occupancy_frames', data=l_occupancy_frames, dtype=int)
+            f.create_dataset('l_active_frames_in_bin', data=l_active_frames_in_bin, dtype=int)
+            f.create_dataset('l_tuning_curves', data=l_tuning_curves)
+            f.create_dataset('l_peak_loc', data=l_peak_loc)
+            f.create_dataset('l_peak_val', data=l_peak_val)
             f.create_dataset('bins', data=bin_vec)
 
     # Extract direction tuning

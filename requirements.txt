@@ -1,21 +1,16 @@
-numpy
-scipy
-scikit-learn
-h5py
-pytest
-pandas
-pyyaml
-pingouin
-notebook
-jupyterlab
-matplotlib
-tqdm
-opencv-python
-seqnmf
-ratinabox
-
-umap-learn==0.5
-tensorflow; sys_platform == 'linux'
-tensorflow; sys_platform == 'windows'
-tensorflow-macos; sys_platform == 'darwin'
-tensorflow-probability
+h5py==3.10.0
+ipykernel==6.27.1
+ipython==8.18.1
+jupyterlab==4.0.9
+matplotlib==3.7.2
+numpy==1.26.4
+pandas==2.1.3
+Pillow==10.1.0
+pingouin==0.5.3
+PyYAML==6.0.1
+ratinabox==1.11.1
+scikit-learn==1.3.2
+scipy==1.15.3
+seaborn==0.13.0
+tqdm==4.67.1
+umap-learn==0.5.3

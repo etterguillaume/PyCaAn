@@ -1,8 +1,4 @@
 #%%
-%load_ext autoreload
-%autoreload 2
-
-#%%
 from pycaan.functions.dataloaders import load_data
 from pycaan.functions.signal_processing import extract_tone, preprocess_data, clean_timestamps
 import yaml
@@ -15,39 +11,38 @@ with open('../params.yaml','r') as file:
     params = yaml.full_load(file)
 
 #%%
-CA3_data = load_data('../' + params['path_to_dataset']+'/LS/M749/M749_LT_20180521')
-#%%
-CA3_data = preprocess_data(CA3_data, params)
-#%%
-
-#%% Load folders to analyze from yaml file?
-with open(os.path.join(params['path_to_results'],'sessionList.yaml'),'r') as file:
-    session_file = yaml.full_load(file)
-session_list = session_file['sessions']
-path = session_list[0]
-#%%
-path = '../../../datasets/calcium_imaging/CA1/M246/M246_LT_6'
-
-#path = '../../datasets/calcium_imaging/LS/M732/M732_LT_2018050701'
-#path = '../../datasets/calcium_imaging/CA1/M246/M246_OF_1'
-#path='/Users/guillaumeetter/Documents/datasets/calcium_imaging/CA1/M991/M991_legoSeqLT_20190313'
-#path = '../../datasets/calcium_imaging/CA1/M989/M989_legoSeqLT_20190313'
-#path = '../../datasets/calcium_imaging/CA1/M990/M990_legoSeqLT_8Hz_20190320'
-
-#%%
-data=load_data(path)
-
-#%%
+data = load_data('../' + params['path_to_dataset']+'/CA1/M986/M986_legoLT_20190201')
 data = preprocess_data(data, params)
 
 #%%
-#data = extract_tone(data, params)
+# Correlated pixels
+plt.imshow(data['corrProj'].T, cmap='viridis', vmin=0, vmax=1)
+plt.axis('off')
+# plt.title('Correlated pixels')
+cax = plt.axes([.95, 0.15, 0.05, 0.7])
+plt.colorbar(cax=cax, label='Pixel correlation')
+plt.savefig('/Users/guillaumeetter/Desktop/RSC_corrProj.pdf')
 
+#%% Intro transients
+import matplotlib
+#cmap = matplotlib.cm.get_cmap('nipy_spectral')
+cmap = matplotlib.cm.get_cmap('viridis')
+#numNeurons=data['SFPs'].shape[0]
+numNeurons=100
+plt.figure(figsize=(2,2))
+for i in range(numNeurons):
+    color = cmap(i/(numNeurons))
+    plt.plot(data['caTime'],data['neuralData'][:,i]/2+i,
+            c=color,
+            linewidth=.3, rasterized=False)
 
+plt.xlim(0,60)
+plt.xticks([0,30,60])
+#plt.yticks([0,400],[0,200])
+plt.ylim(0,numNeurons)
+plt.xlabel('Time (s)')
+plt.ylabel('Neuron #')
 
-#%%
-from functions.tuning import extract_internal_info
-internal_info, p_value = extract_internal_info(data, params, data['running_ts'])
-
-
+plt.tight_layout()
+plt.savefig('/Users/guillaumeetter/Desktop/RSC_traces.pdf')
 # %%
